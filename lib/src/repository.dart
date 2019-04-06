@@ -9,22 +9,21 @@ import 'package:yaml/yaml.dart';
 import 'package:archive/archive.dart';
 
 import 'http_proxy_repository.dart';
-import 'package_database.dart';
-import 'package_storage.dart';
+import 'database.dart';
+import 'storage.dart';
 
-final Logger _logger = new Logger('private_pub.repository');
+final Logger _logger = new Logger('unpub.repository');
 
-class Repository extends PackageRepository {
-  PackageDatabase database;
-  PackageStorage storage;
+class UnpubRepository extends PackageRepository {
+  UnpubDatabase database;
+  UnpubStorage storage;
   HttpProxyRepository proxy;
 
-  Repository({
+  UnpubRepository({
     @required this.database,
     @required this.storage,
-    String proxyUrl,
-  }) : proxy = HttpProxyRepository(
-            http.Client(), Uri.parse(proxyUrl ?? 'https://pub.dartlang.org'));
+    @required String proxyUrl,
+  }) : proxy = HttpProxyRepository(http.Client(), Uri.parse(proxyUrl));
 
   @override
   Stream<PackageVersion> versions(String package) async* {
@@ -103,7 +102,7 @@ class Repository extends PackageRepository {
     if (item == null) {
       return proxy.downloadUrl(package, version);
     }
-    return storage.resolve(package, version);
+    return storage.downloadUri(package, version);
   }
 
   bool get supportsUploaders => false;

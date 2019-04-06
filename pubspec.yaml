@@ -1,4 +1,4 @@
-name: private_pub
+name: unpub
 description: A web server built using the shelf package.
 # version: 1.0.0
 # homepage: https://www.example.com
@@ -16,6 +16,10 @@ dependencies:
   archive: ^2.0.8
   logging: ^0.11.3
   meta: ^1.1.7
+  googleapis: ^0.53.0
 
 dev_dependencies:
   pedantic: ^1.0.0
+
+executables:
+  unpub: unpub

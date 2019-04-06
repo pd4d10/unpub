@@ -1,7 +1,7 @@
 import 'package:pub_server/repository.dart';
 export 'package:pub_server/repository.dart';
 
-abstract class PackageDatabase {
+abstract class UnpubDatabase {
   Stream<PackageVersion> getAllVersions(String package);
 
   Future<PackageVersion> getVersion(String package, String version);
