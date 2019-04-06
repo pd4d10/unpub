@@ -1,8 +1,8 @@
 name: unpub
-description: A web server built using the shelf package.
-# version: 1.0.0
-# homepage: https://www.example.com
-# author: Rongjian Zhang <email@example.com>
+description: Private Dart Pub for Enterprise.
+version: 0.0.1
+homepage: https://github.com/pd4d10/unpub
+author: Rongjian Zhang <pd4d10@gmail.com>
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
