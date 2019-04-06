@@ -10,6 +10,12 @@ environment:
 dependencies:
   args: ^1.4.2
   shelf: ^0.7.2
+  http: ^0.12.0
+  pub_server: ^0.1.5
+  mongo_dart: ^0.3.4
+  archive: ^2.0.8
+  logging: ^0.11.3
+  meta: ^1.1.7
 
 dev_dependencies:
   pedantic: ^1.0.0
