@@ -8,15 +8,15 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
-  args: ^1.4.2
-  shelf: ^0.7.2
+  args: ^1.5.1
+  shelf: ^0.7.5
   http: ^0.12.0
   pub_server: ^0.1.5
-  mongo_dart: ^0.3.4
   archive: ^2.0.8
   logging: ^0.11.3
   meta: ^1.1.7
   googleapis: ^0.53.0
+  yaml: ^2.1.15
 
 dev_dependencies:
   pedantic: ^1.0.0
