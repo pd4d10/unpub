@@ -28,14 +28,10 @@ class UnpubServer {
           proxyUrl: proxyUrl,
         ));
 
-  Future<shelf.Response> requestHandler(shelf.Request request) async {
-    return _pubServer.requestHandler(request);
-  }
-
   serve(String host, int port) async {
     var handler = const shelf.Pipeline()
         .addMiddleware(shelf.logRequests())
-        .addHandler(requestHandler);
+        .addHandler(_pubServer.requestHandler);
 
     var server = await io.serve(handler, host, port);
     print('Serving at http://${server.address.host}:${server.port}');
