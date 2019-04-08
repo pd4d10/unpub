@@ -41,14 +41,9 @@ class UnpubFileMetaStore extends UnpubMetaStore {
 
   @override
   Future<PackageVersion> getVersion(String package, String version) async {
-    var meta = await _getMeta(package);
-    if (meta == null) return null;
-
-    var vs = meta['versions'] as List;
-    var v = vs.firstWhere((item) => item['version'] == version);
-    if (v == null) return null;
-
-    return PackageVersion(package, version, v['pubspec'] as String);
+    return getAllVersions(package).firstWhere(
+        (item) => item.versionString == version,
+        orElse: () => null);
   }
 
   @override
@@ -75,7 +70,8 @@ class UnpubFileMetaStore extends UnpubMetaStore {
   Future<List<String>> getUploadersOfPackage(String package) async {
     var meta = await _getMeta(package);
     return (meta['uploaders'] as List)
-        .map((uploaders) => uploaders['email'] as String);
+        .map((uploaders) => uploaders['email'] as String)
+        .toList();
   }
 
   @override
