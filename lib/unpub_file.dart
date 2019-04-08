@@ -55,6 +55,15 @@ class UnpubFileMetaStore extends UnpubMetaStore {
   Future<void> addVersion(
       String package, String version, String pubspecContent) async {
     var meta = await _getMeta(package);
+    if (meta == null) {
+      await Directory(path.join(baseDir, package)).create(recursive: true);
+      meta = {
+        'name': package,
+        'versions': [],
+        'uploaders': [],
+      };
+    }
+
     (meta['versions'] as List).add({
       'version': version,
       'pubspec': pubspecContent,
@@ -97,6 +106,10 @@ class UnpubFilePackageStore extends UnpubPackageStore {
 
   @override
   Future<void> upload(String package, String version, List<int> bytes) async {
+    var dir = Directory(path.join(baseDir, package, version));
+    if (!(await dir.exists())) {
+      await dir.create(recursive: true);
+    }
     await _getTarballFile(package, version).writeAsBytes(bytes);
   }
 

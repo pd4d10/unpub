@@ -1,7 +1,6 @@
 import 'dart:io';
-
+import 'package:path/path.dart' as path;
 import 'package:args/args.dart';
-
 import 'package:unpub/unpub.dart';
 import 'package:unpub/unpub_file.dart';
 
@@ -21,7 +20,7 @@ main(List<String> args) async {
     exit(1);
   }
 
-  var baseDir = 'unpub-data';
+  var baseDir = path.absolute('unpub-data');
 
   var repository = UnpubRepository(
     metaStore: UnpubFileMetaStore(baseDir),

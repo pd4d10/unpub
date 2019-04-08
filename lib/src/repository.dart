@@ -104,10 +104,13 @@ class UnpubRepository extends PackageRepository {
     }
 
     if (shouldCheckUploader) {
-      var uploaders = await metaStore.getUploadersOfPackage(package);
-      if (!uploaders.contains(info.email)) {
-        throw UnauthorizedAccessException(
-            '${info.email} is not an uploader of $package package');
+      var packageExists = !(await metaStore.getAllVersions(package).isEmpty);
+      if (packageExists) {
+        var uploaders = await metaStore.getUploadersOfPackage(package);
+        if (!uploaders.contains(info.email)) {
+          throw UnauthorizedAccessException(
+              '${info.email} is not an uploader of $package package');
+        }
       }
     }
 
