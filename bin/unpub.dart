@@ -21,9 +21,11 @@ main(List<String> args) async {
     exit(1);
   }
 
+  var baseDir = 'unpub-data';
+
   var repository = UnpubRepository(
-    metaStore: UnpubFileMetaStore(),
-    packageStore: UnpubFilePackageStore(),
+    metaStore: UnpubFileMetaStore(baseDir),
+    packageStore: UnpubFilePackageStore(baseDir),
   );
   var server = UnpubServer(repository);
   server.serve(host, port);
