@@ -1,4 +1,4 @@
-abstract class UnpubStorage {
+abstract class UnpubPackageStore {
   Uri downloadUri(String package, String version) {
     throw 'downloadUri not implemented';
   }

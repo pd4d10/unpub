@@ -1,6 +1,6 @@
-import 'src/database.dart';
+import 'unpub.dart';
 
-class UnpubFileDatabase extends UnpubDatabase {
+class UnpubFileMetaStore extends UnpubMetaStore {
   @override
   Stream<PackageVersion> getAllVersions(String package) {
     return null;
@@ -32,6 +32,18 @@ class UnpubFileDatabase extends UnpubDatabase {
   @override
   Future<void> removeUploader(String package, String email) {
     // TODO: implement removeUploader
+    return null;
+  }
+}
+
+class UnpubFilePackageStore extends UnpubPackageStore {
+  @override
+  Future<void> upload(String package, String version, List<int> content) {
+    return null;
+  }
+
+  @override
+  Stream<List<int>> download(String package, String version) {
     return null;
   }
 }

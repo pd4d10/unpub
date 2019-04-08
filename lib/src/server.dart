@@ -1,4 +1,3 @@
-import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:pub_server/shelf_pubserver.dart';
@@ -10,8 +9,7 @@ class UnpubServer {
 
   UnpubRepository repository;
 
-  UnpubServer({@required this.repository})
-      : _pubServer = ShelfPubServer(repository);
+  UnpubServer(this.repository) : _pubServer = ShelfPubServer(repository);
 
   serve(String host, int port) async {
     var handler = const shelf.Pipeline()

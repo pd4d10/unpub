@@ -11,22 +11,22 @@ import 'package:archive/archive.dart';
 import 'package:googleapis/oauth2/v2.dart';
 
 import 'http_proxy_repository.dart';
-import 'database.dart';
-import 'storage.dart';
+import 'meta_store.dart';
+import 'package_store.dart';
 
 final Logger _logger = new Logger('unpub.repository');
 
 class UnpubRepository extends PackageRepository {
-  UnpubDatabase database;
-  UnpubStorage storage;
+  UnpubMetaStore metaStore;
+  UnpubPackageStore packageStore;
   HttpProxyRepository proxy;
   bool shouldCheckUploader;
 
   static var _httpClient = http.Client();
 
   UnpubRepository({
-    @required this.database,
-    @required this.storage,
+    @required this.metaStore,
+    @required this.packageStore,
 
     /// Upstream proxy
     String proxyUrl = 'https://pub.dartlang.org',
@@ -37,7 +37,7 @@ class UnpubRepository extends PackageRepository {
 
   @override
   Stream<PackageVersion> versions(String package) async* {
-    var items = await database.getAllVersions(package).toList();
+    var items = await metaStore.getAllVersions(package).toList();
 
     if (items.isEmpty) {
       yield* proxy.versions(package);
@@ -48,7 +48,7 @@ class UnpubRepository extends PackageRepository {
 
   @override
   Future<PackageVersion> lookupVersion(String package, String version) async {
-    var item = await database.getVersion(package, version);
+    var item = await metaStore.getVersion(package, version);
     return item ?? proxy.lookupVersion(package, version);
   }
 
@@ -96,7 +96,7 @@ class UnpubRepository extends PackageRepository {
     var package = pubspec['name'] as String;
     var version = pubspec['version'] as String;
 
-    var existing = await database.getVersion(package, version);
+    var existing = await metaStore.getVersion(package, version);
 
     // TODO: Ensure version is greater than existing versions
     if (existing != null) {
@@ -104,7 +104,7 @@ class UnpubRepository extends PackageRepository {
     }
 
     if (shouldCheckUploader) {
-      var uploaders = await database.getUploadersOfPackage(package);
+      var uploaders = await metaStore.getUploadersOfPackage(package);
       if (!uploaders.contains(info.email)) {
         throw UnauthorizedAccessException(
             '${info.email} is not an uploader of $package package');
@@ -114,10 +114,10 @@ class UnpubRepository extends PackageRepository {
     var pubspecContent = utf8.decode(pubspecArchiveFile.content);
 
     // Upload package tar to storage
-    await storage.upload(package, version, tarballBytes);
+    await packageStore.upload(package, version, tarballBytes);
 
     // Write package meta to database
-    await database.addVersion(package, version, pubspecContent);
+    await metaStore.addVersion(package, version, pubspecContent);
 
     return PackageVersion(package, version, pubspecContent);
   }
@@ -132,11 +132,11 @@ class UnpubRepository extends PackageRepository {
 
   @override
   Future<Uri> downloadUrl(String package, String version) async {
-    var item = await database.getVersion(package, version);
+    var item = await metaStore.getVersion(package, version);
     if (item == null) {
       return proxy.downloadUrl(package, version);
     }
-    return storage.downloadUri(package, version);
+    return packageStore.downloadUri(package, version);
   }
 
   bool get supportsUploaders => false;
@@ -144,7 +144,7 @@ class UnpubRepository extends PackageRepository {
   Future addUploader(String package, String userEmail, {request}) async {
     var info = await _getOperatorTokenInfo(request);
 
-    var uploaders = await database.getUploadersOfPackage(package);
+    var uploaders = await metaStore.getUploadersOfPackage(package);
 
     if (!uploaders.contains(info.email)) {
       throw UnauthorizedAccessException(
@@ -155,13 +155,13 @@ class UnpubRepository extends PackageRepository {
       throw StateError('cannot add self');
     }
 
-    await database.addUploader(package, userEmail);
+    await metaStore.addUploader(package, userEmail);
   }
 
   Future removeUploader(String package, String userEmail, {request}) async {
     var info = await _getOperatorTokenInfo(request);
 
-    var uploaders = await database.getUploadersOfPackage(package);
+    var uploaders = await metaStore.getUploadersOfPackage(package);
 
     if (!uploaders.contains(info.email)) {
       throw UnauthorizedAccessException(
@@ -176,7 +176,7 @@ class UnpubRepository extends PackageRepository {
       throw StateError('at least one uploader');
     }
 
-    await database.removeUploader(package, userEmail);
+    await metaStore.removeUploader(package, userEmail);
   }
 }
 

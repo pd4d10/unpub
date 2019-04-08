@@ -3,8 +3,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 
 import 'package:unpub/unpub.dart';
-import 'package:unpub/unpub_file_database.dart';
-import 'package:unpub/unpub_file_storage.dart';
+import 'package:unpub/unpub_file.dart';
 
 main(List<String> args) async {
   var parser = ArgParser();
@@ -22,9 +21,10 @@ main(List<String> args) async {
     exit(1);
   }
 
-  var database = UnpubFileDatabase();
-  var storage = UnpubFileStorage();
-
-  var server = UnpubServer(database: database, storage: storage);
+  var repository = UnpubRepository(
+    metaStore: UnpubFileMetaStore(),
+    packageStore: UnpubFilePackageStore(),
+  );
+  var server = UnpubServer(repository);
   server.serve(host, port);
 }
