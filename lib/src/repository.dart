@@ -20,12 +20,20 @@ class UnpubRepository extends PackageRepository {
   UnpubDatabase database;
   UnpubStorage storage;
   HttpProxyRepository proxy;
+  bool shouldCheckUploader;
+
+  static var _httpClient = http.Client();
 
   UnpubRepository({
     @required this.database,
     @required this.storage,
-    @required String proxyUrl,
-  }) : proxy = HttpProxyRepository(http.Client(), Uri.parse(proxyUrl));
+
+    /// Upstream proxy
+    String proxyUrl = 'https://pub.dartlang.org',
+
+    ///
+    this.shouldCheckUploader = true,
+  }) : proxy = HttpProxyRepository(_httpClient, Uri.parse(proxyUrl));
 
   @override
   Stream<PackageVersion> versions(String package) async* {
@@ -47,20 +55,21 @@ class UnpubRepository extends PackageRepository {
   @override
   bool get supportsUpload => true;
 
-  Future<Tokeninfo> _getOperatorInfo(shelf.Request request) async {
+  Future<Tokeninfo> _getOperatorTokenInfo(shelf.Request request) async {
     var authHeader = request.headers[HttpHeaders.authorizationHeader];
-    if (authHeader == null) return null;
+    if (authHeader == null) {
+      throw UnauthorizedAccessException('no token');
+    }
 
     var token = authHeader.split(' ').last;
-    var info = await Oauth2Api(http.Client()).tokeninfo(accessToken: token);
-    return info;
+    return Oauth2Api(_httpClient).tokeninfo(accessToken: token);
   }
 
   @override
   Future<PackageVersion> upload(Stream<List<int>> data, {request}) async {
-    var info = await _getOperatorInfo(request);
-    if (info == null) {
-      throw UnauthorizedAccessException('google oauth fail');
+    Tokeninfo info;
+    if (shouldCheckUploader) {
+      info = await _getOperatorTokenInfo(request);
     }
 
     _logger.info('Start uploading package.');
@@ -94,10 +103,12 @@ class UnpubRepository extends PackageRepository {
       throw StateError('`$package` already exists at version `$version`.');
     }
 
-    var uploaders = await database.getUploadersOfPackage(package);
-    if (!uploaders.contains(info.email)) {
-      throw UnauthorizedAccessException(
-          '${info.email} is not an uploader of $package package');
+    if (shouldCheckUploader) {
+      var uploaders = await database.getUploadersOfPackage(package);
+      if (!uploaders.contains(info.email)) {
+        throw UnauthorizedAccessException(
+            '${info.email} is not an uploader of $package package');
+      }
     }
 
     var pubspecContent = utf8.decode(pubspecArchiveFile.content);
@@ -131,12 +142,10 @@ class UnpubRepository extends PackageRepository {
   bool get supportsUploaders => false;
 
   Future addUploader(String package, String userEmail, {request}) async {
-    var info = await _getOperatorInfo(request);
-    if (info == null) {
-      throw UnauthorizedAccessException('google oauth fail');
-    }
+    var info = await _getOperatorTokenInfo(request);
 
     var uploaders = await database.getUploadersOfPackage(package);
+
     if (!uploaders.contains(info.email)) {
       throw UnauthorizedAccessException(
           '${info.email} is not an uploader of $package package');
@@ -150,12 +159,10 @@ class UnpubRepository extends PackageRepository {
   }
 
   Future removeUploader(String package, String userEmail, {request}) async {
-    var info = await _getOperatorInfo(request);
-    if (info == null) {
-      throw UnauthorizedAccessException('google oauth fail');
-    }
+    var info = await _getOperatorTokenInfo(request);
 
     var uploaders = await database.getUploadersOfPackage(package);
+
     if (!uploaders.contains(info.email)) {
       throw UnauthorizedAccessException(
           '${info.email} is not an uploader of $package package');
