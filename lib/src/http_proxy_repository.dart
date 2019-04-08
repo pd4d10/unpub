@@ -27,6 +27,9 @@ class HttpProxyRepository extends PackageRepository {
         baseUrl.resolve('/api/packages/${Uri.encodeComponent(package)}');
 
     http.Response response = await client.get(versionUrl);
+
+    if (response.statusCode != 200) return;
+
     var json = convert.json.decode(response.body);
     var versions = json['versions'] as List<dynamic>;
     if (versions != null) {
