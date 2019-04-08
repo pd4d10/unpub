@@ -96,13 +96,13 @@ class UnpubFilePackageStore extends UnpubPackageStore {
   UnpubFilePackageStore(this.baseDir);
 
   File _getTarballFile(String package, String version) {
-    var tarballPath = path.join(baseDir, package, version, 'package.tar.gz');
+    var tarballPath = path.join(baseDir, package, 'package-$version.tar.gz');
     return File(tarballPath);
   }
 
   @override
   Future<void> upload(String package, String version, List<int> bytes) async {
-    var dir = Directory(path.join(baseDir, package, version));
+    var dir = Directory(path.join(baseDir, package));
     if (!(await dir.exists())) {
       await dir.create(recursive: true);
     }

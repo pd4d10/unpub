@@ -10,6 +10,7 @@ import 'package:yaml/yaml.dart';
 import 'package:archive/archive.dart';
 import 'package:googleapis/oauth2/v2.dart';
 
+import 'utils.dart';
 import 'http_proxy_repository.dart';
 import 'meta_store.dart';
 import 'package_store.dart';
@@ -96,11 +97,13 @@ class UnpubRepository extends PackageRepository {
     var package = pubspec['name'] as String;
     var version = pubspec['version'] as String;
 
-    var existing = await metaStore.getVersion(package, version);
+    var newerVersion = await metaStore.getAllVersions(package).firstWhere(
+        (v) => isNewerForVersionString(version, v.versionString),
+        orElse: () => null);
 
-    // TODO: Ensure version is greater than existing versions
-    if (existing != null) {
-      throw StateError('`$package` already exists at version `$version`.');
+    if (newerVersion != null) {
+      throw StateError(
+          'version invalid: ${newerVersion.versionString} exists, which is newer than $version, aborting');
     }
 
     if (shouldCheckUploader) {
