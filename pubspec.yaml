@@ -11,7 +11,10 @@ dependencies:
   args: ^1.5.1
   shelf: ^0.7.5
   http: ^0.12.0
-  pub_server: ^0.1.5
+  pub_server: #^0.1.5
+    git:
+      url: git://github.com/pd4d10/pub_server.git
+      ref: request-param
   archive: ^2.0.8
   logging: ^0.11.3
   meta: ^1.1.7
