@@ -46,8 +46,8 @@ class UnpubVersion {
 
   factory UnpubVersion.fromPubspec(String pubspec) {
     var map = loadYaml(pubspec);
-    map['pubspec'] = pubspec;
-    return _$UnpubVersionFromJson(map);
+    return _$UnpubVersionFromJson(
+        Map<String, dynamic>.from(map)..addAll({'pubspec': pubspec}));
   }
 
   Map<String, dynamic> toJson() => _$UnpubVersionToJson(this);
