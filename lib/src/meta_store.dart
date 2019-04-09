@@ -1,17 +1,16 @@
-import 'package:pub_server/repository.dart';
-export 'package:pub_server/repository.dart';
+import 'models.dart';
+export 'models.dart';
 
 abstract class UnpubMetaStore {
-  Stream<PackageVersion> getAllVersions(String package);
+  Stream<UnpubVersion> getAllVersions(String name);
 
-  Future<PackageVersion> getVersion(String package, String version);
+  Future<UnpubVersion> getVersion(String name, String version);
 
-  Future<void> addVersion(
-      String package, String version, String pubspecContent);
+  Future<void> addVersion(UnpubVersion version);
 
-  Future<List<String>> getUploadersOfPackage(String package);
+  Future<List<UnpubUploader>> getUploaders(String name);
 
-  Future<void> addUploader(String package, String email);
+  Future<void> addUploader(String name, UnpubUploader uploader);
 
-  Future<void> removeUploader(String package, String email);
+  Future<void> removeUploader(String name, UnpubUploader uploader);
 }

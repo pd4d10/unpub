@@ -8,85 +8,66 @@ class UnpubFileMetaStore extends UnpubMetaStore {
 
   UnpubFileMetaStore(this.baseDir);
 
-  Future<Map> _getMeta(String package) async {
+  Future<UnpubPackage> _getPackageMeta(String package) async {
     var metaFile = File(path.join(baseDir, package, 'meta.json'));
 
     if (await metaFile.exists()) {
       var metaString = await metaFile.readAsString();
-      var meta = json.decode(metaString);
-      return meta;
+      return UnpubPackage.fromJson(json.decode(metaString));
     } else {
       return null;
     }
   }
 
-  Future<void> _setMeta(String package, Map meta) async {
-    var metaFile = File(path.join(baseDir, package, 'meta.json'));
-
-    await metaFile.writeAsString(json.encode(meta));
+  Future<void> _setPackageMeta(UnpubPackage package) async {
+    var metaFile = File(path.join(baseDir, package.name, 'meta.json'));
+    await metaFile.writeAsString(json.encode(package.toJson()));
   }
 
   @override
-  Stream<PackageVersion> getAllVersions(String package) async* {
-    var meta = await _getMeta(package);
-    if (meta == null) return;
+  Stream<UnpubVersion> getAllVersions(String name) async* {
+    var package = await _getPackageMeta(name);
+    if (package == null) return;
 
-    var vs = meta['versions'] as List;
-    var versions = vs
-        .map((item) => PackageVersion(
-            package, item['version'] as String, item['pubspec'] as String))
-        .toList();
-    yield* Stream.fromIterable(versions);
+    yield* Stream.fromIterable(package.versions);
   }
 
   @override
-  Future<PackageVersion> getVersion(String package, String version) async {
-    return getAllVersions(package).firstWhere(
-        (item) => item.versionString == version,
-        orElse: () => null);
+  Future<UnpubVersion> getVersion(String name, String version) async {
+    return getAllVersions(name)
+        .firstWhere((item) => item.version == version, orElse: () => null);
   }
 
   @override
-  Future<void> addVersion(
-      String package, String version, String pubspecContent) async {
-    var meta = await _getMeta(package);
-    if (meta == null) {
-      await Directory(path.join(baseDir, package)).create(recursive: true);
-      meta = {
-        'name': package,
-        'versions': [],
-        'uploaders': [],
-      };
+  Future<void> addVersion(UnpubVersion version) async {
+    var package = await _getPackageMeta(version.name);
+    if (package == null) {
+      await Directory(path.join(baseDir, version.name)).create(recursive: true);
+      package = UnpubPackage(name: version.name, versions: [], uploaders: []);
     }
 
-    (meta['versions'] as List).add({
-      'version': version,
-      'pubspec': pubspecContent,
-    });
-    await _setMeta(package, meta);
+    package.versions.add(version);
+    await _setPackageMeta(package);
   }
 
   @override
-  Future<List<String>> getUploadersOfPackage(String package) async {
-    var meta = await _getMeta(package);
-    return (meta['uploaders'] as List)
-        .map((uploaders) => uploaders['email'] as String)
-        .toList();
+  Future<List<UnpubUploader>> getUploaders(String name) async {
+    var package = await _getPackageMeta(name);
+    return package.uploaders;
   }
 
   @override
-  Future<void> addUploader(String package, String email) async {
-    var meta = await _getMeta(package);
-    (meta['uploaders'] as List).add({'email': email});
-    await _setMeta(package, meta);
+  Future<void> addUploader(String name, UnpubUploader uploader) async {
+    var package = await _getPackageMeta(name);
+    package.uploaders.add(uploader);
+    await _setPackageMeta(package);
   }
 
   @override
-  Future<void> removeUploader(String package, String email) async {
-    var meta = await _getMeta(package);
-    (meta['uploaders'] as List)
-        .removeWhere((uploaders) => (uploaders['email'] as String) == email);
-    await _setMeta(package, meta);
+  Future<void> removeUploader(String name, UnpubUploader uploader) async {
+    var package = await _getPackageMeta(name);
+    package.uploaders.removeWhere((item) => item.email == uploader.email);
+    await _setPackageMeta(package);
   }
 }
 

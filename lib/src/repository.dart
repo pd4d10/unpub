@@ -38,19 +38,24 @@ class UnpubRepository extends PackageRepository {
 
   @override
   Stream<PackageVersion> versions(String package) async* {
-    var items = await metaStore.getAllVersions(package).toList();
+    var versions = await metaStore.getAllVersions(package).toList();
 
-    if (items.isEmpty) {
+    if (versions.isEmpty) {
       yield* proxy.versions(package);
     } else {
-      yield* Stream.fromIterable(items);
+      yield* Stream.fromIterable(versions.map(
+          (item) => PackageVersion(item.name, item.version, item.pubspec)));
     }
   }
 
   @override
   Future<PackageVersion> lookupVersion(String package, String version) async {
     var item = await metaStore.getVersion(package, version);
-    return item ?? proxy.lookupVersion(package, version);
+    if (item == null) {
+      return proxy.lookupVersion(package, version);
+    } else {
+      return PackageVersion(item.name, item.version, item.pubspec);
+    }
   }
 
   @override
@@ -98,18 +103,18 @@ class UnpubRepository extends PackageRepository {
     var version = pubspec['version'] as String;
 
     var newerVersion = await metaStore.getAllVersions(package).firstWhere(
-        (v) => isNewerForVersionString(version, v.versionString),
+        (item) => isNewerForVersionString(version, item.version),
         orElse: () => null);
 
     if (newerVersion != null) {
       throw StateError(
-          'version invalid: ${newerVersion.versionString} exists, which is newer than $version, aborting');
+          'version invalid: ${newerVersion.version} exists, which is newer than $version, aborting');
     }
 
     if (shouldCheckUploader) {
       var packageExists = !(await metaStore.getAllVersions(package).isEmpty);
       if (packageExists) {
-        var uploaders = await metaStore.getUploadersOfPackage(package);
+        var uploaders = await metaStore.getUploaders(package);
         if (!uploaders.contains(info.email)) {
           throw UnauthorizedAccessException(
               '${info.email} is not an uploader of $package package');
@@ -123,7 +128,7 @@ class UnpubRepository extends PackageRepository {
     await packageStore.upload(package, version, tarballBytes);
 
     // Write package meta to database
-    await metaStore.addVersion(package, version, pubspecContent);
+    await metaStore.addVersion(UnpubVersion.fromPubspec(pubspecContent));
 
     return PackageVersion(package, version, pubspecContent);
   }
@@ -150,8 +155,7 @@ class UnpubRepository extends PackageRepository {
   Future addUploader(String package, String userEmail, {request}) async {
     var info = await _getOperatorTokenInfo(request);
 
-    var uploaders = await metaStore.getUploadersOfPackage(package);
-
+    var uploaders = await metaStore.getUploaders(package);
     if (!uploaders.contains(info.email)) {
       throw UnauthorizedAccessException(
           '${info.email} is not an uploader of $package package');
@@ -161,14 +165,13 @@ class UnpubRepository extends PackageRepository {
       throw StateError('cannot add self');
     }
 
-    await metaStore.addUploader(package, userEmail);
+    await metaStore.addUploader(package, UnpubUploader(email: userEmail));
   }
 
   Future removeUploader(String package, String userEmail, {request}) async {
     var info = await _getOperatorTokenInfo(request);
 
-    var uploaders = await metaStore.getUploadersOfPackage(package);
-
+    var uploaders = await metaStore.getUploaders(package);
     if (!uploaders.contains(info.email)) {
       throw UnauthorizedAccessException(
           '${info.email} is not an uploader of $package package');
@@ -182,7 +185,7 @@ class UnpubRepository extends PackageRepository {
       throw StateError('at least one uploader');
     }
 
-    await metaStore.removeUploader(package, userEmail);
+    await metaStore.removeUploader(package, UnpubUploader(email: userEmail));
   }
 }
 
