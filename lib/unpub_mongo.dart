@@ -16,12 +16,14 @@ class UnpubMongo extends UnpubMetaStore {
     var map = await db
         .collection(packageCollection)
         .findOne(where.eq('name', package));
+    if (map == null) return null;
     return UnpubPackage.fromJson(map);
   }
 
   @override
   Stream<UnpubVersion> getAllVersions(String name) async* {
     var package = await _queryPackage(name);
+    if (package == null) return;
     yield* Stream.fromIterable(package.versions);
   }
 
