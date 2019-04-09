@@ -32,9 +32,9 @@ class UnpubMongo extends UnpubMetaStore {
   }
 
   @override
-  Future<void> addVersion(UnpubVersion version) async {
+  Future<void> addVersion(String name, UnpubVersion version) async {
     await db.collection(packageCollection).update(
-        where.eq('name', version.name),
+        where.eq('name', name),
         {
           '\$push': {
             'versions': version.toJson(),

@@ -37,24 +37,24 @@ class UnpubRepository extends PackageRepository {
   }) : proxy = HttpProxyRepository(_httpClient, Uri.parse(proxyUrl));
 
   @override
-  Stream<PackageVersion> versions(String package) async* {
-    var versions = await metaStore.getAllVersions(package).toList();
+  Stream<PackageVersion> versions(String name) async* {
+    var versions = await metaStore.getAllVersions(name).toList();
 
     if (versions.isEmpty) {
-      yield* proxy.versions(package);
+      yield* proxy.versions(name);
     } else {
-      yield* Stream.fromIterable(versions.map(
-          (item) => PackageVersion(item.name, item.version, item.pubspec)));
+      yield* Stream.fromIterable(versions
+          .map((item) => PackageVersion(name, item.version, item.pubspec)));
     }
   }
 
   @override
-  Future<PackageVersion> lookupVersion(String package, String version) async {
-    var item = await metaStore.getVersion(package, version);
+  Future<PackageVersion> lookupVersion(String name, String version) async {
+    var item = await metaStore.getVersion(name, version);
     if (item == null) {
-      return proxy.lookupVersion(package, version);
+      return proxy.lookupVersion(name, version);
     } else {
-      return PackageVersion(item.name, item.version, item.pubspec);
+      return PackageVersion(name, item.version, item.pubspec);
     }
   }
 
@@ -99,10 +99,10 @@ class UnpubRepository extends PackageRepository {
     // TODO: Error handling.
     var pubspec = loadYaml(utf8.decode(_getBytes(pubspecArchiveFile)));
 
-    var package = pubspec['name'] as String;
+    var name = pubspec['name'] as String;
     var version = pubspec['version'] as String;
 
-    var newerVersion = await metaStore.getAllVersions(package).firstWhere(
+    var newerVersion = await metaStore.getAllVersions(name).firstWhere(
         (item) => isNewerForVersionString(version, item.version),
         orElse: () => null);
 
@@ -112,12 +112,12 @@ class UnpubRepository extends PackageRepository {
     }
 
     if (shouldCheckUploader) {
-      var packageExists = !(await metaStore.getAllVersions(package).isEmpty);
+      var packageExists = !(await metaStore.getAllVersions(name).isEmpty);
       if (packageExists) {
-        var uploaders = await metaStore.getUploaders(package).toList();
+        var uploaders = await metaStore.getUploaders(name).toList();
         if (!uploaders.contains(info.email)) {
           throw UnauthorizedAccessException(
-              '${info.email} is not an uploader of $package package');
+              '${info.email} is not an uploader of $name package');
         }
       }
     }
@@ -125,12 +125,12 @@ class UnpubRepository extends PackageRepository {
     var pubspecContent = utf8.decode(pubspecArchiveFile.content);
 
     // Upload package tar to storage
-    await packageStore.upload(package, version, tarballBytes);
+    await packageStore.upload(name, version, tarballBytes);
 
     // Write package meta to database
-    await metaStore.addVersion(UnpubVersion.fromPubspec(pubspecContent));
+    await metaStore.addVersion(name, UnpubVersion.fromPubspec(pubspecContent));
 
-    return PackageVersion(package, version, pubspecContent);
+    return PackageVersion(name, version, pubspecContent);
   }
 
   @override

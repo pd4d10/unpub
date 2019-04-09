@@ -4,6 +4,17 @@ import 'package:meta/meta.dart';
 
 part 'models.g.dart';
 
+// @JsonSerializable()
+// class UnpubAuthor {
+//   final String name;
+//   final String email;
+
+//   UnpubAuthor({@required this.name, @required this.email});
+
+//   factory UnpubAuthor.fromJson(Map<String, dynamic> map) =>
+//       _$UnpubAuthorFromJson(map);
+// }
+
 @JsonSerializable()
 class UnpubUploader {
   final String email;
@@ -22,12 +33,10 @@ class UnpubUploader {
 
 @JsonSerializable()
 class UnpubVersion {
-  final String name;
   final String version;
   final String pubspec;
 
   UnpubVersion({
-    @required this.name,
     @required this.version,
     @required this.pubspec,
   });
@@ -41,7 +50,7 @@ class UnpubVersion {
     return _$UnpubVersionFromJson(map);
   }
 
-  Map<String, dynamic> toJson() => _$UnpubVersionToJson(this)..remove('name');
+  Map<String, dynamic> toJson() => _$UnpubVersionToJson(this);
 }
 
 @JsonSerializable()
