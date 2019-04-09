@@ -51,9 +51,9 @@ class UnpubFileMetaStore extends UnpubMetaStore {
   }
 
   @override
-  Future<List<UnpubUploader>> getUploaders(String name) async {
+  Stream<UnpubUploader> getUploaders(String name) async* {
     var package = await _getPackageMeta(name);
-    return package.uploaders;
+    yield* Stream.fromIterable(package.uploaders);
   }
 
   @override

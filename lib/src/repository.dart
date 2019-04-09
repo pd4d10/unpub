@@ -114,7 +114,7 @@ class UnpubRepository extends PackageRepository {
     if (shouldCheckUploader) {
       var packageExists = !(await metaStore.getAllVersions(package).isEmpty);
       if (packageExists) {
-        var uploaders = await metaStore.getUploaders(package);
+        var uploaders = await metaStore.getUploaders(package).toList();
         if (!uploaders.contains(info.email)) {
           throw UnauthorizedAccessException(
               '${info.email} is not an uploader of $package package');
@@ -155,7 +155,7 @@ class UnpubRepository extends PackageRepository {
   Future addUploader(String package, String userEmail, {request}) async {
     var info = await _getOperatorTokenInfo(request);
 
-    var uploaders = await metaStore.getUploaders(package);
+    var uploaders = await metaStore.getUploaders(package).toList();
     if (!uploaders.contains(info.email)) {
       throw UnauthorizedAccessException(
           '${info.email} is not an uploader of $package package');
@@ -171,7 +171,7 @@ class UnpubRepository extends PackageRepository {
   Future removeUploader(String package, String userEmail, {request}) async {
     var info = await _getOperatorTokenInfo(request);
 
-    var uploaders = await metaStore.getUploaders(package);
+    var uploaders = await metaStore.getUploaders(package).toList();
     if (!uploaders.contains(info.email)) {
       throw UnauthorizedAccessException(
           '${info.email} is not an uploader of $package package');

@@ -16,6 +16,8 @@ class UnpubUploader {
 
   factory UnpubUploader.fromJson(Map<String, dynamic> map) =>
       _$UnpubUploaderFromJson(map);
+
+  Map<String, dynamic> toJson() => _$UnpubUploaderToJson(this);
 }
 
 @JsonSerializable()
