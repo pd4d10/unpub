@@ -34,15 +34,15 @@ class UnpubMongo extends UnpubMetaStore {
   }
 
   @override
-  Future<void> addVersion(String name, UnpubVersion version) async {
-    await db.collection(packageCollection).update(
-        where.eq('name', name),
-        {
-          '\$push': {
-            'versions': version.toJson(),
-          }
-        },
-        upsert: true);
+  Future<void> addVersion(
+      String name, UnpubVersion version, UnpubUploader uploader) async {
+    var dataToPush = {'versions': version.toJson()};
+    if (uploader != null) {
+      dataToPush['uploaders'] = uploader.toJson();
+    }
+    await db
+        .collection(packageCollection)
+        .update(where.eq('name', name), {'\$push': dataToPush}, upsert: true);
   }
 
   @override

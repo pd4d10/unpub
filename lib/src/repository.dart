@@ -112,8 +112,8 @@ class UnpubRepository extends PackageRepository {
     }
 
     if (shouldCheckUploader) {
-      var packageExists = !(await metaStore.getAllVersions(name).isEmpty);
-      if (packageExists) {
+      var packageEmpty = await metaStore.getAllVersions(name).isEmpty;
+      if (!packageEmpty) {
         var uploaders = await metaStore.getUploaders(name).toList();
         if (!uploaders.contains(info.email)) {
           throw UnauthorizedAccessException(
@@ -128,7 +128,8 @@ class UnpubRepository extends PackageRepository {
     await packageStore.upload(name, version, tarballBytes);
 
     // Write package meta to database
-    await metaStore.addVersion(name, UnpubVersion.fromPubspec(pubspecContent));
+    await metaStore.addVersion(name, UnpubVersion.fromPubspec(pubspecContent),
+        info == null ? null : UnpubUploader(email: info.email));
 
     return PackageVersion(name, version, pubspecContent);
   }

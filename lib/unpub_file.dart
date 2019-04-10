@@ -39,7 +39,8 @@ class UnpubFileMetaStore extends UnpubMetaStore {
   }
 
   @override
-  Future<void> addVersion(String name, UnpubVersion version) async {
+  Future<void> addVersion(
+      String name, UnpubVersion version, UnpubUploader uploader) async {
     var package = await _getPackageMeta(name);
     if (package == null) {
       await Directory(path.join(baseDir, name)).create(recursive: true);
@@ -47,6 +48,9 @@ class UnpubFileMetaStore extends UnpubMetaStore {
     }
 
     package.versions.add(version);
+    if (uploader != null) {
+      package.uploaders.add(uploader);
+    }
     await _setPackageMeta(package);
   }
 

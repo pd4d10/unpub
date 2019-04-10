@@ -6,7 +6,8 @@ abstract class UnpubMetaStore {
 
   Future<UnpubVersion> getVersion(String name, String version);
 
-  Future<void> addVersion(String name, UnpubVersion version);
+  Future<void> addVersion(
+      String name, UnpubVersion version, UnpubUploader uploader);
 
   Stream<UnpubUploader> getUploaders(String name);
 
