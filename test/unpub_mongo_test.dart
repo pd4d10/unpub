@@ -76,7 +76,25 @@ main() {
         expect(meta['versions'][1]['pubspec'], readPubspec(package, version));
       });
 
-      test('duplicated version', () {
+      test('version number', () async {
+        var package = 'package_0';
+        var version = '0.0.3+1';
+
+        var result = pubPublish(package, version);
+        expect(result.stderr, '');
+
+        var meta = await readMeta(package);
+
+        expect(meta['name'], package);
+        expect(meta['versions'][0]['version'], '0.0.1');
+        expect(meta['versions'][0]['pubspec'], readPubspec(package, '0.0.1'));
+        expect(meta['versions'][1]['version'], '0.0.3');
+        expect(meta['versions'][1]['pubspec'], readPubspec(package, '0.0.3'));
+        expect(meta['versions'][2]['version'], version);
+        expect(meta['versions'][2]['pubspec'], readPubspec(package, version));
+      });
+
+      test('invalid version', () {
         var package = 'package_0';
         var version = '0.0.2';
 
@@ -93,9 +111,10 @@ main() {
 
         var body = json.decode(res.body);
         expect(body['name'], package);
-        expect(body['latest']['version'], '0.0.3');
+        expect(body['latest']['version'], '0.0.3+1');
         expect(body['versions'][0]['version'], '0.0.1');
         expect(body['versions'][1]['version'], '0.0.3');
+        expect(body['versions'][2]['version'], '0.0.3+1');
       });
 
       test('existing at remote', () async {
