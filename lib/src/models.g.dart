@@ -6,6 +6,14 @@ part of 'models.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+UnpubAuthor _$UnpubAuthorFromJson(Map<String, dynamic> json) {
+  return UnpubAuthor(
+      name: json['name'] as String, email: json['email'] as String);
+}
+
+Map<String, dynamic> _$UnpubAuthorToJson(UnpubAuthor instance) =>
+    <String, dynamic>{'name': instance.name, 'email': instance.email};
+
 UnpubUploader _$UnpubUploaderFromJson(Map<String, dynamic> json) {
   return UnpubUploader(email: json['email'] as String);
 }

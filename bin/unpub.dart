@@ -3,10 +3,11 @@ import 'package:path/path.dart' as path;
 import 'package:args/args.dart';
 import 'package:unpub/unpub.dart';
 import 'package:unpub/unpub_file.dart';
+// import 'package:unpub/unpub_mongo.dart';
 
 main(List<String> args) async {
   var parser = ArgParser();
-  parser.addOption('host', abbr: 'h', defaultsTo: 'localhost');
+  parser.addOption('host', abbr: 'h', defaultsTo: '0.0.0.0');
   parser.addOption('port', abbr: 'p', defaultsTo: '3000');
 
   var results = parser.parse(args);
@@ -24,7 +25,9 @@ main(List<String> args) async {
 
   var repository = UnpubRepository(
     metaStore: UnpubFileMetaStore(baseDir),
+    // metaStore: await UnpubMongo.connect('mongodb://localhost:27017/dart_pub'),
     packageStore: UnpubFilePackageStore(baseDir),
+    shouldCheckUploader: false,
   );
   var server = UnpubServer(repository);
   server.serve(host, port);

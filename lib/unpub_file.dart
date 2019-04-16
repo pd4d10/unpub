@@ -21,6 +21,7 @@ class UnpubFileMetaStore extends UnpubMetaStore {
 
   Future<void> _setPackageMeta(UnpubPackage package) async {
     var metaFile = File(path.join(baseDir, package.name, 'meta.json'));
+    await metaFile.create(recursive: true);
     await metaFile.writeAsString(json.encode(package.toJson()));
   }
 
@@ -43,7 +44,6 @@ class UnpubFileMetaStore extends UnpubMetaStore {
       String name, UnpubVersion version, UnpubUploader uploader) async {
     var package = await _getPackageMeta(name);
     if (package == null) {
-      await Directory(path.join(baseDir, name)).create(recursive: true);
       package = UnpubPackage(name: name, versions: [], uploaders: []);
     }
 
@@ -81,17 +81,14 @@ class UnpubFilePackageStore extends UnpubPackageStore {
   UnpubFilePackageStore(this.baseDir);
 
   File _getTarballFile(String package, String version) {
-    var tarballPath = path.join(baseDir, package, 'package-$version.tar.gz');
-    return File(tarballPath);
+    return File(path.join(baseDir, package, version, 'package.tar.gz'));
   }
 
   @override
-  Future<void> upload(String package, String version, List<int> bytes) async {
-    var dir = Directory(path.join(baseDir, package));
-    if (!(await dir.exists())) {
-      await dir.create(recursive: true);
-    }
-    await _getTarballFile(package, version).writeAsBytes(bytes);
+  Future<void> upload(String package, String version, List<int> content) async {
+    var file = _getTarballFile(package, version);
+    await file.create(recursive: true);
+    await file.writeAsBytes(content);
   }
 
   @override

@@ -4,16 +4,18 @@ import 'package:meta/meta.dart';
 
 part 'models.g.dart';
 
-// @JsonSerializable()
-// class UnpubAuthor {
-//   final String name;
-//   final String email;
+@JsonSerializable()
+class UnpubAuthor {
+  final String name;
+  final String email;
 
-//   UnpubAuthor({@required this.name, @required this.email});
+  UnpubAuthor({@required this.name, @required this.email});
 
-//   factory UnpubAuthor.fromJson(Map<String, dynamic> map) =>
-//       _$UnpubAuthorFromJson(map);
-// }
+  factory UnpubAuthor.fromJson(Map<String, dynamic> map) =>
+      _$UnpubAuthorFromJson(map);
+
+  Map<String, dynamic> toJson() => _$UnpubAuthorToJson(this);
+}
 
 @JsonSerializable()
 class UnpubUploader {
