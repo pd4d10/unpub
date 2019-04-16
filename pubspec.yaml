@@ -1,6 +1,6 @@
 name: unpub
 description: Private Dart Pub for Enterprise.
-version: 0.0.1
+version: 0.1.0
 homepage: https://github.com/pd4d10/unpub
 author: Rongjian Zhang <pd4d10@gmail.com>
 
