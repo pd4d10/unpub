@@ -3,14 +3,13 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
+import 'package:pub_semver/pub_semver.dart' as semver;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:logging/logging.dart';
 import 'package:pub_server/repository.dart';
 import 'package:yaml/yaml.dart';
 import 'package:archive/archive.dart';
 import 'package:googleapis/oauth2/v2.dart';
-
-import 'utils.dart';
 import 'http_proxy_repository.dart';
 import 'meta_store.dart';
 import 'package_store.dart';
@@ -102,13 +101,18 @@ class UnpubRepository extends PackageRepository {
     var name = pubspec['name'] as String;
     var version = pubspec['version'] as String;
 
-    var newerVersion = await metaStore.getAllVersions(name).firstWhere(
-        (item) => isNewerForVersionString(version, item.version),
-        orElse: () => null);
+    var newerOrEqualVersion = await metaStore.getAllVersions(name).firstWhere(
+      (item) {
+        var existingVersion = semver.Version.parse(item.version);
+        var newVersion = semver.Version.parse(version);
+        return existingVersion.compareTo(newVersion) >= 0;
+      },
+      orElse: () => null,
+    );
 
-    if (newerVersion != null) {
+    if (newerOrEqualVersion != null) {
       throw StateError(
-          'version invalid: ${newerVersion.version} exists, which is newer than $version, aborting');
+          'version invalid: ${newerOrEqualVersion.version} exists, which is newer than $version, aborting');
     }
 
     if (shouldCheckUploader) {

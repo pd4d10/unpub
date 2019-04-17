@@ -36,7 +36,7 @@ main() {
   }
 
   setUpAll(() async {
-    _db = Db('mongodb://localhost:27017/dart_pub');
+    _db = Db('mongodb://localhost:27017/dart_pub_test');
     await _db.open();
     await _db.dropCollection(packageCollection);
   });
@@ -76,6 +76,22 @@ main() {
         expect(meta['versions'][1]['pubspec'], readPubspec(package, version));
       });
 
+      test('invalid version', () {
+        var package = 'package_0';
+        var version = '0.0.2';
+
+        var result = pubPublish(package, version);
+        expect(result.stderr, contains('version invalid'));
+      });
+
+      test('invalid version', () {
+        var package = 'package_0';
+        var version = '0.0.3';
+
+        var result = pubPublish(package, version);
+        expect(result.stderr, contains('version invalid'));
+      });
+
       test('version number', () async {
         var package = 'package_0';
         var version = '0.0.3+1';
@@ -92,14 +108,6 @@ main() {
         expect(meta['versions'][1]['pubspec'], readPubspec(package, '0.0.3'));
         expect(meta['versions'][2]['version'], version);
         expect(meta['versions'][2]['pubspec'], readPubspec(package, version));
-      });
-
-      test('invalid version', () {
-        var package = 'package_0';
-        var version = '0.0.2';
-
-        var result = pubPublish(package, version);
-        expect(result.stderr, contains('version invalid'));
       });
     });
 
