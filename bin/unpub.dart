@@ -3,7 +3,7 @@ import 'package:path/path.dart' as path;
 import 'package:args/args.dart';
 import 'package:unpub/unpub.dart';
 import 'package:unpub/unpub_file.dart';
-// import 'package:unpub/unpub_mongo.dart';
+import 'package:unpub/unpub_mongo.dart';
 
 main(List<String> args) async {
   var parser = ArgParser();
@@ -24,9 +24,9 @@ main(List<String> args) async {
   var baseDir = path.absolute('unpub-data');
 
   var repository = UnpubRepository(
-    metaStore: UnpubFileMetaStore(baseDir),
-    // metaStore: await UnpubMongo.connect('mongodb://localhost:27017/dart_pub'),
-    packageStore: UnpubFilePackageStore(baseDir),
+    metaStore:
+        await UnpubMongo.connect('mongodb://localhost:27017/dart_pub_test'),
+    packageStore: UnpubFileStore(baseDir),
     shouldCheckUploader: false,
   );
   var server = UnpubServer(repository);

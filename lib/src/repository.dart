@@ -43,7 +43,7 @@ class UnpubRepository extends PackageRepository {
       yield* proxy.versions(name);
     } else {
       yield* Stream.fromIterable(versions
-          .map((item) => PackageVersion(name, item.version, item.pubspec)));
+          .map((item) => PackageVersion(name, item.version, item.pubspecYaml)));
     }
   }
 
@@ -53,7 +53,7 @@ class UnpubRepository extends PackageRepository {
     if (item == null) {
       return proxy.lookupVersion(name, version);
     } else {
-      return PackageVersion(name, item.version, item.pubspec);
+      return PackageVersion(name, item.version, item.pubspecYaml);
     }
   }
 

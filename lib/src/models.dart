@@ -36,20 +36,26 @@ class UnpubUploader {
 @JsonSerializable()
 class UnpubVersion {
   final String version;
-  final String pubspec;
+  // final Map<String, dynamic> pubspec;
+  final String pubspecYaml;
 
   UnpubVersion({
     @required this.version,
-    @required this.pubspec,
+    // @required this.pubspec,
+    @required this.pubspecYaml,
   });
 
   factory UnpubVersion.fromJson(Map<String, dynamic> map) =>
       _$UnpubVersionFromJson(map);
 
-  factory UnpubVersion.fromPubspec(String pubspec) {
-    var map = loadYaml(pubspec);
-    return _$UnpubVersionFromJson(
-        Map<String, dynamic>.from(map)..addAll({'pubspec': pubspec}));
+  factory UnpubVersion.fromPubspec(String pubspecString) {
+    var map = loadYaml(pubspecString);
+
+    return UnpubVersion(
+      version: map['version'] as String,
+      // pubspec: Map<String, dynamic>.from(map),
+      pubspecYaml: pubspecString,
+    );
   }
 
   Map<String, dynamic> toJson() => _$UnpubVersionToJson(this);

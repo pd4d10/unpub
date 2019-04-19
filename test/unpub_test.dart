@@ -2,26 +2,50 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
+import 'package:mongo_dart/mongo_dart.dart';
 import 'utils.dart';
 import 'package:unpub/unpub.dart';
 import 'package:unpub/unpub_file.dart';
+import 'package:unpub/unpub_mongo.dart';
 
 final baseDir = path.absolute('unpub-data');
 
+// class MongoTestRunner extends TestRunner {
+//   Db db;
+
+//   MongoTestRunner(this.db);
+
+//   @override
+//   Future<UnpubMetaStore> createMetaStore() async {
+//     return UnpubMongo.connect('mongodb://localhost:27017/dart_pub');
+//   }
+
+//   @override
+//   Future<UnpubPackageStore> createPackageStore() async {
+//     return UnpubFilePackageStore(baseDir);
+//   }
+
+// @override
+// }
+
 main() {
+  Db _db;
+
   Future<Map> readMeta(String package) async {
-    return json.decode(File(path.absolute('unpub-data', package, 'meta.json'))
-        .readAsStringSync());
+    return _db.collection(packageCollection).findOne(where.eq('name', package));
   }
 
-  setUpAll(() {
-    var dir = Directory(baseDir);
-    if (dir.existsSync()) {
-      dir.deleteSync(recursive: true);
-    }
+  setUpAll(() async {
+    _db = Db('mongodb://localhost:27017/dart_pub_test');
+    await _db.open();
+    await _db.dropCollection(packageCollection);
   });
 
-  group('file', () {
+  tearDownAll(() async {
+    await _db.close();
+  });
+
+  group('mongo', () {
     group('publish', () {
       test('fresh', () async {
         var package = 'package_0';
@@ -33,7 +57,8 @@ main() {
         var meta = await readMeta(package);
         expect(meta['name'], package);
         expect(meta['versions'][0]['version'], version);
-        expect(meta['versions'][0]['pubspec'], readPubspec(package, version));
+        expect(
+            meta['versions'][0]['pubspecYaml'], readPubspec(package, version));
       });
 
       test('existing package', () async {
@@ -47,9 +72,11 @@ main() {
 
         expect(meta['name'], package);
         expect(meta['versions'][0]['version'], '0.0.1');
-        expect(meta['versions'][0]['pubspec'], readPubspec(package, '0.0.1'));
+        expect(
+            meta['versions'][0]['pubspecYaml'], readPubspec(package, '0.0.1'));
         expect(meta['versions'][1]['version'], version);
-        expect(meta['versions'][1]['pubspec'], readPubspec(package, version));
+        expect(
+            meta['versions'][1]['pubspecYaml'], readPubspec(package, version));
       });
 
       test('invalid version', () {
@@ -79,11 +106,14 @@ main() {
 
         expect(meta['name'], package);
         expect(meta['versions'][0]['version'], '0.0.1');
-        expect(meta['versions'][0]['pubspec'], readPubspec(package, '0.0.1'));
+        expect(
+            meta['versions'][0]['pubspecYaml'], readPubspec(package, '0.0.1'));
         expect(meta['versions'][1]['version'], '0.0.3');
-        expect(meta['versions'][1]['pubspec'], readPubspec(package, '0.0.3'));
+        expect(
+            meta['versions'][1]['pubspecYaml'], readPubspec(package, '0.0.3'));
         expect(meta['versions'][2]['version'], version);
-        expect(meta['versions'][2]['pubspec'], readPubspec(package, version));
+        expect(
+            meta['versions'][2]['pubspecYaml'], readPubspec(package, version));
       });
     });
 
