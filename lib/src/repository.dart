@@ -22,6 +22,9 @@ class UnpubRepository extends PackageRepository {
   HttpProxyRepository proxy;
   bool shouldCheckUploader;
 
+  String googleapisProxy;
+  HttpClient googleapisClient;
+
   static var _httpClient = http.Client();
 
   UnpubRepository({
@@ -33,6 +36,9 @@ class UnpubRepository extends PackageRepository {
 
     ///
     this.shouldCheckUploader = true,
+
+    ///
+    this.googleapisProxy,
   }) : proxy = HttpProxyRepository(_httpClient, Uri.parse(proxyUrl));
 
   @override
@@ -67,7 +73,19 @@ class UnpubRepository extends PackageRepository {
     }
 
     var token = authHeader.split(' ').last;
-    return Oauth2Api(_httpClient).tokeninfo(accessToken: token);
+
+    if (googleapisProxy != null && googleapisClient == null) {
+      googleapisClient = HttpClient()
+        ..findProxy = (url) {
+          return HttpClient.findProxyFromEnvironment(url, environment: {
+            'http_proxy': googleapisProxy,
+            'https_proxy': googleapisProxy,
+          });
+        };
+    }
+
+    return Oauth2Api(googleapisClient ?? _httpClient)
+        .tokeninfo(accessToken: token);
   }
 
   @override
