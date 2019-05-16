@@ -16,11 +16,16 @@ import 'package_store.dart';
 
 final Logger _logger = new Logger('unpub.repository');
 
+Future<bool> defaultPackageValidator(String name) async => true;
+Future<bool> defaultUploaderValidator(Tokeninfo info) async => true;
+
 class UnpubRepository extends PackageRepository {
   UnpubMetaStore metaStore;
   UnpubPackageStore packageStore;
   HttpProxyRepository proxy;
   bool shouldCheckUploader;
+  Future<bool> Function(String name) packageValidator;
+  Future<bool> Function(Tokeninfo info) uploaderValidator;
 
   String googleapisProxy;
   HttpClient googleapisClient;
@@ -36,6 +41,12 @@ class UnpubRepository extends PackageRepository {
 
     ///
     this.shouldCheckUploader = true,
+
+    ///
+    this.packageValidator = defaultPackageValidator,
+
+    ///
+    this.uploaderValidator = defaultUploaderValidator,
 
     ///
     this.googleapisProxy,
@@ -93,6 +104,10 @@ class UnpubRepository extends PackageRepository {
     Tokeninfo info;
     if (shouldCheckUploader) {
       info = await _getOperatorTokenInfo(request);
+      var isValidUser = await uploaderValidator(info);
+      if (!isValidUser) {
+        throw 'Uploader invalid: ${info.toJson()}';
+      }
     }
 
     _logger.info('Start uploading package.');
@@ -117,6 +132,11 @@ class UnpubRepository extends PackageRepository {
     var pubspec = loadYaml(utf8.decode(_getBytes(pubspecArchiveFile)));
 
     var name = pubspec['name'] as String;
+    var isNameValid = await packageValidator(name);
+    if (!isNameValid) {
+      throw 'Package name invalid: $name';
+    }
+
     var version = pubspec['version'] as String;
 
     var newerOrEqualVersion = await metaStore.getAllVersions(name).firstWhere(
