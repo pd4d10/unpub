@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:pub_semver/pub_semver.dart' as semver;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:logging/logging.dart';
@@ -16,19 +17,19 @@ import 'package_store.dart';
 
 final Logger _logger = new Logger('unpub.repository');
 
-Future<bool> defaultPackageValidator(String name) async => true;
-Future<bool> defaultUploaderValidator(Tokeninfo info) async => true;
+Future<void> defaultUploadValidator(
+    dynamic pubspecJson, Tokeninfo googleTokenInfo) async {}
 
 class UnpubRepository extends PackageRepository {
   UnpubMetaStore metaStore;
   UnpubPackageStore packageStore;
   HttpProxyRepository proxy;
   bool shouldCheckUploader;
-  Future<bool> Function(String name) packageValidator;
-  Future<bool> Function(Tokeninfo info) uploaderValidator;
+  Future<void> Function(dynamic pubspecJson, Tokeninfo googleTokenInfo)
+      uploadValidator;
 
   String googleapisProxy;
-  HttpClient googleapisClient;
+  http.Client _googleapisClient;
 
   static var _httpClient = http.Client();
 
@@ -43,10 +44,7 @@ class UnpubRepository extends PackageRepository {
     this.shouldCheckUploader = true,
 
     ///
-    this.packageValidator = defaultPackageValidator,
-
-    ///
-    this.uploaderValidator = defaultUploaderValidator,
+    this.uploadValidator = defaultUploadValidator,
 
     ///
     this.googleapisProxy,
@@ -85,17 +83,15 @@ class UnpubRepository extends PackageRepository {
 
     var token = authHeader.split(' ').last;
 
-    if (googleapisProxy != null && googleapisClient == null) {
-      googleapisClient = HttpClient()
+    if (googleapisProxy != null && _googleapisClient == null) {
+      _googleapisClient = IOClient(HttpClient()
         ..findProxy = (url) {
-          return HttpClient.findProxyFromEnvironment(url, environment: {
-            'http_proxy': googleapisProxy,
-            'https_proxy': googleapisProxy,
-          });
-        };
+          return HttpClient.findProxyFromEnvironment(url,
+              environment: {"https_proxy": googleapisProxy});
+        });
     }
 
-    return Oauth2Api(googleapisClient ?? _httpClient)
+    return Oauth2Api(_googleapisClient ?? _httpClient)
         .tokeninfo(accessToken: token);
   }
 
@@ -104,10 +100,6 @@ class UnpubRepository extends PackageRepository {
     Tokeninfo info;
     if (shouldCheckUploader) {
       info = await _getOperatorTokenInfo(request);
-      var isValidUser = await uploaderValidator(info);
-      if (!isValidUser) {
-        throw 'Uploader invalid: ${info.toJson()}';
-      }
     }
 
     _logger.info('Start uploading package.');
@@ -131,12 +123,10 @@ class UnpubRepository extends PackageRepository {
     // TODO: Error handling.
     var pubspec = loadYaml(utf8.decode(_getBytes(pubspecArchiveFile)));
 
-    var name = pubspec['name'] as String;
-    var isNameValid = await packageValidator(name);
-    if (!isNameValid) {
-      throw 'Package name invalid: $name';
-    }
+    // Validator
+    await uploadValidator(pubspec, info);
 
+    var name = pubspec['name'] as String;
     var version = pubspec['version'] as String;
 
     var newerOrEqualVersion = await metaStore.getAllVersions(name).firstWhere(
