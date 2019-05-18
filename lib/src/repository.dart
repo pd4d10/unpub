@@ -205,7 +205,7 @@ class UnpubRepository extends PackageRepository {
       throw StateError('cannot add self');
     }
 
-    await metaStore.addUploader(package, UnpubUploader(email: userEmail));
+    await metaStore.addUploader(package, userEmail);
   }
 
   Future removeUploader(String package, String userEmail, {request}) async {
@@ -225,7 +225,7 @@ class UnpubRepository extends PackageRepository {
       throw StateError('at least one uploader');
     }
 
-    await metaStore.removeUploader(package, UnpubUploader(email: userEmail));
+    await metaStore.removeUploader(package, userEmail);
   }
 }
 

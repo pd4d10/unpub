@@ -11,7 +11,7 @@ abstract class UnpubMetaStore {
 
   Stream<UnpubUploader> getUploaders(String name);
 
-  Future<void> addUploader(String name, UnpubUploader uploader);
+  Future<void> addUploader(String name, String email);
 
-  Future<void> removeUploader(String name, UnpubUploader uploader);
+  Future<void> removeUploader(String name, String email);
 }

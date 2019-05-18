@@ -46,24 +46,24 @@ class UnpubMongo extends UnpubMetaStore {
   }
 
   @override
-  Future<void> addUploader(String name, UnpubUploader uploader) async {
+  Future<void> addUploader(String name, String email) async {
     await db.collection(packageCollection).update(
         where.eq('name', name),
         {
           '\$push': {
-            'uploaders': uploader.toJson(),
+            'uploaders.email': email,
           }
         },
         upsert: true);
   }
 
   @override
-  Future<void> removeUploader(String name, UnpubUploader uploader) async {
+  Future<void> removeUploader(String name, String email) async {
     await db.collection(packageCollection).update(
         where.eq('name', name),
         {
           '\$pull': {
-            'uploaders.email': uploader.email,
+            'uploaders.email': email,
           }
         },
         upsert: true);
