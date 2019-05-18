@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/io_client.dart';
 import 'package:pub_semver/pub_semver.dart' as semver;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:logging/logging.dart';
@@ -17,21 +16,24 @@ import 'package_store.dart';
 
 final Logger _logger = new Logger('unpub.repository');
 
-Future<void> defaultUploadValidator(
-    dynamic pubspecJson, Tokeninfo googleTokenInfo) async {}
-
 class UnpubRepository extends PackageRepository {
   UnpubMetaStore metaStore;
   UnpubPackageStore packageStore;
   HttpProxyRepository proxy;
   bool supportsDownloadUrl;
-  Future<void> Function(dynamic pubspecJson, Tokeninfo googleTokenInfo)
-      uploadValidator;
 
-  String googleapisProxy;
-  http.Client _googleapisClient;
+  Future<String> Function(String token) uploaderEmailGetter;
+  Future<void> Function(dynamic pubspecJson, String email) uploadValidator;
 
   static var _httpClient = http.Client();
+
+  static Future<void> defaultUploadValidator(_, __) async {}
+
+  static Future<String> defaultUploaderEmailGetter(String token) async {
+    var info = await Oauth2Api(_httpClient).tokeninfo(accessToken: token);
+    if (info == null) return null;
+    return info.email;
+  }
 
   UnpubRepository({
     @required this.metaStore,
@@ -41,10 +43,10 @@ class UnpubRepository extends PackageRepository {
     String proxyUrl = 'https://pub.dartlang.org',
 
     ///
-    this.uploadValidator = defaultUploadValidator,
+    this.uploaderEmailGetter = defaultUploaderEmailGetter,
 
     ///
-    this.googleapisProxy,
+    this.uploadValidator = defaultUploadValidator,
 
     ///
     this.supportsDownloadUrl = true,
@@ -77,29 +79,20 @@ class UnpubRepository extends PackageRepository {
   @override
   bool get supportsUpload => true;
 
-  Future<Tokeninfo> _getOperatorTokenInfo(shelf.Request request) async {
+  Future<String> _getUploaderEmail(shelf.Request request) async {
     var authHeader = request.headers[HttpHeaders.authorizationHeader];
     if (authHeader == null) {
       throw UnauthorizedAccessException('no token');
     }
 
     var token = authHeader.split(' ').last;
-
-    if (googleapisProxy != null && _googleapisClient == null) {
-      _googleapisClient = IOClient(HttpClient()
-        ..findProxy = (url) {
-          return HttpClient.findProxyFromEnvironment(url,
-              environment: {"https_proxy": googleapisProxy});
-        });
-    }
-
-    return Oauth2Api(_googleapisClient ?? _httpClient)
-        .tokeninfo(accessToken: token);
+    var email = await uploaderEmailGetter(token);
+    return email;
   }
 
   @override
   Future<PackageVersion> upload(Stream<List<int>> data, {request}) async {
-    var info = await _getOperatorTokenInfo(request);
+    var email = await _getUploaderEmail(request);
 
     _logger.info('Start uploading package.');
     var bb = await data.fold(
@@ -123,7 +116,7 @@ class UnpubRepository extends PackageRepository {
     var pubspec = loadYaml(utf8.decode(_getBytes(pubspecArchiveFile)));
 
     // Validator
-    await uploadValidator(pubspec, info);
+    await uploadValidator(pubspec, email);
 
     var name = pubspec['name'] as String;
     var version = pubspec['version'] as String;
@@ -145,9 +138,9 @@ class UnpubRepository extends PackageRepository {
     var packageEmpty = await metaStore.getAllVersions(name).isEmpty;
     if (!packageEmpty) {
       var uploaders = await metaStore.getUploaders(name).toList();
-      if (!uploaders.contains(info.email)) {
+      if (!uploaders.contains(email)) {
         throw UnauthorizedAccessException(
-            '${info.email} is not an uploader of $name package');
+            '$email is not an uploader of $name package');
       }
     }
 
@@ -158,7 +151,7 @@ class UnpubRepository extends PackageRepository {
 
     // Write package meta to database
     await metaStore.addVersion(name, UnpubVersion.fromPubspec(pubspecContent),
-        info == null ? null : UnpubUploader(email: info.email));
+        UnpubUploader(email: email));
 
     // TODO: Upload docs
 
@@ -190,15 +183,15 @@ class UnpubRepository extends PackageRepository {
   bool get supportsUploaders => false;
 
   Future addUploader(String package, String userEmail, {request}) async {
-    var info = await _getOperatorTokenInfo(request);
+    var email = await _getUploaderEmail(request);
 
     var uploaders = await metaStore.getUploaders(package).toList();
-    if (!uploaders.contains(info.email)) {
+    if (!uploaders.contains(email)) {
       throw UnauthorizedAccessException(
-          '${info.email} is not an uploader of $package package');
+          '$email is not an uploader of $package package');
     }
 
-    if (userEmail == info.email) {
+    if (userEmail == email) {
       throw StateError('cannot add self');
     }
 
@@ -206,15 +199,15 @@ class UnpubRepository extends PackageRepository {
   }
 
   Future removeUploader(String package, String userEmail, {request}) async {
-    var info = await _getOperatorTokenInfo(request);
+    var email = await _getUploaderEmail(request);
 
     var uploaders = await metaStore.getUploaders(package).toList();
-    if (!uploaders.contains(info.email)) {
+    if (!uploaders.contains(email)) {
       throw UnauthorizedAccessException(
-          '${info.email} is not an uploader of $package package');
+          '$email is not an uploader of $package package');
     }
 
-    if (userEmail == info.email) {
+    if (userEmail == email) {
       throw StateError('cannot remove self');
     }
 
