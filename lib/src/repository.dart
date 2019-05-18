@@ -24,7 +24,6 @@ class UnpubRepository extends PackageRepository {
   UnpubMetaStore metaStore;
   UnpubPackageStore packageStore;
   HttpProxyRepository proxy;
-  bool shouldCheckUploader;
   bool supportsDownloadUrl;
   Future<void> Function(dynamic pubspecJson, Tokeninfo googleTokenInfo)
       uploadValidator;
@@ -40,9 +39,6 @@ class UnpubRepository extends PackageRepository {
 
     /// Upstream proxy
     String proxyUrl = 'https://pub.dartlang.org',
-
-    ///
-    this.shouldCheckUploader = true,
 
     ///
     this.uploadValidator = defaultUploadValidator,
@@ -103,10 +99,7 @@ class UnpubRepository extends PackageRepository {
 
   @override
   Future<PackageVersion> upload(Stream<List<int>> data, {request}) async {
-    Tokeninfo info;
-    if (shouldCheckUploader) {
-      info = await _getOperatorTokenInfo(request);
-    }
+    var info = await _getOperatorTokenInfo(request);
 
     _logger.info('Start uploading package.');
     var bb = await data.fold(
@@ -149,14 +142,12 @@ class UnpubRepository extends PackageRepository {
           'version invalid: ${newerOrEqualVersion.version} exists, which is newer than $version, aborting');
     }
 
-    if (shouldCheckUploader) {
-      var packageEmpty = await metaStore.getAllVersions(name).isEmpty;
-      if (!packageEmpty) {
-        var uploaders = await metaStore.getUploaders(name).toList();
-        if (!uploaders.contains(info.email)) {
-          throw UnauthorizedAccessException(
-              '${info.email} is not an uploader of $name package');
-        }
+    var packageEmpty = await metaStore.getAllVersions(name).isEmpty;
+    if (!packageEmpty) {
+      var uploaders = await metaStore.getUploaders(name).toList();
+      if (!uploaders.contains(info.email)) {
+        throw UnauthorizedAccessException(
+            '${info.email} is not an uploader of $name package');
       }
     }
 

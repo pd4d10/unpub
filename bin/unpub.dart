@@ -27,7 +27,6 @@ main(List<String> args) async {
     metaStore:
         await UnpubMongo.connect('mongodb://localhost:27017/dart_pub_test'),
     packageStore: UnpubFileStore(baseDir),
-    shouldCheckUploader: false,
   );
   var server = UnpubServer(repository);
   server.serve(host, port);
