@@ -61,6 +61,7 @@ class UnpubRepository extends PackageRepository {
     if (versions.isEmpty) {
       yield* proxy.versions(name);
     } else {
+      metaStore.increaseQueryCount(name);
       yield* Stream.fromIterable(versions
           .map((item) => PackageVersion(name, item.version, item.pubspecYaml)));
     }
@@ -72,6 +73,7 @@ class UnpubRepository extends PackageRepository {
     if (item == null) {
       return proxy.lookupVersion(name, version);
     } else {
+      metaStore.increaseQueryCount(name);
       return PackageVersion(name, item.version, item.pubspecYaml);
     }
   }
@@ -177,8 +179,10 @@ class UnpubRepository extends PackageRepository {
     var item = await metaStore.getVersion(package, version);
     if (item == null) {
       return proxy.download(package, version);
+    } else {
+      metaStore.increaseDownloadCount(package);
+      return packageStore.download(package, version);
     }
-    return packageStore.download(package, version);
   }
 
   @override
@@ -186,8 +190,10 @@ class UnpubRepository extends PackageRepository {
     var item = await metaStore.getVersion(package, version);
     if (item == null) {
       return proxy.downloadUrl(package, version);
+    } else {
+      metaStore.increaseDownloadCount(package);
+      return packageStore.downloadUri(package, version);
     }
-    return packageStore.downloadUri(package, version);
   }
 
   bool get supportsUploaders => false;

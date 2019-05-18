@@ -14,4 +14,8 @@ abstract class UnpubMetaStore {
   Future<void> addUploader(String name, String email);
 
   Future<void> removeUploader(String name, String email);
+
+  void increaseDownloadCount(String name);
+
+  void increaseQueryCount(String name);
 }

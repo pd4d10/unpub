@@ -2,6 +2,7 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:unpub/unpub.dart';
 
 final packageCollection = 'packages';
+final statsCollection = 'stats';
 
 class UnpubMongo extends UnpubMetaStore {
   Db db;
@@ -73,5 +74,25 @@ class UnpubMongo extends UnpubMetaStore {
   Stream<UnpubUploader> getUploaders(String name) async* {
     var package = await _queryPackage(name);
     yield* Stream.fromIterable(package.uploaders);
+  }
+
+  @override
+  void increaseDownloadCount(String name) {
+    db.collection(statsCollection).update(
+        where.eq('name', name),
+        {
+          '\$inc': {'download': 1}
+        },
+        upsert: true);
+  }
+
+  @override
+  void increaseQueryCount(String name) {
+    db.collection(statsCollection).update(
+        where.eq('name', name),
+        {
+          '\$inc': {'query': 1}
+        },
+        upsert: true);
   }
 }
