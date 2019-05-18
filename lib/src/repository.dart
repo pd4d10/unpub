@@ -180,7 +180,7 @@ class UnpubRepository extends PackageRepository {
     }
   }
 
-  bool get supportsUploaders => false;
+  bool get supportsUploaders => true;
 
   Future addUploader(String package, String userEmail, {request}) async {
     var email = await _getUploaderEmail(request);
