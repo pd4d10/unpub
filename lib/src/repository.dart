@@ -25,6 +25,7 @@ class UnpubRepository extends PackageRepository {
   UnpubPackageStore packageStore;
   HttpProxyRepository proxy;
   bool shouldCheckUploader;
+  bool supportsDownloadUrl;
   Future<void> Function(dynamic pubspecJson, Tokeninfo googleTokenInfo)
       uploadValidator;
 
@@ -48,6 +49,9 @@ class UnpubRepository extends PackageRepository {
 
     ///
     this.googleapisProxy,
+
+    ///
+    this.supportsDownloadUrl = true,
   }) : proxy = HttpProxyRepository(_httpClient, Uri.parse(proxyUrl));
 
   @override
@@ -170,11 +174,12 @@ class UnpubRepository extends PackageRepository {
 
   @override
   Future<Stream<List<int>>> download(String package, String version) async {
-    throw 'Should redirect to tos';
+    var item = await metaStore.getVersion(package, version);
+    if (item == null) {
+      return proxy.download(package, version);
+    }
+    return packageStore.download(package, version);
   }
-
-  @override
-  bool get supportsDownloadUrl => true;
 
   @override
   Future<Uri> downloadUrl(String package, String version) async {
