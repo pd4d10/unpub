@@ -36,14 +36,18 @@ class UnpubMongo extends UnpubMetaStore {
 
   @override
   Future<void> addVersion(
-      String name, UnpubVersion version, UnpubUploader uploader) async {
-    var dataToPush = {'versions': version.toJson()};
-    if (uploader != null) {
-      dataToPush['uploaders'] = uploader.toJson();
-    }
-    await db
-        .collection(packageCollection)
-        .update(where.eq('name', name), {'\$push': dataToPush}, upsert: true);
+      String name, UnpubVersion version, String uploaderEmail) async {
+    await db.collection(packageCollection).update(
+        where.eq('name', name),
+        {
+          '\$push': {
+            'versions': version.toJson(),
+          },
+          '\$addToSet': {
+            'uploaders': uploaderEmail,
+          }
+        },
+        upsert: true);
   }
 
   @override
@@ -52,7 +56,7 @@ class UnpubMongo extends UnpubMetaStore {
         where.eq('name', name),
         {
           '\$push': {
-            'uploaders.email': email,
+            'uploaders': email,
           }
         },
         upsert: true);
@@ -64,14 +68,14 @@ class UnpubMongo extends UnpubMetaStore {
         where.eq('name', name),
         {
           '\$pull': {
-            'uploaders.email': email,
+            'uploaders': email,
           }
         },
         upsert: true);
   }
 
   @override
-  Stream<UnpubUploader> getUploaders(String name) async* {
+  Stream<String> getUploaders(String name) async* {
     var package = await _queryPackage(name);
     yield* Stream.fromIterable(package.uploaders);
   }

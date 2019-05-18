@@ -18,22 +18,6 @@ class UnpubAuthor {
 }
 
 @JsonSerializable()
-class UnpubUploader {
-  final String email;
-  // final String userId;
-
-  UnpubUploader({
-    @required this.email,
-    // @required this.userId,
-  });
-
-  factory UnpubUploader.fromJson(Map<String, dynamic> map) =>
-      _$UnpubUploaderFromJson(map);
-
-  Map<String, dynamic> toJson() => _$UnpubUploaderToJson(this);
-}
-
-@JsonSerializable()
 class UnpubVersion {
   final String version;
   // final Map<String, dynamic> pubspec;
@@ -65,7 +49,7 @@ class UnpubVersion {
 class UnpubPackage {
   final String name;
   final List<UnpubVersion> versions;
-  final List<UnpubUploader> uploaders;
+  final List<String> uploaders;
 
   UnpubPackage({
     @required this.name,

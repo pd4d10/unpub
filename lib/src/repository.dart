@@ -151,7 +151,7 @@ class UnpubRepository extends PackageRepository {
 
     // Write package meta to database
     await metaStore.addVersion(name, UnpubVersion.fromPubspec(pubspecContent),
-        UnpubUploader(email: email));
+        email);
 
     // TODO: Upload docs
 

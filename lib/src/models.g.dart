@@ -14,13 +14,6 @@ UnpubAuthor _$UnpubAuthorFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$UnpubAuthorToJson(UnpubAuthor instance) =>
     <String, dynamic>{'name': instance.name, 'email': instance.email};
 
-UnpubUploader _$UnpubUploaderFromJson(Map<String, dynamic> json) {
-  return UnpubUploader(email: json['email'] as String);
-}
-
-Map<String, dynamic> _$UnpubUploaderToJson(UnpubUploader instance) =>
-    <String, dynamic>{'email': instance.email};
-
 UnpubVersion _$UnpubVersionFromJson(Map<String, dynamic> json) {
   return UnpubVersion(
       version: json['version'] as String,
@@ -41,11 +34,8 @@ UnpubPackage _$UnpubPackageFromJson(Map<String, dynamic> json) {
               ? null
               : UnpubVersion.fromJson(e as Map<String, dynamic>))
           ?.toList(),
-      uploaders: (json['uploaders'] as List)
-          ?.map((e) => e == null
-              ? null
-              : UnpubUploader.fromJson(e as Map<String, dynamic>))
-          ?.toList());
+      uploaders:
+          (json['uploaders'] as List)?.map((e) => e as String)?.toList());
 }
 
 Map<String, dynamic> _$UnpubPackageToJson(UnpubPackage instance) =>
