@@ -82,7 +82,7 @@ class UnpubRepository extends PackageRepository {
   Future<String> _getUploaderEmail(shelf.Request request) async {
     var authHeader = request.headers[HttpHeaders.authorizationHeader];
     if (authHeader == null) {
-      throw UnauthorizedAccessException('no token');
+      throw UnauthorizedAccessException('');
     }
 
     var token = authHeader.split(' ').last;
@@ -139,8 +139,7 @@ class UnpubRepository extends PackageRepository {
     if (!packageEmpty) {
       var uploaders = await metaStore.getUploaders(name).toList();
       if (!uploaders.contains(email)) {
-        throw UnauthorizedAccessException(
-            '$email is not an uploader of $name package');
+        throw UnauthorizedAccessException('');
       }
     }
 
@@ -150,8 +149,8 @@ class UnpubRepository extends PackageRepository {
     await packageStore.upload(name, version, tarballBytes);
 
     // Write package meta to database
-    await metaStore.addVersion(name, UnpubVersion.fromPubspec(pubspecContent),
-        email);
+    await metaStore.addVersion(
+        name, UnpubVersion.fromPubspec(pubspecContent), email);
 
     // TODO: Upload docs
 
@@ -182,40 +181,42 @@ class UnpubRepository extends PackageRepository {
 
   bool get supportsUploaders => true;
 
-  Future addUploader(String package, String userEmail, {request}) async {
+  Future addUploader(String package, String emailToAdd, {request}) async {
     var email = await _getUploaderEmail(request);
 
     var uploaders = await metaStore.getUploaders(package).toList();
     if (!uploaders.contains(email)) {
-      throw UnauthorizedAccessException(
-          '$email is not an uploader of $package package');
+      throw UnauthorizedAccessException('');
     }
 
-    if (userEmail == email) {
-      throw StateError('cannot add self');
+    if (uploaders.contains(emailToAdd)) {
+      throw UploaderAlreadyExistsException();
     }
 
-    await metaStore.addUploader(package, userEmail);
+    if (emailToAdd == email) {
+      throw GenericProcessingException('Cannot remove self');
+    }
+
+    await metaStore.addUploader(package, emailToAdd);
   }
 
-  Future removeUploader(String package, String userEmail, {request}) async {
+  Future removeUploader(String package, String emailToAdd, {request}) async {
     var email = await _getUploaderEmail(request);
 
     var uploaders = await metaStore.getUploaders(package).toList();
     if (!uploaders.contains(email)) {
-      throw UnauthorizedAccessException(
-          '$email is not an uploader of $package package');
+      throw UnauthorizedAccessException('');
     }
 
-    if (userEmail == email) {
-      throw StateError('cannot remove self');
+    if (emailToAdd == email) {
+      throw GenericProcessingException('Cannot remove self');
     }
 
     if (uploaders.length <= 1) {
-      throw StateError('at least one uploader');
+      throw LastUploaderRemoveException();
     }
 
-    await metaStore.removeUploader(package, userEmail);
+    await metaStore.removeUploader(package, emailToAdd);
   }
 }
 
