@@ -28,12 +28,9 @@ import 'package:unpub/unpub.dart';
 var baseDir = path.absolute('unpub-data');
 
 var repository = UnpubRepository(
-  metaStore: UnpubFileMetaStore(baseDir),
-  // You can also use MongoDB as meta store
-  // metaStore: await UnpubMongo.connect('mongodb://localhost:27017/dart_pub'),
-
-  packageStore: UnpubFilePackageStore(baseDir),
-
+    metaStore:
+        await UnpubMongo.connect('mongodb://localhost:27017/dart_pub_test'),
+    packageStore: UnpubFileStore(baseDir),
   shouldCheckUploader: true,
 );
 
