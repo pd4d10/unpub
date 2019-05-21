@@ -6,3 +6,8 @@
 
 - `pub get`
 - `pub publish` with permission check
+
+## 0.1.1
+
+- Get email via Google APIs
+- Upload validator
