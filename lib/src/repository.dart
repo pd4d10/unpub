@@ -40,7 +40,7 @@ class UnpubRepository extends PackageRepository {
     @required this.packageStore,
 
     /// Upstream proxy
-    String proxyUrl = 'https://pub.dartlang.org',
+    String proxyUrl = 'https://pub.dev',
 
     ///
     this.uploaderEmailGetter = defaultUploaderEmailGetter,

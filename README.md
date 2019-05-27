@@ -1,6 +1,6 @@
 # Unpub
 
-[![pub](https://img.shields.io/pub/v/unpub.svg)](https://pub.dartlang.org/packages/unpub)
+[![pub](https://img.shields.io/pub/v/unpub.svg)](https://pub.dev/packages/unpub)
 
 Private Dart Pub for Enterprise.
 
