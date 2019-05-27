@@ -10,7 +10,6 @@ import 'package:pub_server/repository.dart';
 import 'package:yaml/yaml.dart';
 import 'package:archive/archive.dart';
 import 'package:googleapis/oauth2/v2.dart';
-import 'http_proxy_repository.dart';
 import 'meta_store.dart';
 import 'package_store.dart';
 
@@ -19,8 +18,8 @@ final Logger _logger = new Logger('unpub.repository');
 class UnpubRepository extends PackageRepository {
   UnpubMetaStore metaStore;
   UnpubPackageStore packageStore;
-  HttpProxyRepository proxy;
   bool supportsDownloadUrl;
+  String proxyUrl;
 
   Future<String> Function(String token) uploaderEmailGetter;
   Future<void> Function(dynamic pubspecJson, String email) uploadValidator;
@@ -40,7 +39,7 @@ class UnpubRepository extends PackageRepository {
     @required this.packageStore,
 
     /// Upstream proxy
-    String proxyUrl = 'https://pub.dev',
+    this.proxyUrl = 'https://pub.dev',
 
     ///
     this.uploaderEmailGetter = defaultUploaderEmailGetter,
@@ -50,14 +49,29 @@ class UnpubRepository extends PackageRepository {
 
     ///
     this.supportsDownloadUrl = true,
-  }) : proxy = HttpProxyRepository(_httpClient, Uri.parse(proxyUrl));
+  });
 
   @override
   Stream<PackageVersion> versions(String name) async* {
     var versions = await metaStore.getAllVersions(name).toList();
 
     if (versions.isEmpty) {
-      yield* proxy.versions(name);
+      name = Uri.encodeComponent(name);
+      var res = await _httpClient.get('$proxyUrl/api/packages/$name');
+      if (res.statusCode != 200) return;
+
+      // TODO: No need to parse
+      var data = json.decode(res.body);
+      var versions = data['versions'] as List<dynamic>;
+
+      if (versions == null) return;
+
+      for (var item in versions) {
+        var pubspec = item['pubspec'];
+        var pubspecString = json.encode(pubspec);
+        yield PackageVersion(pubspec['name'] as String,
+            pubspec['version'] as String, pubspecString);
+      }
     } else {
       metaStore.increaseQueryCount(name);
       yield* Stream.fromIterable(versions
@@ -69,7 +83,18 @@ class UnpubRepository extends PackageRepository {
   Future<PackageVersion> lookupVersion(String name, String version) async {
     var item = await metaStore.getVersion(name, version);
     if (item == null) {
-      return proxy.lookupVersion(name, version);
+      name = Uri.encodeComponent(name);
+      version = Uri.encodeComponent(version);
+      var res = await _httpClient
+          .get('$proxyUrl/api/packages/$name/versions/$version');
+      if (res.statusCode != 200) return null;
+
+      var data = json.decode(res.body);
+      var pubspec = data['pubspec'];
+      var pubspecString = json.encode(pubspec);
+
+      return PackageVersion(pubspec['name'] as String,
+          pubspec['version'] as String, pubspecString);
     } else {
       metaStore.increaseQueryCount(name);
       return PackageVersion(name, item.version, item.pubspecYaml);
@@ -161,7 +186,15 @@ class UnpubRepository extends PackageRepository {
   Future<Stream<List<int>>> download(String package, String version) async {
     var item = await metaStore.getVersion(package, version);
     if (item == null) {
-      return proxy.download(package, version);
+      _logger.info('Downloading package $package/$version.');
+      package = Uri.encodeComponent(package);
+      version = Uri.encodeComponent(version);
+
+      var response = await _httpClient.send(http.Request(
+          'GET',
+          Uri.parse(proxyUrl)
+              .resolve('/packages/$package/versions/$version.tar.gz')));
+      return response.stream;
     } else {
       metaStore.increaseDownloadCount(package);
       return packageStore.download(package, version);
@@ -172,7 +205,10 @@ class UnpubRepository extends PackageRepository {
   Future<Uri> downloadUrl(String package, String version) async {
     var item = await metaStore.getVersion(package, version);
     if (item == null) {
-      return proxy.downloadUrl(package, version);
+      package = Uri.encodeComponent(package);
+      version = Uri.encodeComponent(version);
+      return Uri.parse(proxyUrl)
+          .resolve('/packages/$package/versions/$version.tar.gz');
     } else {
       metaStore.increaseDownloadCount(package);
       return packageStore.downloadUri(package, version);
