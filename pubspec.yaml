@@ -10,6 +10,7 @@ environment:
 dependencies:
   args: ^1.5.1
   shelf: ^0.7.5
+  shelf_router: ^0.7.0
   http: ^0.12.0
   pub_server: #^0.1.5
     git:
