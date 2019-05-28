@@ -7,7 +7,6 @@ import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:pub_semver/pub_semver.dart' as semver;
-import 'package:pub_server/repository.dart';
 import 'package:yaml/yaml.dart';
 import 'package:archive/archive.dart';
 import 'package:unpub/src/meta_store.dart';
@@ -203,19 +202,53 @@ class UnpubService {
     if (error != null) {
       return _badRequest(error);
     }
-    return _jsonResponse({
-      'success': {'message': 'Successfully uploaded package.'}
-    });
+    return _ok('Successfully uploaded package.');
   }
 
-  Response _jsonResponse(Map<String, dynamic> data, {int status = 200}) =>
-      Response(status,
-          body: json.encode(data),
-          headers: {'content-type': 'application/json'});
+  Response _ok(String message, {int status = 200}) => Response(status,
+      body: json.encode({
+        'success': {'message': message}
+      }),
+      headers: {'content-type': 'application/json'});
 
-  Response _badRequest(String message) => Response(400,
+  Response _badRequest(String message, {int status = 400}) => Response(status,
       body: json.encode({
         'error': {'message': message}
       }),
       headers: {'content-type': 'application/json'});
+
+  @Route.post('/api/packages/<name>/uploaders')
+  Future<Response> addUploader(Request req, String name) async {
+    var body = await req.readAsString();
+    var email = Uri.splitQueryString(body)['email'];
+    var operatorEmail = await _getUploaderEmail(req);
+    var uploaders = await metaStore.getUploaders(name).toList();
+
+    if (!uploaders.contains(operatorEmail)) {
+      return _badRequest('no permission', status: 403);
+    }
+    if (uploaders.contains(email)) {
+      return _badRequest('email already exists');
+    }
+
+    await metaStore.addUploader(name, email);
+    return _ok('uploader added');
+  }
+
+  @Route.delete('/api/packages/<name>/uploaders/<email>')
+  Future<Response> removeUploader(
+      Request req, String name, String email) async {
+    var operatorEmail = await _getUploaderEmail(req);
+    var uploaders = await metaStore.getUploaders(name).toList();
+
+    if (!uploaders.contains(operatorEmail)) {
+      return _badRequest('no permission', status: 403);
+    }
+    if (!uploaders.contains(email)) {
+      return _badRequest('email not uploader');
+    }
+
+    await metaStore.removeUploader(name, email);
+    return _ok('uploader removed');
+  }
 }

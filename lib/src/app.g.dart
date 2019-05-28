@@ -15,5 +15,8 @@ Router _$UnpubServiceRouter(UnpubService service) {
   router.add('POST', '/api/packages/versions/newUpload', service.upload);
   router.add(
       'GET', '/api/packages/versions/newUploadFinish', service.uploadFinish);
+  router.add('POST', '/api/packages/<name>/uploaders', service.addUploader);
+  router.add('DELETE', '/api/packages/<name>/uploaders/<email>',
+      service.removeUploader);
   return router;
 }
