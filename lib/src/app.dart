@@ -105,6 +105,29 @@ class UnpubService {
     return Response.ok(_versionToJson(item, req.requestedUri));
   }
 
+  @Route.get('/packages/<name>/versions/<version>.tar.gz')
+  Future<Response> download(Request req, String name, String version) async {
+    var item = await metaStore.getVersion(name, version);
+
+    Stream<List<int>> stream;
+
+    if (item == null) {
+      name = Uri.encodeComponent(name);
+      version = Uri.encodeComponent(version);
+
+      var res = await _httpClient.send(http.Request(
+          'GET',
+          Uri.parse(proxyUrl)
+              .resolve('/packages/$name/versions/$version.tar.gz')));
+      stream = res.stream;
+    } else {
+      metaStore.increaseDownloadCount(name);
+      stream = packageStore.download(name, version);
+    }
+
+    return Response(200, body: stream);
+  }
+
   @Route.get('/api/packages/versions/new')
   Future<Response> getUploadUrl(Request req) async {
     return Response.ok({

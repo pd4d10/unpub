@@ -11,6 +11,8 @@ Router _$UnpubServiceRouter(UnpubService service) {
   router.add('GET', '/api/packages/<name>', service.getVersions);
   router.add(
       'GET', '/api/packages/<name>/versions/<version>', service.getVersion);
+  router.add(
+      'GET', '/packages/<name>/versions/<version>.tar.gz', service.download);
   router.add('GET', '/api/packages/versions/new', service.getUploadUrl);
   router.add('POST', '/api/packages/versions/newUpload', service.upload);
   router.add(
