@@ -31,6 +31,7 @@ dev_dependencies:
   test: ^1.6.1
   build_runner: ^1.0.0
   json_serializable: ^2.0.0
+  shelf_router_generator: ^0.7.1
 
 executables:
   unpub: unpub

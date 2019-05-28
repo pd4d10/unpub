@@ -13,9 +13,11 @@ import 'package:archive/archive.dart';
 import 'package:unpub/src/meta_store.dart';
 import 'package:unpub/src/package_store.dart';
 
+part 'app.g.dart';
+
 List<int> _getBytes(ArchiveFile file) => file.content as List<int>;
 
-class UnpubApp {
+class UnpubService {
   static var _httpClient = http.Client();
 
   var app = Router();
@@ -33,7 +35,7 @@ class UnpubApp {
 
   static Future<void> defaultUploadValidator(_, __) async {}
 
-  UnpubApp({
+  UnpubService({
     this.metaStore,
     this.packageStore,
     this.proxyUrl = 'https://pub.dev',
@@ -63,143 +65,146 @@ class UnpubApp {
     };
   }
 
-  void init() {
-    app.get('/api/packages/<name>', (Request req, String name) async {
-      var versions = await metaStore.getAllVersions(name).toList();
+  Router get router => _$UnpubServiceRouter(this);
 
-      if (versions.isEmpty) {
-        name = Uri.encodeComponent(name);
-        var res = await _httpClient.send(http.Request(
-            'GET', Uri.parse(proxyUrl).resolve('/api/packages/$name')));
-        return Response.ok(res.stream);
+  @Route.get('/api/packages/<name>')
+  Future<Response> getVersions(Request req, String name) async {
+    var versions = await metaStore.getAllVersions(name).toList();
+
+    if (versions.isEmpty) {
+      name = Uri.encodeComponent(name);
+      var res = await _httpClient.send(http.Request(
+          'GET', Uri.parse(proxyUrl).resolve('/api/packages/$name')));
+      return Response.ok(res.stream);
+    }
+
+    metaStore.increaseQueryCount(name);
+
+    return Response.ok({
+      'name': name,
+      'latest': {}, // TODO:
+      'versions':
+          versions.map((item) => _versionToJson(item, req.requestedUri)),
+    });
+  }
+
+  @Route.get('/api/packages/<name>/versions/<version>')
+  Future<Response> getVersion(Request req, String name, String version) async {
+    var item = await metaStore.getVersion(name, version);
+
+    if (item == null) {
+      name = Uri.encodeComponent(name);
+      version = Uri.encodeComponent(version);
+      var res = await _httpClient.send(http.Request(
+          'GET',
+          Uri.parse(proxyUrl)
+              .resolve('/api/packages/$name/versions/$version')));
+      return Response.ok(res.stream);
+    }
+
+    metaStore.increaseQueryCount(name);
+    return Response.ok(_versionToJson(item, req.requestedUri));
+  }
+
+  @Route.get('/api/packages/versions/new')
+  Future<Response> getUploadUrl(Request req) async {
+    return Response.ok({
+      'url': req.requestedUri.resolve('/api/packages/versions/newUpload'),
+      'fields': {},
+    });
+  }
+
+  @Route.post('/api/packages/versions/newUpload')
+  Future<Response> upload(Request req) async {
+    try {
+      var email = await _getUploaderEmail(req);
+
+      var mediaType = MediaType.parse(req.headers['content-type']);
+
+      var boundary = mediaType.parameters['boundary'];
+      MimeMultipart fileData;
+
+      await for (MimeMultipart part
+          in req.read().transform(MimeMultipartTransformer(boundary))) {
+        if (fileData != null) continue;
+        fileData = part;
       }
 
-      metaStore.increaseQueryCount(name);
-
-      return Response.ok({
-        'name': name,
-        'latest': {}, // TODO:
-        'versions':
-            versions.map((item) => _versionToJson(item, req.requestedUri)),
-      });
-    });
-
-    app.get('/api/packages/<name>/versions/<version>',
-        (Request req, String name, String version) async {
-      var item = await metaStore.getVersion(name, version);
-
-      if (item == null) {
-        name = Uri.encodeComponent(name);
-        version = Uri.encodeComponent(version);
-        var res = await _httpClient.send(http.Request(
-            'GET',
-            Uri.parse(proxyUrl)
-                .resolve('/api/packages/$name/versions/$version')));
-        return Response.ok(res.stream);
+      var bb = await fileData.fold(
+          BytesBuilder(), (BytesBuilder byteBuilder, d) => byteBuilder..add(d));
+      var tarballBytes = bb.takeBytes();
+      var tarBytes = GZipDecoder().decodeBytes(tarballBytes);
+      var archive = TarDecoder().decodeBytes(tarBytes);
+      ArchiveFile pubspecArchiveFile;
+      for (var file in archive.files) {
+        if (file.name == 'pubspec.yaml') {
+          pubspecArchiveFile = file;
+          break;
+        }
       }
 
-      metaStore.increaseQueryCount(name);
-      return Response.ok(_versionToJson(item, req.requestedUri));
-    });
-
-    app.get('/api/packages/versions/new', (Request req) {
-      return Response.ok({
-        'url': req.requestedUri.resolve('/api/packages/versions/newUpload'),
-        'fields': {},
-      });
-    });
-
-    app.post('/api/packages/versions/newUpload', (Request req) async {
-      try {
-        var email = await _getUploaderEmail(req);
-
-        var mediaType = MediaType.parse(req.headers['content-type']);
-
-        var boundary = mediaType.parameters['boundary'];
-        MimeMultipart fileData;
-
-        await for (MimeMultipart part
-            in req.read().transform(MimeMultipartTransformer(boundary))) {
-          if (fileData != null) continue;
-          fileData = part;
-        }
-
-        var bb = await fileData.fold(BytesBuilder(),
-            (BytesBuilder byteBuilder, d) => byteBuilder..add(d));
-        var tarballBytes = bb.takeBytes();
-        var tarBytes = GZipDecoder().decodeBytes(tarballBytes);
-        var archive = TarDecoder().decodeBytes(tarBytes);
-        ArchiveFile pubspecArchiveFile;
-        for (var file in archive.files) {
-          if (file.name == 'pubspec.yaml') {
-            pubspecArchiveFile = file;
-            break;
-          }
-        }
-
-        if (pubspecArchiveFile == null) {
-          throw 'Did not find any pubspec.yaml file in upload. Aborting.';
-        }
-
-        // TODO: Error handling.
-        var pubspec = loadYaml(utf8.decode(_getBytes(pubspecArchiveFile)));
-
-        // Validator
-        await uploadValidator(pubspec, email);
-
-        var name = pubspec['name'] as String;
-        var version = pubspec['version'] as String;
-
-        var newerOrEqualVersion =
-            await metaStore.getAllVersions(name).firstWhere(
-          (item) {
-            var existingVersion = semver.Version.parse(item.version);
-            var newVersion = semver.Version.parse(version);
-            return existingVersion.compareTo(newVersion) >= 0;
-          },
-          orElse: () => null,
-        );
-
-        if (newerOrEqualVersion != null) {
-          throw StateError(
-              'version invalid: ${newerOrEqualVersion.version} exists, which is newer than $version, aborting');
-        }
-
-        var packageEmpty = await metaStore.getAllVersions(name).isEmpty;
-        if (!packageEmpty) {
-          var uploaders = await metaStore.getUploaders(name).toList();
-          if (!uploaders.contains(email)) {
-            throw 'UnauthorizedAccess';
-          }
-        }
-
-        var pubspecContent = utf8.decode(pubspecArchiveFile.content);
-
-        // Upload package tar to storage
-        await packageStore.upload(name, version, tarballBytes);
-
-        // Write package meta to database
-        await metaStore.addVersion(
-            name, UnpubVersion.fromPubspec(pubspecContent), email);
-
-        // TODO: Upload docs
-
-        return Response.found(
-            req.requestedUri.resolve('/api/packages/versions/newUploadFinish'));
-      } catch (err) {
-        return Response.found(req.requestedUri
-            .resolve('/api/packages/versions/newUploadFinish?error=$err'));
+      if (pubspecArchiveFile == null) {
+        throw 'Did not find any pubspec.yaml file in upload. Aborting.';
       }
-    });
 
-    app.get('/api/packages/versions/newUploadFinish', (Request req) {
-      var error = req.requestedUri.queryParameters['error'];
-      if (error != null) {
-        return _badRequest(error);
+      // TODO: Error handling.
+      var pubspec = loadYaml(utf8.decode(_getBytes(pubspecArchiveFile)));
+
+      // Validator
+      await uploadValidator(pubspec, email);
+
+      var name = pubspec['name'] as String;
+      var version = pubspec['version'] as String;
+
+      var newerOrEqualVersion = await metaStore.getAllVersions(name).firstWhere(
+        (item) {
+          var existingVersion = semver.Version.parse(item.version);
+          var newVersion = semver.Version.parse(version);
+          return existingVersion.compareTo(newVersion) >= 0;
+        },
+        orElse: () => null,
+      );
+
+      if (newerOrEqualVersion != null) {
+        throw StateError(
+            'version invalid: ${newerOrEqualVersion.version} exists, which is newer than $version, aborting');
       }
-      return _jsonResponse({
-        'success': {'message': 'Successfully uploaded package.'}
-      });
+
+      var packageEmpty = await metaStore.getAllVersions(name).isEmpty;
+      if (!packageEmpty) {
+        var uploaders = await metaStore.getUploaders(name).toList();
+        if (!uploaders.contains(email)) {
+          throw 'UnauthorizedAccess';
+        }
+      }
+
+      var pubspecContent = utf8.decode(pubspecArchiveFile.content);
+
+      // Upload package tar to storage
+      await packageStore.upload(name, version, tarballBytes);
+
+      // Write package meta to database
+      await metaStore.addVersion(
+          name, UnpubVersion.fromPubspec(pubspecContent), email);
+
+      // TODO: Upload docs
+
+      return Response.found(
+          req.requestedUri.resolve('/api/packages/versions/newUploadFinish'));
+    } catch (err) {
+      return Response.found(req.requestedUri
+          .resolve('/api/packages/versions/newUploadFinish?error=$err'));
+    }
+  }
+
+  @Route.get('/api/packages/versions/newUploadFinish')
+  Future<Response> uploadFinish(Request req) async {
+    var error = req.requestedUri.queryParameters['error'];
+    if (error != null) {
+      return _badRequest(error);
+    }
+    return _jsonResponse({
+      'success': {'message': 'Successfully uploaded package.'}
     });
   }
 
