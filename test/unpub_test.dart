@@ -1,33 +1,15 @@
 import 'dart:io';
 import 'dart:convert';
-import 'package:collection/equality.dart';
+import 'package:unpub/unpub.dart';
+import 'package:unpub/unpub_file.dart';
+import 'package:collection/collection.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
 import 'package:mongo_dart/mongo_dart.dart';
 import 'utils.dart';
-import 'package:unpub/unpub.dart';
-import 'package:unpub/unpub_file.dart';
 import 'package:unpub/unpub_mongo.dart';
 
 final baseDir = path.absolute('unpub-data');
-
-// class MongoTestRunner extends TestRunner {
-//   Db db;
-
-//   MongoTestRunner(this.db);
-
-//   @override
-//   Future<UnpubMetaStore> createMetaStore() async {
-//     return UnpubMongo.connect('mongodb://localhost:27017/dart_pub');
-//   }
-
-//   @override
-//   Future<UnpubPackageStore> createPackageStore() async {
-//     return UnpubFilePackageStore(baseDir);
-//   }
-
-// @override
-// }
 
 main() {
   Db _db;
@@ -40,6 +22,7 @@ main() {
     _db = Db('mongodb://localhost:27017/dart_pub_test');
     await _db.open();
     await _db.dropCollection(packageCollection);
+    await _db.dropCollection(statsCollection);
   });
 
   tearDownAll(() async {
@@ -165,6 +148,28 @@ main() {
     test('not existing', () async {
       var res = await getSpecificVersion(notExistingPacakge, '0.0.1');
       expect(res.statusCode, HttpStatus.notFound);
+    });
+  });
+
+  group('add uploader', () {
+    var name = 'package_0';
+    var admin = 'admin@example.com';
+    var email = 'add@gmail.com';
+
+    test('already exists', () async {
+      var result = pubUploader(name, 'add', admin);
+      expect(result.stderr, contains('email already exists'));
+
+      var meta = await readMeta(name);
+      expect(meta['uploaders'], unorderedEquals([admin]));
+    });
+
+    test('success', () async {
+      var result = pubUploader(name, 'add', email);
+      expect(result.stderr, '');
+
+      var meta = await readMeta(name);
+      expect(meta['uploaders'], unorderedEquals([admin, email]));
     });
   });
 }

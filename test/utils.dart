@@ -49,3 +49,11 @@ ProcessResult pubPublish(String name, String version) {
       workingDirectory: path.absolute('test/fixtures', name, version),
       environment: {'PUB_HOSTED_URL': pubHostedUrl});
 }
+
+ProcessResult pubUploader(String name, String operation, String email) {
+  assert(['add', 'remove'].contains(operation), 'operation error');
+
+  return Process.runSync('pub.bat', ['uploader', operation, email],
+      workingDirectory: path.absolute('test/fixtures', name, '0.0.1'),
+      environment: {'PUB_HOSTED_URL': pubHostedUrl});
+}
