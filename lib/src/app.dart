@@ -16,15 +16,29 @@ part 'app.g.dart';
 
 List<int> _getBytes(ArchiveFile file) => file.content as List<int>;
 
+Response _ok(Map<String, dynamic> data, {int status = 200}) => Response(status,
+    body: json.encode(data),
+    headers: {HttpHeaders.contentTypeHeader: 'application/json'});
+
+Response _successMessage(String message, {int status = 200}) => _ok({
+      'success': {'message': message}
+    }, status: status);
+
+Response _badRequest(String message, {int status = 400}) => Response(status,
+    body: json.encode({
+      'error': {'message': message}
+    }),
+    headers: {HttpHeaders.contentTypeHeader: 'application/json'});
+
 class UnpubService {
   static var _httpClient = http.Client();
 
-  var app = Router();
-  UnpubMetaStore metaStore;
-  UnpubPackageStore packageStore;
-  String proxyUrl;
-  Future<String> Function(String token) uploaderEmailGetter;
-  Future<void> Function(dynamic pubspecJson, String email) uploadValidator;
+  final UnpubMetaStore metaStore;
+  final UnpubPackageStore packageStore;
+  final String proxyUrl;
+  final Future<String> Function(String token) uploaderEmailGetter;
+  final Future<void> Function(dynamic pubspecJson, String email)
+      uploadValidator;
 
   static Future<String> defaultUploaderEmailGetter(String token) async {
     var info = await Oauth2Api(_httpClient).tokeninfo(accessToken: token);
@@ -57,8 +71,9 @@ class UnpubService {
     var name = item.pubspec['name'] as String;
     var version = item.version;
     return {
-      'archive_url':
-          baseUri.resolve('/packages/$name/versions/$version.tar.gz'),
+      'archive_url': baseUri
+          .resolve('/packages/$name/versions/$version.tar.gz')
+          .toString(),
       'pubspec': item.pubspec,
       'version': version,
     };
@@ -71,19 +86,27 @@ class UnpubService {
     var versions = await metaStore.getAllVersions(name).toList();
 
     if (versions.isEmpty) {
-      name = Uri.encodeComponent(name);
       var res = await _httpClient.send(http.Request(
           'GET', Uri.parse(proxyUrl).resolve('/api/packages/$name')));
-      return Response.ok(res.stream);
+      return Response(res.statusCode,
+          headers: {HttpHeaders.contentTypeHeader: 'application/json'},
+          body: res.stream);
     }
 
     metaStore.increaseQueryCount(name);
 
-    return Response.ok({
+    versions.sort((a, b) {
+      return semver.Version.prioritize(
+          semver.Version.parse(a.version), semver.Version.parse(b.version));
+    });
+
+    var versionMaps =
+        versions.map((item) => _versionToJson(item, req.requestedUri)).toList();
+
+    return _ok({
       'name': name,
-      'latest': {}, // TODO:
-      'versions':
-          versions.map((item) => _versionToJson(item, req.requestedUri)),
+      'latest': versionMaps.last,
+      'versions': versionMaps,
     });
   }
 
@@ -92,17 +115,17 @@ class UnpubService {
     var item = await metaStore.getVersion(name, version);
 
     if (item == null) {
-      name = Uri.encodeComponent(name);
-      version = Uri.encodeComponent(version);
       var res = await _httpClient.send(http.Request(
           'GET',
           Uri.parse(proxyUrl)
               .resolve('/api/packages/$name/versions/$version')));
-      return Response.ok(res.stream);
+      return Response(res.statusCode,
+          headers: {HttpHeaders.contentTypeHeader: 'application/json'},
+          body: res.stream);
     }
 
     metaStore.increaseQueryCount(name);
-    return Response.ok(_versionToJson(item, req.requestedUri));
+    return _ok(_versionToJson(item, req.requestedUri));
   }
 
   @Route.get('/packages/<name>/versions/<version>.tar.gz')
@@ -112,9 +135,6 @@ class UnpubService {
     Stream<List<int>> stream;
 
     if (item == null) {
-      name = Uri.encodeComponent(name);
-      version = Uri.encodeComponent(version);
-
       var res = await _httpClient.send(http.Request(
           'GET',
           Uri.parse(proxyUrl)
@@ -130,8 +150,10 @@ class UnpubService {
 
   @Route.get('/api/packages/versions/new')
   Future<Response> getUploadUrl(Request req) async {
-    return Response.ok({
-      'url': req.requestedUri.resolve('/api/packages/versions/newUpload'),
+    return _ok({
+      'url': req.requestedUri
+          .resolve('/api/packages/versions/newUpload')
+          .toString(),
       'fields': {},
     });
   }
@@ -210,9 +232,9 @@ class UnpubService {
           name, UnpubVersion.fromPubspec(pubspecContent), email);
 
       // TODO: Upload docs
-
-      return Response.found(
-          req.requestedUri.resolve('/api/packages/versions/newUploadFinish'));
+      return Response.found(req.requestedUri
+          .resolve('/api/packages/versions/newUploadFinish')
+          .toString());
     } catch (err) {
       return Response.found(req.requestedUri
           .resolve('/api/packages/versions/newUploadFinish?error=$err'));
@@ -225,20 +247,8 @@ class UnpubService {
     if (error != null) {
       return _badRequest(error);
     }
-    return _ok('Successfully uploaded package.');
+    return _successMessage('Successfully uploaded package.');
   }
-
-  Response _ok(String message, {int status = 200}) => Response(status,
-      body: json.encode({
-        'success': {'message': message}
-      }),
-      headers: {'content-type': 'application/json'});
-
-  Response _badRequest(String message, {int status = 400}) => Response(status,
-      body: json.encode({
-        'error': {'message': message}
-      }),
-      headers: {'content-type': 'application/json'});
 
   @Route.post('/api/packages/<name>/uploaders')
   Future<Response> addUploader(Request req, String name) async {
@@ -255,7 +265,7 @@ class UnpubService {
     }
 
     await metaStore.addUploader(name, email);
-    return _ok('uploader added');
+    return _successMessage('uploader added');
   }
 
   @Route.delete('/api/packages/<name>/uploaders/<email>')
@@ -272,6 +282,6 @@ class UnpubService {
     }
 
     await metaStore.removeUploader(name, email);
-    return _ok('uploader removed');
+    return _successMessage('uploader removed');
   }
 }

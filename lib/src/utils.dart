@@ -11,3 +11,8 @@ convertYaml(dynamic value) {
   }
   return value;
 }
+
+Map<String, dynamic> loadYamlAsMap(dynamic value) {
+  var yamlMap = loadYaml(value) as YamlMap;
+  return convertYaml(yamlMap).cast<String, dynamic>();
+}

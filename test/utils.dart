@@ -7,7 +7,9 @@ import 'package:unpub/unpub.dart';
 
 final notExistingPacakge = 'not_existing_package';
 
-final baseUri = Uri.parse('http://localhost:3000');
+final pubHostedUrl = 'http://localhost:4000';
+
+final baseUri = Uri.parse(pubHostedUrl);
 
 // abstract class TestRusnner {
 // Future<UnpubMetaStore> createMetaStore();
@@ -42,8 +44,8 @@ Future<http.Response> getSpecificVersion(String package, String version) {
   return http.get(baseUri.resolve('/api/packages/$package/versions/$version'));
 }
 
-ProcessResult pubPublish(String package, String version) {
-  return Process.runSync('pub', ['publish', '--force'],
-      workingDirectory: path.absolute('test/fixtures', package, version),
-      environment: {'PUB_HOSTED_URL': 'http://localhost:3000'});
+ProcessResult pubPublish(String name, String version) {
+  return Process.runSync('pub.bat', ['publish', '--force'],
+      workingDirectory: path.absolute('test/fixtures', name, version),
+      environment: {'PUB_HOSTED_URL': pubHostedUrl});
 }

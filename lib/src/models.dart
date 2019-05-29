@@ -34,12 +34,11 @@ class UnpubVersion {
       _$UnpubVersionFromJson(map);
 
   factory UnpubVersion.fromPubspec(String pubspecString) {
-    var yamlMap = loadYaml(pubspecString) as YamlMap;
-    var map = convertYaml(yamlMap).cast<String, dynamic>();
+    var pubspec = loadYamlAsMap(pubspecString);
 
     return UnpubVersion(
-      version: map['version'] as String,
-      pubspec: map,
+      version: pubspec['version'] as String,
+      pubspec: pubspec,
       pubspecYaml: pubspecString,
     );
   }
