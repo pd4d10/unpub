@@ -6,7 +6,7 @@ part of 'app.dart';
 // ShelfRouterGenerator
 // **************************************************************************
 
-Router _$UnpubServiceRouter(UnpubService service) {
+Router _$UnpubAppRouter(UnpubApp service) {
   final router = Router();
   router.add('GET', '/api/packages/<name>', service.getVersions);
   router.add(

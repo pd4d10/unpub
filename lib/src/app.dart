@@ -30,7 +30,7 @@ Response _badRequest(String message, {int status = 400}) => Response(status,
     }),
     headers: {HttpHeaders.contentTypeHeader: 'application/json'});
 
-class UnpubService {
+class UnpubApp {
   static var _httpClient = http.Client();
 
   final UnpubMetaStore metaStore;
@@ -48,7 +48,7 @@ class UnpubService {
 
   static Future<void> defaultUploadValidator(_, __) async {}
 
-  UnpubService({
+  UnpubApp({
     this.metaStore,
     this.packageStore,
     this.proxyUrl = 'https://pub.dev',
@@ -79,7 +79,7 @@ class UnpubService {
     };
   }
 
-  Router get router => _$UnpubServiceRouter(this);
+  Router get router => _$UnpubAppRouter(this);
 
   @Route.get('/api/packages/<name>')
   Future<Response> getVersions(Request req, String name) async {
