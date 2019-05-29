@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'package:shelf/shelf.dart' as shelf;
-import 'package:shelf/shelf_io.dart' as io;
 import 'package:path/path.dart' as path;
 import 'package:args/args.dart';
 import 'package:unpub/src/app.dart';
@@ -34,10 +32,5 @@ main(List<String> args) async {
     // },
   );
 
-  var handler = const shelf.Pipeline()
-      .addMiddleware(shelf.logRequests())
-      // .addHandler(_pubServer.requestHandler);
-      .addHandler(app.router.handler);
-  var server = await io.serve(handler, host, port);
-  print('Serving at http://${server.address.host}:${server.port}');
+  app.serve(host, port);
 }

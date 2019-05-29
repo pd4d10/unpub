@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf_io.dart' as shelfIo;
 import 'package:http/http.dart' as http;
 import 'package:googleapis/oauth2/v2.dart';
 import 'package:mime/mime.dart';
@@ -55,6 +56,16 @@ class UnpubApp {
     this.uploaderEmailGetter = defaultUploaderEmailGetter,
     this.uploadValidator = defaultUploadValidator,
   });
+
+  serve([String host = '0.0.0.0', int port = 4000]) async {
+    var handler = const Pipeline()
+        .addMiddleware(logRequests())
+        .addHandler(router.handler);
+    var server = await shelfIo.serve(handler, host, port);
+    host = server.address.host;
+    port = server.port;
+    print('Serving at http://$host:$port');
+  }
 
   Future<String> _getUploaderEmail(Request req) async {
     var authHeader = req.headers[HttpHeaders.authorizationHeader];
