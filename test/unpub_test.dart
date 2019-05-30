@@ -1,20 +1,11 @@
 import 'dart:io';
 import 'dart:convert';
-import 'package:unpub/unpub.dart';
-import 'package:unpub/unpub_file.dart';
 import 'package:collection/collection.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
 import 'package:mongo_dart/mongo_dart.dart';
 import 'utils.dart';
 import 'package:unpub/unpub_mongo.dart';
-
-final baseDir = path.absolute('unpub-data');
-
-final package0 = 'package_0';
-final email0 = 'email0@example.com';
-final email1 = 'email1@example.com';
-final email2 = 'email2@example.com';
 
 main() {
   Db _db;
@@ -24,6 +15,8 @@ main() {
   }
 
   setUpAll(() async {
+    await startServer();
+
     _db = Db('mongodb://localhost:27017/dart_pub_test');
     await _db.open();
     await _db.dropCollection(packageCollection);
@@ -36,77 +29,76 @@ main() {
 
   group('publish', () {
     test('fresh', () async {
-      var name = 'package_0';
       var version = '0.0.1';
 
-      var result = pubPublish(name, version);
+      var result = await pubPublish(package0, version);
       expect(result.stderr, '');
 
-      var meta = await readMeta(name);
-      expect(meta['name'], name);
+      var meta = await readMeta(package0);
+      expect(meta['name'], package0);
       expect(meta['versions'][0]['version'], version);
-      expect(meta['versions'][0]['pubspecYaml'], readPubspec(name, version));
+      expect(
+          meta['versions'][0]['pubspecYaml'], readPubspec(package0, version));
     });
 
     test('existing package', () async {
-      var name = 'package_0';
       var version = '0.0.3';
 
-      var result = pubPublish(name, version);
+      var result = await pubPublish(package0, version);
       expect(result.stderr, '');
 
-      var meta = await readMeta(name);
+      var meta = await readMeta(package0);
 
-      expect(meta['name'], name);
+      expect(meta['name'], package0);
       expect(meta['versions'][0]['version'], '0.0.1');
-      expect(meta['versions'][0]['pubspecYaml'], readPubspec(name, '0.0.1'));
+      expect(
+          meta['versions'][0]['pubspecYaml'], readPubspec(package0, '0.0.1'));
       expect(meta['versions'][1]['version'], version);
-      expect(meta['versions'][1]['pubspecYaml'], readPubspec(name, version));
+      expect(
+          meta['versions'][1]['pubspecYaml'], readPubspec(package0, version));
     });
 
-    test('invalid version', () {
-      var name = 'package_0';
+    test('invalid version', () async {
       var version = '0.0.2';
 
-      var result = pubPublish(name, version);
+      var result = await pubPublish(package0, version);
       expect(result.stderr, contains('version invalid'));
     });
 
-    test('invalid version', () {
-      var name = 'package_0';
+    test('invalid version', () async {
       var version = '0.0.3';
-
-      var result = pubPublish(name, version);
+      var result = await pubPublish(package0, version);
       expect(result.stderr, contains('version invalid'));
     });
 
     test('version number', () async {
-      var name = 'package_0';
       var version = '0.0.3+1';
 
-      var result = pubPublish(name, version);
+      var result = await pubPublish(package0, version);
       expect(result.stderr, '');
 
-      var meta = await readMeta(name);
+      var meta = await readMeta(package0);
 
-      expect(meta['name'], name);
+      expect(meta['name'], package0);
       expect(meta['versions'][0]['version'], '0.0.1');
-      expect(meta['versions'][0]['pubspecYaml'], readPubspec(name, '0.0.1'));
+      expect(
+          meta['versions'][0]['pubspecYaml'], readPubspec(package0, '0.0.1'));
       expect(meta['versions'][1]['version'], '0.0.3');
-      expect(meta['versions'][1]['pubspecYaml'], readPubspec(name, '0.0.3'));
+      expect(
+          meta['versions'][1]['pubspecYaml'], readPubspec(package0, '0.0.3'));
       expect(meta['versions'][2]['version'], version);
-      expect(meta['versions'][2]['pubspecYaml'], readPubspec(name, version));
+      expect(
+          meta['versions'][2]['pubspecYaml'], readPubspec(package0, version));
     });
   });
 
   group('get versions', () {
     test('existing at local', () async {
-      var name = 'package_0';
-      var res = await getVersions(name);
+      var res = await getVersions(package0);
       expect(res.statusCode, HttpStatus.ok);
 
       var body = json.decode(res.body);
-      expect(body['name'], name);
+      expect(body['name'], package0);
       expect(body['latest']['version'], '0.0.3+1');
       expect(body['versions'][0]['version'], '0.0.1');
       expect(body['versions'][1]['version'], '0.0.3');
@@ -158,7 +150,7 @@ main() {
 
   group('add uploader', () {
     test('already exists', () async {
-      var result = pubUploader(package0, 'add', email0);
+      var result = await pubUploader(package0, 'add', email0);
       expect(result.stderr, contains('email already exists'));
 
       var meta = await readMeta(package0);
@@ -166,7 +158,7 @@ main() {
     });
 
     test('success', () async {
-      var result = pubUploader(package0, 'add', email1);
+      var result = await pubUploader(package0, 'add', email1);
       expect(result.stderr, '');
 
       var meta = await readMeta(package0);
@@ -176,7 +168,7 @@ main() {
 
   group('remove uploader', () {
     test('not in uploader', () async {
-      var result = pubUploader(package0, 'remove', email2);
+      var result = await pubUploader(package0, 'remove', email2);
       expect(result.stderr, contains('email not uploader'));
 
       var meta = await readMeta(package0);
@@ -184,7 +176,7 @@ main() {
     });
 
     test('success', () async {
-      var result = pubUploader(package0, 'remove', email1);
+      var result = await pubUploader(package0, 'remove', email1);
       expect(result.stderr, '');
 
       var meta = await readMeta(package0);
