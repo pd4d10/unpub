@@ -28,7 +28,7 @@ main(List<String> args) async {
         await UnpubMongo.connect('mongodb://localhost:27017/dart_pub_test'),
     packageStore: UnpubFileStore(baseDir),
     uploaderEmailGetter: (token) async {
-      return 'admin@example.com';
+      return 'email0@example.com';
     },
   );
 

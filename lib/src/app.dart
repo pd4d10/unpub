@@ -282,6 +282,7 @@ class UnpubApp {
   @Route.delete('/api/packages/<name>/uploaders/<email>')
   Future<Response> removeUploader(
       Request req, String name, String email) async {
+    email = Uri.decodeComponent(email);
     var operatorEmail = await _getUploaderEmail(req);
     var uploaders = await metaStore.getUploaders(name).toList();
 

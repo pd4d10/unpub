@@ -11,6 +11,11 @@ import 'package:unpub/unpub_mongo.dart';
 
 final baseDir = path.absolute('unpub-data');
 
+final package0 = 'package_0';
+final email0 = 'email0@example.com';
+final email1 = 'email1@example.com';
+final email2 = 'email2@example.com';
+
 main() {
   Db _db;
 
@@ -152,24 +157,38 @@ main() {
   });
 
   group('add uploader', () {
-    var name = 'package_0';
-    var admin = 'admin@example.com';
-    var email = 'add@gmail.com';
-
     test('already exists', () async {
-      var result = pubUploader(name, 'add', admin);
+      var result = pubUploader(package0, 'add', email0);
       expect(result.stderr, contains('email already exists'));
 
-      var meta = await readMeta(name);
-      expect(meta['uploaders'], unorderedEquals([admin]));
+      var meta = await readMeta(package0);
+      expect(meta['uploaders'], unorderedEquals([email0]));
     });
 
     test('success', () async {
-      var result = pubUploader(name, 'add', email);
+      var result = pubUploader(package0, 'add', email1);
       expect(result.stderr, '');
 
-      var meta = await readMeta(name);
-      expect(meta['uploaders'], unorderedEquals([admin, email]));
+      var meta = await readMeta(package0);
+      expect(meta['uploaders'], unorderedEquals([email0, email1]));
+    });
+  });
+
+  group('remove uploader', () {
+    test('not in uploader', () async {
+      var result = pubUploader(package0, 'remove', email2);
+      expect(result.stderr, contains('email not uploader'));
+
+      var meta = await readMeta(package0);
+      expect(meta['uploaders'], unorderedEquals([email0, email1]));
+    });
+
+    test('success', () async {
+      var result = pubUploader(package0, 'remove', email1);
+      expect(result.stderr, '');
+
+      var meta = await readMeta(package0);
+      expect(meta['uploaders'], unorderedEquals([email0]));
     });
   });
 }
