@@ -25,11 +25,11 @@ main() {
 
   Map<String, String> _pubspecCache = {};
 
-  Future<String> _readPubspec(String package, String version) async {
-    var key = package + version;
+  Future<String> _readFile(
+      String package, String version, String filename) async {
+    var key = package + version + filename;
     if (_pubspecCache[key] == null) {
-      var filePath =
-          path.absolute('test/fixtures', package, version, 'pubspec.yaml');
+      var filePath = path.absolute('test/fixtures', package, version, filename);
       _pubspecCache[key] = await File(filePath).readAsString();
     }
     return _pubspecCache[key];
@@ -74,8 +74,12 @@ main() {
             'versions': [
               {
                 'version': version,
-                'pubspecYaml': await _readPubspec(package0, version),
-                'pubspec': loadYamlAsMap(await _readPubspec(package0, version)),
+                'pubspecYaml':
+                    await _readFile(package0, version, 'pubspec.yaml'),
+                'pubspec': loadYamlAsMap(
+                    await _readFile(package0, version, 'pubspec.yaml')),
+                'readme': await _readFile(package0, version, 'README.md'),
+                'changelog': await _readFile(package0, version, 'CHANGELOG.md')
               }
             ]
           },
@@ -104,13 +108,21 @@ main() {
             'versions': [
               {
                 'version': '0.0.1',
-                'pubspecYaml': await _readPubspec(package0, '0.0.1'),
-                'pubspec': loadYamlAsMap(await _readPubspec(package0, '0.0.1')),
+                'pubspecYaml':
+                    await _readFile(package0, '0.0.1', 'pubspec.yaml'),
+                'pubspec': loadYamlAsMap(
+                    await _readFile(package0, '0.0.1', 'pubspec.yaml')),
+                'readme': await _readFile(package0, '0.0.1', 'README.md'),
+                'changelog': await _readFile(package0, '0.0.1', 'CHANGELOG.md')
               },
               {
                 'version': version,
-                'pubspecYaml': await _readPubspec(package0, version),
-                'pubspec': loadYamlAsMap(await _readPubspec(package0, version)),
+                'pubspecYaml':
+                    await _readFile(package0, version, 'pubspec.yaml'),
+                'pubspec': loadYamlAsMap(
+                    await _readFile(package0, version, 'pubspec.yaml')),
+                'readme': await _readFile(package0, version, 'README.md'),
+                'changelog': await _readFile(package0, version, 'CHANGELOG.md')
               }
             ]
           },
@@ -152,18 +164,30 @@ main() {
             'versions': [
               {
                 'version': '0.0.1',
-                'pubspecYaml': await _readPubspec(package0, '0.0.1'),
-                'pubspec': loadYamlAsMap(await _readPubspec(package0, '0.0.1')),
+                'pubspecYaml':
+                    await _readFile(package0, '0.0.1', 'pubspec.yaml'),
+                'pubspec': loadYamlAsMap(
+                    await _readFile(package0, '0.0.1', 'pubspec.yaml')),
+                'readme': await _readFile(package0, '0.0.1', 'README.md'),
+                'changelog': await _readFile(package0, '0.0.1', 'CHANGELOG.md')
               },
               {
                 'version': '0.0.3',
-                'pubspecYaml': await _readPubspec(package0, '0.0.3'),
-                'pubspec': loadYamlAsMap(await _readPubspec(package0, '0.0.3')),
+                'pubspecYaml':
+                    await _readFile(package0, '0.0.3', 'pubspec.yaml'),
+                'pubspec': loadYamlAsMap(
+                    await _readFile(package0, '0.0.3', 'pubspec.yaml')),
+                'readme': await _readFile(package0, '0.0.3', 'README.md'),
+                'changelog': await _readFile(package0, '0.0.3', 'CHANGELOG.md')
               },
               {
                 'version': version,
-                'pubspecYaml': await _readPubspec(package0, version),
-                'pubspec': loadYamlAsMap(await _readPubspec(package0, version)),
+                'pubspecYaml':
+                    await _readFile(package0, version, 'pubspec.yaml'),
+                'pubspec': loadYamlAsMap(
+                    await _readFile(package0, version, 'pubspec.yaml')),
+                'readme': await _readFile(package0, version, 'README.md'),
+                'changelog': await _readFile(package0, version, 'CHANGELOG.md')
               }
             ]
           },
