@@ -189,10 +189,21 @@ class UnpubApp {
       var tarBytes = GZipDecoder().decodeBytes(tarballBytes);
       var archive = TarDecoder().decodeBytes(tarBytes);
       ArchiveFile pubspecArchiveFile;
+      ArchiveFile readmeFile;
+      ArchiveFile changelogFile;
+
       for (var file in archive.files) {
         if (file.name == 'pubspec.yaml') {
           pubspecArchiveFile = file;
-          break;
+          continue;
+        }
+        if (file.name.toLowerCase() == 'readme.md') {
+          readmeFile = file;
+          continue;
+        }
+        if (file.name.toLowerCase() == 'changelog.md') {
+          changelogFile = file;
+          continue;
         }
       }
 
@@ -200,8 +211,9 @@ class UnpubApp {
         throw 'Did not find any pubspec.yaml file in upload. Aborting.';
       }
 
+      var pubspecYaml = utf8.decode(pubspecArchiveFile.content);
       // TODO: Error handling.
-      var pubspec = loadYaml(utf8.decode(_getBytes(pubspecArchiveFile)));
+      var pubspec = loadYaml(pubspecYaml);
 
       // Validator
       await uploadValidator(pubspec, email);
@@ -231,14 +243,15 @@ class UnpubApp {
         }
       }
 
-      var pubspecContent = utf8.decode(pubspecArchiveFile.content);
-
       // Upload package tar to storage
       await packageStore.upload(name, version, tarballBytes);
 
+      var readme = utf8.decode(readmeFile.content);
+      var changelog = utf8.decode(changelogFile.content);
+
       // Write package meta to database
-      await metaStore.addVersion(
-          name, UnpubVersion.fromPubspec(pubspecContent), email);
+      await metaStore.addVersion(name,
+          UnpubVersion.fromPubspec(pubspecYaml, readme, changelog), email);
 
       // TODO: Upload docs
       return Response.found(req.requestedUri

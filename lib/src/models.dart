@@ -23,23 +23,30 @@ class UnpubVersion {
   final String version;
   final Map<String, dynamic> pubspec;
   final String pubspecYaml;
+  final String readme;
+  final String changelog;
 
-  UnpubVersion({
-    @required this.version,
-    @required this.pubspec,
-    @required this.pubspecYaml,
-  });
+  UnpubVersion(
+    this.version,
+    this.pubspec,
+    this.pubspecYaml,
+    this.readme,
+    this.changelog,
+  );
 
   factory UnpubVersion.fromJson(Map<String, dynamic> map) =>
       _$UnpubVersionFromJson(map);
 
-  factory UnpubVersion.fromPubspec(String pubspecString) {
-    var pubspec = loadYamlAsMap(pubspecString);
+  factory UnpubVersion.fromPubspec(
+      String pubspecYaml, String readme, String changelog) {
+    var pubspec = loadYamlAsMap(pubspecYaml);
 
     return UnpubVersion(
-      version: pubspec['version'] as String,
-      pubspec: pubspec,
-      pubspecYaml: pubspecString,
+      pubspec['version'] as String,
+      pubspec,
+      pubspecYaml,
+      readme,
+      changelog,
     );
   }
 

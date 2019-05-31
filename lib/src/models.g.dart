@@ -16,16 +16,20 @@ Map<String, dynamic> _$UnpubAuthorToJson(UnpubAuthor instance) =>
 
 UnpubVersion _$UnpubVersionFromJson(Map<String, dynamic> json) {
   return UnpubVersion(
-      version: json['version'] as String,
-      pubspec: json['pubspec'] as Map<String, dynamic>,
-      pubspecYaml: json['pubspecYaml'] as String);
+      json['version'] as String,
+      json['pubspec'] as Map<String, dynamic>,
+      json['pubspecYaml'] as String,
+      json['readme'] as String,
+      json['changelog'] as String);
 }
 
 Map<String, dynamic> _$UnpubVersionToJson(UnpubVersion instance) =>
     <String, dynamic>{
       'version': instance.version,
       'pubspec': instance.pubspec,
-      'pubspecYaml': instance.pubspecYaml
+      'pubspecYaml': instance.pubspecYaml,
+      'readme': instance.readme,
+      'changelog': instance.changelog
     };
 
 UnpubPackage _$UnpubPackageFromJson(Map<String, dynamic> json) {
