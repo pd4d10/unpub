@@ -29,5 +29,8 @@ main(List<String> args) async {
     packageStore: UnpubFileStore(baseDir),
   );
 
-  app.serve(host, port);
+  var server = await app.serve(host, port);
+  host = server.address.host;
+  port = server.port;
+  print('Serving at http://$host:$port');
 }

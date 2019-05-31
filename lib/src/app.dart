@@ -57,14 +57,12 @@ class UnpubApp {
     this.uploadValidator = defaultUploadValidator,
   });
 
-  serve([String host = '0.0.0.0', int port = 4000]) async {
+  Future<HttpServer> serve([String host = '0.0.0.0', int port = 4000]) async {
     var handler = const Pipeline()
         .addMiddleware(logRequests())
         .addHandler(router.handler);
     var server = await shelfIo.serve(handler, host, port);
-    host = server.address.host;
-    port = server.port;
-    print('Serving at http://$host:$port');
+    return server;
   }
 
   Future<String> _getUploaderEmail(Request req) async {
