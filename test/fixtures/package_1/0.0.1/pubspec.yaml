@@ -1,5 +1,7 @@
 name: package_1
-description:
+description: test
 version: 0.0.1
-homepage:
-author:
+homepage: https://example.com
+author: test <test@example.com>
+environment:
+  sdk: ">=2.0.0 <3.0.0"

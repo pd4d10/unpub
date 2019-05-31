@@ -13,24 +13,22 @@ final pubHostedUrl = 'http://localhost:4000';
 final baseUri = Uri.parse(pubHostedUrl);
 
 final package0 = 'package_0';
+final package1 = 'package_1';
 final email0 = 'email0@example.com';
 final email1 = 'email1@example.com';
 final email2 = 'email2@example.com';
+final email3 = 'email3@example.com';
 
-startServer() async {
+createServer(String opEmail) async {
   var app = UnpubApp(
     metaStore:
         await UnpubMongo.connect('mongodb://localhost:27017/dart_pub_test'),
     packageStore: UnpubFileStore(baseDir),
-    uploaderEmailGetter: (token) async => email0,
+    uploaderEmailGetter: (token) async => opEmail,
   );
 
-  await app.serve('0.0.0.0', 4000);
-}
-
-String readPubspec(String package, String version) {
-  return File(path.absolute('test/fixtures', package, version, 'pubspec.yaml'))
-      .readAsStringSync();
+  var server = await app.serve('0.0.0.0', 4000);
+  return server;
 }
 
 Future<http.Response> getVersions(String package) {
