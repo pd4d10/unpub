@@ -1,0 +1,7 @@
+services:
+  - mongodb
+language: dart
+dart:
+  - stable
+before_script:
+  - sleep 15
