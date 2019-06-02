@@ -132,15 +132,12 @@ main() {
     });
 
     test('invalid version', () async {
-      var version = '0.0.2';
-
-      var result = await pubPublish(package0, version);
+      var result = await pubPublish(package0, '0.0.2');
       expect(result.stderr, contains('version invalid'));
     });
 
     test('invalid version', () async {
-      var version = '0.0.3';
-      var result = await pubPublish(package0, version);
+      var result = await pubPublish(package0, '0.0.3');
       expect(result.stderr, contains('version invalid'));
     });
 
@@ -151,8 +148,8 @@ main() {
       expect(result.stderr, '');
 
       var meta = await _readMeta(package0);
-      (meta['versions'] as List).forEach((version) {
-        version.remove('createAt');
+      (meta['versions'] as List).forEach((v) {
+        v.remove('createAt');
       });
 
       expect(
@@ -194,6 +191,33 @@ main() {
         ),
         true,
       );
+    });
+
+    group('edge case', () {
+      test('no readme and changelog', () async {
+        var version = '1.0.0-noreadme';
+        var result = await pubPublish(package0, version);
+        // expect(result.stderr, ''); // Suggestions:
+
+        var meta = await _readMeta(package0);
+        (meta['versions'] as List).forEach((version) {
+          version.remove('createAt');
+        });
+        var item = (meta['versions'] as List)
+            .firstWhere((v) => v['version'] == version, orElse: () => null);
+
+        expect(
+          DeepCollectionEquality().equals(item, {
+            'version': version,
+            'pubspecYaml': await _readFile(package0, version, 'pubspec.yaml'),
+            'pubspec': loadYamlAsMap(
+                await _readFile(package0, version, 'pubspec.yaml')),
+            'readme': null,
+            'changelog': null
+          }),
+          true,
+        );
+      });
     });
   });
 

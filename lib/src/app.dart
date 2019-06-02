@@ -246,9 +246,14 @@ class UnpubApp {
       // Upload package tar to storage
       await packageStore.upload(name, version, tarballBytes);
 
-      var readme = utf8.decode(readmeFile.content);
-      var changelog = utf8.decode(changelogFile.content);
-
+      String readme;
+      String changelog;
+      if (readmeFile != null) {
+        readme = utf8.decode(readmeFile.content);
+      }
+      if (changelogFile != null) {
+        changelog = utf8.decode(changelogFile.content);
+      }
       // Write package meta to database
       await metaStore.addVersion(name,
           UnpubVersion.fromPubspec(pubspecYaml, readme, changelog), email);
