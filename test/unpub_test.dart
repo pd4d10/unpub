@@ -35,6 +35,12 @@ main() {
     return _pubspecCache[key];
   }
 
+  // Future<Map<String, dynamic>> _readPubSpec(
+  //     String package, String version) async {
+  //   var content = await _readFile(package, version, 'pubspec.yaml');
+  //   return loadYamlAsMap(content);
+  // }
+
   _cleanUpDb() async {
     await _db.dropCollection(packageCollection);
     await _db.dropCollection(statsCollection);
@@ -224,16 +230,9 @@ main() {
   group('get versions', () {
     setUpAll(() async {
       await _cleanUpDb();
-      await _db.collection(packageCollection).insert({
-        'name': package0,
-        'versions': [
-          {
-            'version': {'version': '0.0.1', 'pubspec': {}}
-          }
-        ],
-        'uploaders': [email0]
-      });
       _server = await createServer(email0);
+      await pubPublish(package0, '0.0.1');
+      await pubPublish(package0, '0.0.2');
     });
 
     tearDownAll(() async {
@@ -245,11 +244,35 @@ main() {
       expect(res.statusCode, HttpStatus.ok);
 
       var body = json.decode(res.body);
-      expect(body['name'], package0);
-      expect(body['latest']['version'], '0.0.3+1');
-      expect(body['versions'][0]['version'], '0.0.1');
-      expect(body['versions'][1]['version'], '0.0.3');
-      expect(body['versions'][2]['version'], '0.0.3+1');
+      expect(
+        DeepCollectionEquality().equals(body, {
+          "name": "package_0",
+          "latest": {
+            "archive_url":
+                "http://localhost:4000/packages/package_0/versions/0.0.2.tar.gz",
+            "pubspec": loadYamlAsMap(
+                await _readFile('package_0', '0.0.2', 'pubspec.yaml')),
+            "version": "0.0.2"
+          },
+          "versions": [
+            {
+              "archive_url":
+                  "http://localhost:4000/packages/package_0/versions/0.0.1.tar.gz",
+              "pubspec": loadYamlAsMap(
+                  await _readFile('package_0', '0.0.1', 'pubspec.yaml')),
+              "version": "0.0.1"
+            },
+            {
+              "archive_url":
+                  "http://localhost:4000/packages/package_0/versions/0.0.2.tar.gz",
+              "pubspec": loadYamlAsMap(
+                  await _readFile('package_0', '0.0.2', 'pubspec.yaml')),
+              "version": "0.0.2"
+            }
+          ]
+        }),
+        true,
+      );
     });
 
     test('existing at remote', () async {
@@ -284,7 +307,16 @@ main() {
       expect(res.statusCode, HttpStatus.ok);
 
       var body = json.decode(res.body);
-      expect(body['version'], '0.0.1');
+      expect(
+        DeepCollectionEquality().equals(body, {
+          "archive_url":
+              "http://localhost:4000/packages/package_0/versions/0.0.1.tar.gz",
+          "pubspec": loadYamlAsMap(
+              await _readFile('package_0', '0.0.1', 'pubspec.yaml')),
+          "version": '0.0.1'
+        }),
+        true,
+      );
     });
 
     test('not existing version at local', () async {
