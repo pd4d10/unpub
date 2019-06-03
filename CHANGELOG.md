@@ -1,13 +1,18 @@
-## 0.0.1
+## 0.2.0
 
-- Initial version, created by Stagehand
+- Refactor
+- Semver whitelist
+
+## 0.1.1
+
+- Get email via Google APIs
+- Upload validator
 
 ## 0.1.0
 
 - `pub get`
 - `pub publish` with permission check
 
-## 0.1.1
+## 0.0.1
 
-- Get email via Google APIs
-- Upload validator
+- Initial version, created by Stagehand
