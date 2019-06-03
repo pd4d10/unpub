@@ -6,14 +6,6 @@ part of 'models.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-UnpubAuthor _$UnpubAuthorFromJson(Map<String, dynamic> json) {
-  return UnpubAuthor(
-      name: json['name'] as String, email: json['email'] as String);
-}
-
-Map<String, dynamic> _$UnpubAuthorToJson(UnpubAuthor instance) =>
-    <String, dynamic>{'name': instance.name, 'email': instance.email};
-
 UnpubVersion _$UnpubVersionFromJson(Map<String, dynamic> json) {
   return UnpubVersion(
       json['version'] as String,
@@ -23,14 +15,22 @@ UnpubVersion _$UnpubVersionFromJson(Map<String, dynamic> json) {
       json['changelog'] as String);
 }
 
-Map<String, dynamic> _$UnpubVersionToJson(UnpubVersion instance) =>
-    <String, dynamic>{
-      'version': instance.version,
-      'pubspec': instance.pubspec,
-      'pubspecYaml': instance.pubspecYaml,
-      'readme': instance.readme,
-      'changelog': instance.changelog
-    };
+Map<String, dynamic> _$UnpubVersionToJson(UnpubVersion instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('version', instance.version);
+  writeNotNull('pubspec', instance.pubspec);
+  writeNotNull('pubspecYaml', instance.pubspecYaml);
+  writeNotNull('readme', instance.readme);
+  writeNotNull('changelog', instance.changelog);
+  return val;
+}
 
 UnpubPackage _$UnpubPackageFromJson(Map<String, dynamic> json) {
   return UnpubPackage(

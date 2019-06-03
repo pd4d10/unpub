@@ -1,24 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:unpub/src/utils.dart';
-import 'package:yaml/yaml.dart';
 import 'package:meta/meta.dart';
 
 part 'models.g.dart';
 
-@JsonSerializable()
-class UnpubAuthor {
-  final String name;
-  final String email;
-
-  UnpubAuthor({@required this.name, @required this.email});
-
-  factory UnpubAuthor.fromJson(Map<String, dynamic> map) =>
-      _$UnpubAuthorFromJson(map);
-
-  Map<String, dynamic> toJson() => _$UnpubAuthorToJson(this);
-}
-
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class UnpubVersion {
   final String version;
   final Map<String, dynamic> pubspec;

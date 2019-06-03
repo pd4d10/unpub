@@ -217,8 +217,6 @@ main() {
           'pubspecYaml': await _readFile(package0, version, 'pubspec.yaml'),
           'pubspec':
               loadYamlAsMap(await _readFile(package0, version, 'pubspec.yaml')),
-          'readme': null,
-          'changelog': null
         }),
         true,
       );
