@@ -21,6 +21,7 @@ dependencies:
   pub_semver: ^1.4.2
   json_annotation: ^2.1.0
   mongo_dart: ^0.3.4
+  mime: ^0.9.6+3
 
 dev_dependencies:
   pedantic: ^1.0.0
