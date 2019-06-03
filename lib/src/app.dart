@@ -58,9 +58,17 @@ class UnpubApp {
   });
 
   Future<HttpServer> serve([String host = '0.0.0.0', int port = 4000]) async {
-    var handler = const Pipeline()
-        .addMiddleware(logRequests())
-        .addHandler(router.handler);
+    var handler =
+        const Pipeline().addMiddleware(logRequests()).addHandler((req) async {
+      // Return 404 by default
+      // https://github.com/google/dart-neats/issues/1
+      var res = await router.handler(req);
+      if (res == null) {
+        return Response.notFound('Not found');
+      } else {
+        return res;
+      }
+    });
     var server = await shelfIo.serve(handler, host, port);
     return server;
   }
