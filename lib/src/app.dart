@@ -15,8 +15,6 @@ import 'package:unpub/src/package_store.dart';
 
 part 'app.g.dart';
 
-List<int> _getBytes(ArchiveFile file) => file.content as List<int>;
-
 Response _ok(Map<String, dynamic> data, {int status = 200}) => Response(status,
     body: json.encode(data),
     headers: {HttpHeaders.contentTypeHeader: 'application/json'});
@@ -40,6 +38,7 @@ class UnpubApp {
   final Future<String> Function(String token) uploaderEmailGetter;
   final Future<void> Function(dynamic pubspecJson, String email)
       uploadValidator;
+  final List<String> semverWhitelist;
 
   static Future<String> defaultUploaderEmailGetter(String token) async {
     var info = await Oauth2Api(_httpClient).tokeninfo(accessToken: token);
@@ -55,6 +54,7 @@ class UnpubApp {
     this.proxyUrl = 'https://pub.dev',
     this.uploaderEmailGetter = defaultUploaderEmailGetter,
     this.uploadValidator = defaultUploadValidator,
+    this.semverWhitelist,
   });
 
   Future<HttpServer> serve([String host = '0.0.0.0', int port = 4000]) async {
@@ -221,14 +221,22 @@ class UnpubApp {
       var name = pubspec['name'] as String;
       var version = pubspec['version'] as String;
 
-      var newerOrEqualVersion = await metaStore.getAllVersions(name).firstWhere(
-        (item) {
-          var existingVersion = semver.Version.parse(item.version);
-          var newVersion = semver.Version.parse(version);
-          return existingVersion.compareTo(newVersion) >= 0;
-        },
-        orElse: () => null,
-      );
+      UnpubVersion newerOrEqualVersion;
+      if (semverWhitelist != null && semverWhitelist.contains(name)) {
+        newerOrEqualVersion = await metaStore.getAllVersions(name).firstWhere(
+              (item) => version == item.version,
+              orElse: () => null,
+            );
+      } else {
+        newerOrEqualVersion = await metaStore.getAllVersions(name).firstWhere(
+          (item) {
+            var existingVersion = semver.Version.parse(item.version);
+            var newVersion = semver.Version.parse(version);
+            return existingVersion.compareTo(newVersion) >= 0;
+          },
+          orElse: () => null,
+        );
+      }
 
       if (newerOrEqualVersion != null) {
         throw StateError(

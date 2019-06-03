@@ -199,30 +199,58 @@ main() {
       );
     });
 
-    group('edge case', () {
-      test('no readme and changelog', () async {
-        var version = '1.0.0-noreadme';
-        var result = await pubPublish(package0, version);
-        // expect(result.stderr, ''); // Suggestions:
+    test('no readme and changelog', () async {
+      var version = '1.0.0-noreadme';
+      var result = await pubPublish(package0, version);
+      // expect(result.stderr, ''); // Suggestions:
+
+      var meta = await _readMeta(package0);
+      (meta['versions'] as List).forEach((version) {
+        version.remove('createAt');
+      });
+      var item = (meta['versions'] as List)
+          .firstWhere((v) => v['version'] == version, orElse: () => null);
+
+      expect(
+        DeepCollectionEquality().equals(item, {
+          'version': version,
+          'pubspecYaml': await _readFile(package0, version, 'pubspec.yaml'),
+          'pubspec':
+              loadYamlAsMap(await _readFile(package0, version, 'pubspec.yaml')),
+          'readme': null,
+          'changelog': null
+        }),
+        true,
+      );
+    });
+
+    group('semver whitelist', () {
+      setUpAll(() async {
+        await _server.close();
+        _server = await createServer(email0, [package0]);
+      });
+
+      tearDownAll(() async {
+        await _server.close();
+      });
+
+      test('success', () async {
+        var result = await pubPublish(package0, '0.0.2');
+        expect(result.stderr, '');
 
         var meta = await _readMeta(package0);
-        (meta['versions'] as List).forEach((version) {
-          version.remove('createAt');
+        (meta['versions'] as List).forEach((v) {
+          v.remove('createAt');
         });
         var item = (meta['versions'] as List)
-            .firstWhere((v) => v['version'] == version, orElse: () => null);
+            .firstWhere((v) => v['version'] == '0.0.2', orElse: () => null);
 
-        expect(
-          DeepCollectionEquality().equals(item, {
-            'version': version,
-            'pubspecYaml': await _readFile(package0, version, 'pubspec.yaml'),
-            'pubspec': loadYamlAsMap(
-                await _readFile(package0, version, 'pubspec.yaml')),
-            'readme': null,
-            'changelog': null
-          }),
-          true,
-        );
+        expect(item['version'], '0.0.2');
+      });
+
+      test('failure', () async {
+        var result = await pubPublish(package0, '0.0.3');
+        expect(result.stderr, contains('version invalid'));
       });
     });
   });
