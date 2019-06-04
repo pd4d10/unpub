@@ -127,6 +127,7 @@ class UnpubApp {
 
   @Route.get('/api/packages/<name>/versions/<version>')
   Future<Response> getVersion(Request req, String name, String version) async {
+    version = Uri.decodeComponent(version); // TODO: catch error
     var item = await metaStore.getVersion(name, version);
 
     if (item == null) {
