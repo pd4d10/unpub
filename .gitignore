@@ -10,3 +10,4 @@ build/
 # Directory created by dartdoc
 doc/api/
 unpub-data/
+.vscode/
