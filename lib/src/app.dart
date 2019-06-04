@@ -17,7 +17,7 @@ part 'app.g.dart';
 
 Response _ok(Map<String, dynamic> data, {int status = 200}) => Response(status,
     body: json.encode(data),
-    headers: {HttpHeaders.contentTypeHeader: 'application/json'});
+    headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
 
 Response _successMessage(String message, {int status = 200}) => _ok({
       'success': {'message': message}
@@ -27,7 +27,7 @@ Response _badRequest(String message, {int status = 400}) => Response(status,
     body: json.encode({
       'error': {'message': message}
     }),
-    headers: {HttpHeaders.contentTypeHeader: 'application/json'});
+    headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
 
 class UnpubApp {
   static var _httpClient = http.Client();
@@ -104,7 +104,7 @@ class UnpubApp {
       var res = await _httpClient.send(http.Request(
           'GET', Uri.parse(proxyUrl).resolve('/api/packages/$name')));
       return Response(res.statusCode,
-          headers: {HttpHeaders.contentTypeHeader: 'application/json'},
+          headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType},
           body: res.stream);
     }
 
@@ -142,7 +142,7 @@ class UnpubApp {
           Uri.parse(proxyUrl)
               .resolve('/api/packages/$name/versions/$version')));
       return Response(res.statusCode,
-          headers: {HttpHeaders.contentTypeHeader: 'application/json'},
+          headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType},
           body: res.stream);
     }
 
@@ -167,7 +167,9 @@ class UnpubApp {
       stream = packageStore.download(name, version);
     }
 
-    return Response(200, body: stream);
+    return Response(200,
+        headers: {HttpHeaders.contentTypeHeader: ContentType.binary.mimeType},
+        body: stream);
   }
 
   @Route.get('/api/packages/versions/new')
