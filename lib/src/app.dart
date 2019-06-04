@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart' as shelfIo;
+import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:http/http.dart' as http;
 import 'package:googleapis/oauth2/v2.dart';
 import 'package:mime/mime.dart';
@@ -69,7 +69,7 @@ class UnpubApp {
         return res;
       }
     });
-    var server = await shelfIo.serve(handler, host, port);
+    var server = await shelf_io.serve(handler, host, port);
     return server;
   }
 
