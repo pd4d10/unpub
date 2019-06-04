@@ -234,7 +234,7 @@ main() {
       await _cleanUpDb();
       _server = await createServer(email0);
       await pubPublish(package0, '0.0.1');
-      await pubPublish(package0, '0.0.3');
+      await pubPublish(package0, '0.0.3+1');
     });
 
     tearDownAll(() async {
@@ -253,6 +253,23 @@ main() {
           "pubspec": loadYamlAsMap(
               await _readFile('package_0', '0.0.1', 'pubspec.yaml')),
           "version": '0.0.1'
+        }),
+        true,
+      );
+    });
+
+    test('decode version correctly', () async {
+      var res = await getSpecificVersion(package0, '0.0.3+1');
+      expect(res.statusCode, HttpStatus.ok);
+
+      var body = json.decode(res.body);
+      expect(
+        DeepCollectionEquality().equals(body, {
+          "archive_url":
+              "http://localhost:4000/packages/package_0/versions/0.0.3+1.tar.gz",
+          "pubspec": loadYamlAsMap(
+              await _readFile('package_0', '0.0.3+1', 'pubspec.yaml')),
+          "version": '0.0.3+1'
         }),
         true,
       );
