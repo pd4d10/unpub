@@ -19,13 +19,12 @@ final email1 = 'email1@example.com';
 final email2 = 'email2@example.com';
 final email3 = 'email3@example.com';
 
-createServer(String opEmail, [List<String> semverWhitelist]) async {
+createServer(String opEmail) async {
   var app = UnpubApp(
     metaStore:
         await UnpubMongo.connect('mongodb://localhost:27017/dart_pub_test'),
     packageStore: UnpubFileStore(baseDir),
     uploaderEmailGetter: (token) async => opEmail,
-    semverWhitelist: semverWhitelist,
   );
 
   var server = await app.serve('0.0.0.0', 4000);
