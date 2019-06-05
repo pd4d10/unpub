@@ -8,7 +8,6 @@ environment:
 
 dependencies:
   angular: ^5.2.0
-  angular_components: ^0.11.0
 
 dev_dependencies:
   angular_test: ^2.2.0

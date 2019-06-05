@@ -1,0 +1,51 @@
+<header class="site-header-row">
+  <div class="site-header">
+    <div class="nav-wrap">
+      <div class="nav-header">
+        <a class="logo" href="/">Unpub</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="_banner-bg">
+  <main class="home-banner">
+    <form class="search-bar" action="/packages">
+      <input class="input" name="q" placeholder="Search Dart packages" autocomplete="on" autofocus="autofocus" />
+      <button class="icon"></button>
+    </form>
+    <div class="list-filters">
+      <a class="filter " href="/flutter">Flutter</a>
+      <a class="filter " href="/web">Web</a>
+      <a class="filter -active" href="/">All</a>
+    </div>
+  </main>
+</div>
+
+<main>
+  <div class="home-lists-container">
+    <div class="landing-page-title-block">
+      <div class="tooltip-base hoverable">
+        <h2 class="center landing-page-title tooltip-dotted">
+          Top Dart packages
+        </h2>
+      </div>
+    </div>
+
+    <ul class="package-list">
+      <li class="list-item" *ngFor="let package of packages">
+        <h3 class="title"><a href="/packages/{{ package['name'] }}">{{ package['name'] }}</a></h3>
+        <p class="metadata">
+          <a class="package-tag" href="/flutter/packages" title="Compatible with the Flutter platform.">Flutter</a>
+          <a class="package-tag" href="/web/packages" title="Compatible with the web platform.">web</a>
+          <span class="package-tag" title="Compatible with other platforms (terminal, server, etc.).">other</span>
+        </p>
+        <p class="description">{{ package['description'] }}</p>
+      </li>
+    </ul>
+
+    <div class="more">
+      <a href="/packages">More Dart packages...</a>
+    </div>
+  </div>
+</main>
