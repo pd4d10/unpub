@@ -1,7 +1,10 @@
+import 'package:mongo_dart/mongo_dart.dart';
 import 'models.dart';
 export 'models.dart';
 
 abstract class UnpubMetaStore {
+  Db db;
+
   Stream<UnpubVersion> getAllVersions(String name);
 
   Future<UnpubVersion> getVersion(String name, String version);

@@ -24,8 +24,7 @@ main(List<String> args) async {
   var baseDir = path.absolute('unpub-data');
 
   var app = UnpubApp(
-    metaStore:
-        await UnpubMongo.connect('mongodb://localhost:27017/dart_pub_test'),
+    metaStore: await UnpubMongo.connect('mongodb://localhost:27017/dart_pub'),
     packageStore: UnpubFileStore(baseDir),
   );
 

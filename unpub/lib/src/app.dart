@@ -8,6 +8,8 @@ import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:pub_semver/pub_semver.dart' as semver;
+import 'package:unpub/unpub_mongo.dart';
+import 'package:mongo_dart/mongo_dart.dart';
 import 'package:yaml/yaml.dart';
 import 'package:archive/archive.dart';
 import 'package:unpub/src/meta_store.dart';
@@ -321,5 +323,32 @@ class UnpubApp {
 
     await metaStore.removeUploader(name, email);
     return _successMessage('uploader removed');
+  }
+
+  @Route.get('/webapi/top')
+  Future<Response> getTopPackages(Request req) async {
+    var packageNames = await metaStore.db
+        .collection(statsCollection)
+        .find(where.limit(15).sortBy('download', descending: true))
+        .map((item) => item['name'] as String)
+        .toList();
+
+    var map = packageNames.asMap().map((key, value) => MapEntry(value, key));
+
+    var packages = await metaStore.db.collection(packageCollection).find({
+      '\$or': packageNames.map((name) => {'name': name}).toList()
+    }).map((item) {
+      var versions = item['versions'] as List;
+      return {
+        'name': item['name'],
+        'description': versions.last['pubspec']['description']
+      };
+    }).toList();
+
+    packages.sort((a, b) => map[a['name']].compareTo(map[b['name']]));
+
+    return _ok({
+      'data': packages,
+    });
   }
 }
