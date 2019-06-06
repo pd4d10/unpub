@@ -41,10 +41,7 @@ class UnpubMongo extends UnpubMetaStore {
         where.eq('name', name),
         {
           '\$push': {
-            'versions': {
-              ...version.toJson(),
-              'createAt': DateTime.now(),
-            },
+            'versions': version.toJson(),
           },
           '\$addToSet': {
             'uploaders': uploaderEmail,

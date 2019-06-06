@@ -67,29 +67,24 @@ main() {
       expect(result.stderr, '');
 
       var meta = await _readMeta(package0);
-      (meta['versions'] as List).forEach((version) {
-        version.remove('createAt');
-      });
 
+      expect(meta['name'], package0);
+      expect(meta['uploaders'], [email0]);
+      expect(meta['versions'], isList);
+      expect(meta['versions'], hasLength(1));
+
+      var item = meta['versions'][0];
+      expect(item['createAt'], isA<DateTime>());
+      item.remove('createAt');
       expect(
-        DeepCollectionEquality().equals(
-          meta,
-          {
-            'name': package0,
-            'uploaders': [email0],
-            'versions': [
-              {
-                'version': version,
-                'pubspecYaml':
-                    await _readFile(package0, version, 'pubspec.yaml'),
-                'pubspec': loadYamlAsMap(
-                    await _readFile(package0, version, 'pubspec.yaml')),
-                'readme': await _readFile(package0, version, 'README.md'),
-                'changelog': await _readFile(package0, version, 'CHANGELOG.md')
-              }
-            ]
-          },
-        ),
+        DeepCollectionEquality().equals(item, {
+          'version': version,
+          'pubspecYaml': await _readFile(package0, version, 'pubspec.yaml'),
+          'pubspec':
+              loadYamlAsMap(await _readFile(package0, version, 'pubspec.yaml')),
+          'readme': await _readFile(package0, version, 'README.md'),
+          'changelog': await _readFile(package0, version, 'CHANGELOG.md')
+        }),
         true,
       );
     });
@@ -101,40 +96,13 @@ main() {
       expect(result.stderr, '');
 
       var meta = await _readMeta(package0);
-      (meta['versions'] as List).forEach((version) {
-        version.remove('createAt');
-      });
 
-      expect(
-        DeepCollectionEquality().equals(
-          meta,
-          {
-            'name': package0,
-            'uploaders': [email0],
-            'versions': [
-              {
-                'version': '0.0.1',
-                'pubspecYaml':
-                    await _readFile(package0, '0.0.1', 'pubspec.yaml'),
-                'pubspec': loadYamlAsMap(
-                    await _readFile(package0, '0.0.1', 'pubspec.yaml')),
-                'readme': await _readFile(package0, '0.0.1', 'README.md'),
-                'changelog': await _readFile(package0, '0.0.1', 'CHANGELOG.md')
-              },
-              {
-                'version': version,
-                'pubspecYaml':
-                    await _readFile(package0, version, 'pubspec.yaml'),
-                'pubspec': loadYamlAsMap(
-                    await _readFile(package0, version, 'pubspec.yaml')),
-                'readme': await _readFile(package0, version, 'README.md'),
-                'changelog': await _readFile(package0, version, 'CHANGELOG.md')
-              }
-            ]
-          },
-        ),
-        true,
-      );
+      expect(meta['name'], package0);
+      expect(meta['uploaders'], [email0]);
+      expect(meta['versions'], isList);
+      expect(meta['versions'], hasLength(2));
+      expect(meta['versions'][0]['version'], '0.0.1');
+      expect(meta['versions'][1]['version'], version);
     });
 
     test('duplicated version', () async {
@@ -148,12 +116,17 @@ main() {
       // expect(result.stderr, ''); // Suggestions:
 
       var meta = await _readMeta(package0);
-      (meta['versions'] as List).forEach((version) {
-        version.remove('createAt');
-      });
-      var item = (meta['versions'] as List)
-          .firstWhere((v) => v['version'] == version, orElse: () => null);
 
+      expect(meta['name'], package0);
+      expect(meta['uploaders'], [email0]);
+      expect(meta['versions'], isList);
+      expect(meta['versions'], hasLength(3));
+      expect(meta['versions'][0]['version'], '0.0.1');
+      expect(meta['versions'][1]['version'], '0.0.3');
+
+      var item = meta['versions'][2];
+      expect(item['createAt'], isA<DateTime>());
+      item.remove('createAt');
       expect(
         DeepCollectionEquality().equals(item, {
           'version': version,

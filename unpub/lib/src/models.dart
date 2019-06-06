@@ -4,6 +4,8 @@ import 'package:meta/meta.dart';
 
 part 'models.g.dart';
 
+DateTime identity(DateTime x) => x;
+
 @JsonSerializable(includeIfNull: false)
 class UnpubVersion {
   final String version;
@@ -12,18 +14,22 @@ class UnpubVersion {
   final String readme;
   final String changelog;
 
+  @JsonKey(fromJson: identity, toJson: identity)
+  final DateTime createAt;
+
   UnpubVersion(
     this.version,
     this.pubspec,
     this.pubspecYaml,
     this.readme,
     this.changelog,
+    this.createAt,
   );
 
   factory UnpubVersion.fromJson(Map<String, dynamic> map) =>
       _$UnpubVersionFromJson(map);
 
-  factory UnpubVersion.fromPubspec(
+  factory UnpubVersion.fromTarball(
       String pubspecYaml, String readme, String changelog) {
     var pubspec = loadYamlAsMap(pubspecYaml);
 
@@ -33,6 +39,7 @@ class UnpubVersion {
       pubspecYaml,
       readme,
       changelog,
+      DateTime.now(),
     );
   }
 
