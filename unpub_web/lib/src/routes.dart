@@ -1,6 +1,7 @@
 import 'package:angular_router/angular_router.dart';
 
 import 'home_component.template.dart' as home_template;
+import 'list_component.template.dart' as list_template;
 // import 'not_found_component.template.dart' as not_found_template;
 
 class RoutePaths {
@@ -18,9 +19,14 @@ class Routes {
     routePath: RoutePaths.home,
     component: home_template.HomeComponentNgFactory,
   );
+  static final list = RouteDefinition(
+    routePath: RoutePaths.list,
+    component: list_template.ListComponentNgFactory,
+  );
 
   static final all = <RouteDefinition>[
     home,
+    list,
     // RouteDefinition.redirect(
     //   path: '',
     //   redirectTo: RoutePaths.heroes.toUrl(),

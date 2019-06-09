@@ -5,17 +5,17 @@ import 'package:unpub_web/app_service.dart';
 import 'routes.dart';
 
 @Component(
-  selector: 'home',
-  templateUrl: 'home_component.html',
+  selector: 'list',
+  templateUrl: 'list_component.html',
   directives: [NgFor, NgIf, RouterLink],
   providers: [ClassProvider(AppService)],
   exports: [RoutePaths],
 )
-class HomeComponent implements OnInit {
+class ListComponent implements OnInit {
   final AppService appService;
 
   List packages = [];
-  HomeComponent(this.appService);
+  ListComponent(this.appService);
 
   @override
   Future<Null> ngOnInit() async {

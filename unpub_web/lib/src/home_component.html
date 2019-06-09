@@ -1,22 +1,3 @@
-<header class="site-header-row">
-  <div class="site-header">
-    <div class="nav-wrap">
-      <div class="nav-header">
-        <a class="logo" href="/">Unpub</a>
-      </div>
-    </div>
-  </div>
-</header>
-
-<div class="_banner-bg">
-  <main class="home-banner">
-    <form class="search-bar" action="/packages">
-      <input class="input" name="q" placeholder="Search Dart packages" autocomplete="on" autofocus="autofocus" />
-      <button class="icon"></button>
-    </form>
-  </main>
-</div>
-
 <main>
   <div class="home-lists-container">
     <div class="landing-page-title-block">
@@ -29,7 +10,7 @@
 
     <ul class="package-list">
       <li class="list-item" *ngFor="let package of packages">
-        <h3 class="title"><a href="/packages/{{ package['name'] }}">{{ package['name'] }}</a></h3>
+        <h3 class="title"><a [routerLink]="getDetailUrl(package)">{{ package['name'] }}</a></h3>
         <p class="metadata">
           <span class="package-tag" *ngFor="let tag of package['tags']">{{ tag }}</span>
         </p>
@@ -38,7 +19,7 @@
     </ul>
 
     <div class="more">
-      <a href="/packages">More Dart packages...</a>
+      <a [routerLink]="RoutePaths.list.toUrl()">More Dart packages...</a>
     </div>
   </div>
 </main>

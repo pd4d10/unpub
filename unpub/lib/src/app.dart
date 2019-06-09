@@ -358,7 +358,9 @@ class UnpubApp {
       return {
         'name': item['name'],
         'description': versions.last['pubspec']['description'],
-        'tags': tags
+        'tags': tags,
+        'latest': versions.last['version'],
+        'updateAt': versions.last['createAt'].toString(),
       };
     }).toList();
 
