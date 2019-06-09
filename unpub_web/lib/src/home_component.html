@@ -14,11 +14,6 @@
       <input class="input" name="q" placeholder="Search Dart packages" autocomplete="on" autofocus="autofocus" />
       <button class="icon"></button>
     </form>
-    <div class="list-filters">
-      <a class="filter " href="/flutter">Flutter</a>
-      <a class="filter " href="/web">Web</a>
-      <a class="filter -active" href="/">All</a>
-    </div>
   </main>
 </div>
 
@@ -36,9 +31,7 @@
       <li class="list-item" *ngFor="let package of packages">
         <h3 class="title"><a href="/packages/{{ package['name'] }}">{{ package['name'] }}</a></h3>
         <p class="metadata">
-          <a class="package-tag" href="/flutter/packages" title="Compatible with the Flutter platform.">Flutter</a>
-          <a class="package-tag" href="/web/packages" title="Compatible with the web platform.">web</a>
-          <span class="package-tag" title="Compatible with other platforms (terminal, server, etc.).">other</span>
+          <span class="package-tag" *ngFor="let tag of package['tags']">{{ tag }}</span>
         </p>
         <p class="description">{{ package['description'] }}</p>
       </li>

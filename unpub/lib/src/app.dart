@@ -350,9 +350,15 @@ class UnpubApp {
       '\$or': packageNames.map((name) => {'name': name}).toList()
     }).map((item) {
       var versions = item['versions'] as List;
+      List<String> tags = ['flutter', 'web', 'other'];
+      if (versions.last['pubspec']['flutter'] != null) {
+        tags = ['flutter'];
+      }
+
       return {
         'name': item['name'],
-        'description': versions.last['pubspec']['description']
+        'description': versions.last['pubspec']['description'],
+        'tags': tags
       };
     }).toList();
 
