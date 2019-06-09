@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:angular/core.dart';
+import 'src/api/models.dart';
 
 @Injectable()
 class AppService {
@@ -11,5 +12,8 @@ class AppService {
     return data['data'];
   }
 
-  fetchTop() => _fetch('/webapi/top');
+  Future<List<PackageView>> fetchTop() async {
+    var items = await _fetch('/webapi/top');
+    return (items as List).map(((item) => PackageView.fromJson(item))).toList();
+  }
 }

@@ -8,6 +8,7 @@ import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:pub_semver/pub_semver.dart' as semver;
+import 'package:unpub/src/api/models.dart';
 import 'package:unpub/unpub_mongo.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:yaml/yaml.dart';
@@ -17,9 +18,11 @@ import 'package:unpub/src/package_store.dart';
 
 part 'app.g.dart';
 
-Response _ok(Map<String, dynamic> data, {int status = 200}) => Response(status,
-    body: json.encode(data),
-    headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
+Response _ok(Map<String, dynamic> data, {int status = 200}) =>
+    Response(status, body: json.encode(data), headers: {
+      HttpHeaders.contentTypeHeader: ContentType.json.mimeType,
+      'Access-Control-Allow-Origin': '*'
+    });
 
 Response _successMessage(String message, {int status = 200}) => _ok({
       'success': {'message': message}
@@ -355,19 +358,19 @@ class UnpubApp {
         tags = ['flutter'];
       }
 
-      return {
-        'name': item['name'],
-        'description': versions.last['pubspec']['description'],
-        'tags': tags,
-        'latest': versions.last['version'],
-        'updateAt': versions.last['createAt'].toString(),
-      };
+      return PackageView(
+        item['name'] as String,
+        versions.last['pubspec']['description'] as String,
+        tags,
+        versions.last['version'],
+        versions.last['createAt'],
+      );
     }).toList();
 
-    packages.sort((a, b) => map[a['name']].compareTo(map[b['name']]));
+    packages.sort((a, b) => map[a.name].compareTo(map[b.name]));
 
     return _ok({
-      'data': packages,
+      'data': packages.map((item) => item.toJson()).toList(),
     });
   }
 }

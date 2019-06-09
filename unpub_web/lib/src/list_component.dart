@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:angular/angular.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:unpub_web/app_service.dart';
+import 'package:unpub_web/src/api/models.dart';
 import 'routes.dart';
 
 @Component(
@@ -14,7 +15,7 @@ import 'routes.dart';
 class ListComponent implements OnInit {
   final AppService appService;
 
-  List packages = [];
+  List<PackageView> packages = [];
   ListComponent(this.appService);
 
   @override
@@ -22,7 +23,7 @@ class ListComponent implements OnInit {
     packages = await appService.fetchTop();
   }
 
-  getDetailUrl(package) {
-    return RoutePaths.detail.toUrl(parameters: {'name': package['name']});
+  getDetailUrl(PackageView package) {
+    return RoutePaths.detail.toUrl(parameters: {'name': package.name});
   }
 }
