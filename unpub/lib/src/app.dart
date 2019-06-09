@@ -96,6 +96,11 @@ class UnpubApp {
     };
   }
 
+  bool isPubClient(Request req) {
+    var ua = req.headers[HttpHeaders.userAgentHeader];
+    return ua != null && ua.toLowerCase().contains('dart pub');
+  }
+
   Router get router => _$UnpubAppRouter(this);
 
   @Route.get('/api/packages/<name>')
@@ -110,7 +115,9 @@ class UnpubApp {
           body: res.stream);
     }
 
-    metaStore.increaseQueryCount(name);
+    if (isPubClient(req)) {
+      metaStore.increaseQueryCount(name);
+    }
 
     versions.sort((a, b) {
       return semver.Version.prioritize(
@@ -148,7 +155,9 @@ class UnpubApp {
           body: res.stream);
     }
 
-    metaStore.increaseQueryCount(name);
+    if (isPubClient(req)) {
+      metaStore.increaseQueryCount(name);
+    }
     return _ok(_versionToJson(item, req.requestedUri));
   }
 
@@ -165,7 +174,9 @@ class UnpubApp {
               .resolve('/packages/$name/versions/$version.tar.gz')));
       stream = res.stream;
     } else {
-      metaStore.increaseDownloadCount(name);
+      if (isPubClient(req)) {
+        metaStore.increaseDownloadCount(name);
+      }
       stream = packageStore.download(name, version);
     }
 
