@@ -16,4 +16,13 @@ class AppService {
     var items = await _fetch('/webapi/top');
     return (items as List).map(((item) => PackageView.fromJson(item))).toList();
   }
+
+  Future<DetailView> fetchDetail(String name, String version) async {
+    var path = '/webapi/detail/$name';
+    if (version != null) {
+      path += '?version=$version';
+    }
+    var res = await _fetch(path);
+    return DetailView.fromJson(res);
+  }
 }

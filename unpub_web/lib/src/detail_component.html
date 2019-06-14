@@ -1,0 +1,96 @@
+<main *ngIf="package != null">
+
+  <div class="package-header">
+    <h2 class="title">{{ package.name }} {{ package.version }}</h2>
+    <div class="metadata">
+      Published <span>{{ package.createAt }}</span>
+      <div class="tags"> <a class="package-tag" href="/flutter/packages"
+          title="Compatible with the Flutter platform.">Flutter</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="package-container">
+    <div class="main tabs-content">
+      <ul class="package-tabs js-tabs">
+        <li [ngClass]="{'-active': activeTab == 0}" (click)="activeTab = 0" class="tab" role="button">README.md</li>
+        <li [ngClass]="{'-active': activeTab == 1}" (click)="activeTab = 1" class="tab" role="button">CHANGELOG.md</li>
+        <!-- <li class="tab" data-name="-installing-tab-" role="button">Installing</li> -->
+        <li [ngClass]="{'-active': activeTab == 2}" (click)="activeTab = 2" class="tab" role="button">Versions</li>
+      </ul>
+      <section class="content js-content markdown-body" [ngClass]="{'-active': activeTab == 0}">{{ package.readme }}
+      </section>
+      <section class="content js-content markdown-body" [ngClass]="{'-active': activeTab == 1}">{{ package.changelog }}
+      </section>
+      <section class="content js-content">
+        <table class="version-table">
+          <thead>
+            <tr>
+              <th>Version</th>
+              <th>Uploaded</th>
+              <th class="documentation" width="60">Documentation</th>
+              <th class="archive" width="60">Archive</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of package.versions">
+              <td><strong><a
+                    href="/packages/{{ package.name }}/versions/{{ item.version }}">{{ package.version }}</a></strong>
+              </td>
+              <td>Jun 4, 2019</td>
+              <td class="documentation">
+                <a href="/documentation/{{ package.name }}/{{ item.version }}/" rel="nofollow"
+                  title="Go to the documentation of {{ package.name }} {{ item.version }}">
+                  <img src="/static/img/ic_drive_document_black_24dp.svg"
+                    alt="Go to the documentation of {{ package.name }} {{ item.version }}">
+                </a>
+              </td>
+              <td class="archive">
+                <a href="/packages/{{ package.name }}-{{ item.version }}.tar.gz"
+                  title="Download {{ package.name }} {{ item.version }} archive">
+                  <img src="/static/img/ic_get_app_black_24dp.svg"
+                    alt="Download {{ package.name }} {{ item.version }} archive">
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          <a href="/packages/{{ package.name }}/versions">All {{ package.versions.length }} versions...</a>
+        </p>
+
+      </section>
+    </div>
+
+    <aside class="sidebar sidebar-content">
+      <h3 class="title">About</h3>
+      <p>{{ package.pubspec['description'] }}</p>
+      <p>
+        <a class="link" href="{{ package.pubspec['homepage'] }}">Homepage</a><br>
+        <a class="link" href="/documentation/{{ package.name }}/{{ package.pubspec['version'] }}/">API reference</a><br>
+      </p>
+
+      <h3 class="title">Author</h3>
+      <div><span class="author" *ngFor="let author of authors">
+          <a href="/packages?q=email:{{author}}" title="Search packages with {{author}}" rel="nofollow"><i
+              class="search-icon"></i></a>
+          {{author}}</span></div>
+
+      <h3 class="title">Uploader</h3>
+      <p><span class="author" *ngFor="let author of package.uploaders">
+          <a href="/packages?q=email:{{author}}" title="Search packages with {{author}}" rel="nofollow"><i
+              class="search-icon"></i></a>
+          {{author}}</span></p>
+
+      <h3 class="title">Dependencies</h3>
+      <p><a *ngFor="let dep of dependencies" href="/packages/{{dep}}">{{dep}}</a>,</p>
+
+      <h3 class="title">More</h3>
+      <p><a href="/packages?q=dependency%3A{{ package.name }}" rel="nofollow">Packages that depend on
+          {{ package.name }}</a></p>
+    </aside>
+
+  </div>
+
+</main>

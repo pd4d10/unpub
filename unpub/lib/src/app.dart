@@ -373,4 +373,43 @@ class UnpubApp {
       'data': packages.map((item) => item.toJson()).toList(),
     });
   }
+
+  @Route.get('/webapi/detail/<name>')
+  Future<Response> getPackageDetail(Request req, String name) async {
+    var version = req.requestedUri.queryParameters['version'];
+
+    var package = await metaStore.db
+        .collection(packageCollection)
+        .findOne(where.eq('name', name));
+    if (package == null) {
+      return _ok({'error': 'package not exists'});
+    }
+
+    var versions = (package['versions'] as List);
+
+    var packageVersion = version == null
+        ? versions.last
+        : versions.firstWhere((item) => item['version'] == version,
+            orElse: () => null);
+
+    if (packageVersion == null) {
+      return _ok({'error': 'version not exists'});
+    }
+
+    var data = DetailView(
+      package['name'] as String,
+      packageVersion['version'] as String,
+      packageVersion['createAt'] as DateTime,
+      packageVersion['pubspec'],
+      (package['uploaders'] as List).cast<String>(),
+      packageVersion['readme'],
+      packageVersion['changelog'],
+      versions
+          .map((item) => DetailViewVersion(
+              item['version'] as String, item['createAt'] as DateTime))
+          .toList(),
+    );
+
+    return _ok({'data': data.toJson()});
+  }
 }
