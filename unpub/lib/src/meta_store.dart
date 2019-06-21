@@ -1,4 +1,5 @@
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:intl/intl.dart';
 import 'package:unpub/src/models.dart';
 
 final packageCollection = 'packages';
@@ -71,10 +72,11 @@ class UnpubMetaStore {
   }
 
   void increaseDownloadCount(String name) {
+    var today = DateFormat('yyyyMMdd').format(DateTime.now());
     db.collection(statsCollection).update(
         where.eq('name', name),
         {
-          '\$inc': {'download': 1}
+          '\$inc': {'download': 1, 'd$today': 1}
         },
         upsert: true);
   }
