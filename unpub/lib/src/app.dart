@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:http/http.dart' as http;
 import 'package:googleapis/oauth2/v2.dart';
@@ -18,21 +18,22 @@ import 'package:unpub/src/package_store.dart';
 
 part 'app.g.dart';
 
-Response _ok(Map<String, dynamic> data, {int status = 200}) =>
-    Response(status, body: json.encode(data), headers: {
+shelf.Response _ok(Map<String, dynamic> data, {int status = 200}) =>
+    shelf.Response(status, body: json.encode(data), headers: {
       HttpHeaders.contentTypeHeader: ContentType.json.mimeType,
       'Access-Control-Allow-Origin': '*'
     });
 
-Response _successMessage(String message, {int status = 200}) => _ok({
+shelf.Response _successMessage(String message, {int status = 200}) => _ok({
       'success': {'message': message}
     }, status: status);
 
-Response _badRequest(String message, {int status = 400}) => Response(status,
-    body: json.encode({
-      'error': {'message': message}
-    }),
-    headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
+shelf.Response _badRequest(String message, {int status = 400}) =>
+    shelf.Response(status,
+        body: json.encode({
+          'error': {'message': message}
+        }),
+        headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
 
 class UnpubApp {
   static var _httpClient = http.Client();
@@ -61,13 +62,14 @@ class UnpubApp {
   });
 
   Future<HttpServer> serve([String host = '0.0.0.0', int port = 4000]) async {
-    var handler =
-        const Pipeline().addMiddleware(logRequests()).addHandler((req) async {
+    var handler = const shelf.Pipeline()
+        .addMiddleware(shelf.logRequests())
+        .addHandler((req) async {
       // Return 404 by default
       // https://github.com/google/dart-neats/issues/1
       var res = await router.handler(req);
       if (res == null) {
-        return Response.notFound('Not found');
+        return shelf.Response.notFound('Not found');
       } else {
         return res;
       }
@@ -76,7 +78,7 @@ class UnpubApp {
     return server;
   }
 
-  Future<String> _getUploaderEmail(Request req) async {
+  Future<String> _getUploaderEmail(shelf.Request req) async {
     var authHeader = req.headers[HttpHeaders.authorizationHeader];
     if (authHeader == null) {
       throw 'No auth';
@@ -99,7 +101,7 @@ class UnpubApp {
     };
   }
 
-  bool isPubClient(Request req) {
+  bool isPubClient(shelf.Request req) {
     var ua = req.headers[HttpHeaders.userAgentHeader];
     return ua != null && ua.toLowerCase().contains('dart pub');
   }
@@ -107,13 +109,13 @@ class UnpubApp {
   Router get router => _$UnpubAppRouter(this);
 
   @Route.get('/api/packages/<name>')
-  Future<Response> getVersions(Request req, String name) async {
+  Future<shelf.Response> getVersions(shelf.Request req, String name) async {
     var versions = await metaStore.getAllVersions(name).toList();
 
     if (versions.isEmpty) {
       var res = await _httpClient.send(http.Request(
           'GET', Uri.parse(proxyUrl).resolve('/api/packages/$name')));
-      return Response(res.statusCode,
+      return shelf.Response(res.statusCode,
           headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType},
           body: res.stream);
     }
@@ -134,7 +136,8 @@ class UnpubApp {
   }
 
   @Route.get('/api/packages/<name>/versions/<version>')
-  Future<Response> getVersion(Request req, String name, String version) async {
+  Future<shelf.Response> getVersion(
+      shelf.Request req, String name, String version) async {
     // Important: + -> %2B, should be decoded here
     try {
       version = Uri.decodeComponent(version);
@@ -149,7 +152,7 @@ class UnpubApp {
           'GET',
           Uri.parse(proxyUrl)
               .resolve('/api/packages/$name/versions/$version')));
-      return Response(res.statusCode,
+      return shelf.Response(res.statusCode,
           headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType},
           body: res.stream);
     }
@@ -158,7 +161,8 @@ class UnpubApp {
   }
 
   @Route.get('/packages/<name>/versions/<version>.tar.gz')
-  Future<Response> download(Request req, String name, String version) async {
+  Future<shelf.Response> download(
+      shelf.Request req, String name, String version) async {
     var item = await metaStore.getVersion(name, version);
 
     Stream<List<int>> stream;
@@ -176,13 +180,13 @@ class UnpubApp {
       stream = packageStore.download(name, version);
     }
 
-    return Response(200,
+    return shelf.Response(200,
         headers: {HttpHeaders.contentTypeHeader: ContentType.binary.mimeType},
         body: stream);
   }
 
   @Route.get('/api/packages/versions/new')
-  Future<Response> getUploadUrl(Request req) async {
+  Future<shelf.Response> getUploadUrl(shelf.Request req) async {
     return _ok({
       'url': req.requestedUri
           .resolve('/api/packages/versions/newUpload')
@@ -192,7 +196,7 @@ class UnpubApp {
   }
 
   @Route.post('/api/packages/versions/newUpload')
-  Future<Response> upload(Request req) async {
+  Future<shelf.Response> upload(shelf.Request req) async {
     try {
       var email = await _getUploaderEmail(req);
 
@@ -278,17 +282,17 @@ class UnpubApp {
           UnpubVersion.fromTarball(pubspecYaml, readme, changelog), email);
 
       // TODO: Upload docs
-      return Response.found(req.requestedUri
+      return shelf.Response.found(req.requestedUri
           .resolve('/api/packages/versions/newUploadFinish')
           .toString());
     } catch (err) {
-      return Response.found(req.requestedUri
+      return shelf.Response.found(req.requestedUri
           .resolve('/api/packages/versions/newUploadFinish?error=$err'));
     }
   }
 
   @Route.get('/api/packages/versions/newUploadFinish')
-  Future<Response> uploadFinish(Request req) async {
+  Future<shelf.Response> uploadFinish(shelf.Request req) async {
     var error = req.requestedUri.queryParameters['error'];
     if (error != null) {
       return _badRequest(error);
@@ -297,7 +301,7 @@ class UnpubApp {
   }
 
   @Route.post('/api/packages/<name>/uploaders')
-  Future<Response> addUploader(Request req, String name) async {
+  Future<shelf.Response> addUploader(shelf.Request req, String name) async {
     var body = await req.readAsString();
     var email = Uri.splitQueryString(body)['email'];
     var operatorEmail = await _getUploaderEmail(req);
@@ -315,8 +319,8 @@ class UnpubApp {
   }
 
   @Route.delete('/api/packages/<name>/uploaders/<email>')
-  Future<Response> removeUploader(
-      Request req, String name, String email) async {
+  Future<shelf.Response> removeUploader(
+      shelf.Request req, String name, String email) async {
     email = Uri.decodeComponent(email);
     var operatorEmail = await _getUploaderEmail(req);
     var uploaders = await metaStore.getUploaders(name).toList();
@@ -333,7 +337,7 @@ class UnpubApp {
   }
 
   @Route.get('/webapi/top')
-  Future<Response> getTopPackages(Request req) async {
+  Future<shelf.Response> getTopPackages(shelf.Request req) async {
     var packageNames = await metaStore.db
         .collection(statsCollection)
         .find(where.limit(15).sortBy('download', descending: true))
@@ -368,7 +372,8 @@ class UnpubApp {
   }
 
   @Route.get('/webapi/detail/<name>')
-  Future<Response> getPackageDetail(Request req, String name) async {
+  Future<shelf.Response> getPackageDetail(
+      shelf.Request req, String name) async {
     var version = req.requestedUri.queryParameters['version'];
 
     var package = await metaStore.db
@@ -407,7 +412,7 @@ class UnpubApp {
   }
 
   @Route.get('/webapi/search')
-  Future<Response> search(Request req) async {
+  Future<shelf.Response> search(shelf.Request req) async {
     var params = req.requestedUri.queryParameters;
     var q = params['q'];
     var page = int.tryParse(params['page'] ?? '') ?? 1;
