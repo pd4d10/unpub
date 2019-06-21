@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
 import 'package:mongo_dart/mongo_dart.dart';
 import 'utils.dart';
-import 'package:unpub/unpub_mongo.dart';
+import 'package:unpub/src/meta_store.dart';
 
 main() {
   Db _db = Db('mongodb://localhost:27017/dart_pub_test');

@@ -1,11 +1,8 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:unpub/unpub.dart';
 import 'package:unpub/unpub_file.dart';
-import 'package:unpub/unpub_mongo.dart';
 
 final notExistingPacakge = 'not_existing_package';
 final baseDir = path.absolute('unpub-data');
@@ -20,9 +17,11 @@ final email2 = 'email2@example.com';
 final email3 = 'email3@example.com';
 
 createServer(String opEmail) async {
+  var metaStore = UnpubMetaStore('mongodb://localhost:27017/dart_pub_test');
+  await metaStore.db.open();
+
   var app = UnpubApp(
-    metaStore:
-        await UnpubMongo.connect('mongodb://localhost:27017/dart_pub_test'),
+    metaStore: metaStore,
     packageStore: UnpubFileStore(baseDir),
     uploaderEmailGetter: (token) async => opEmail,
   );

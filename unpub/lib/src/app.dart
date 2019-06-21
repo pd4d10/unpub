@@ -9,10 +9,10 @@ import 'package:http_parser/http_parser.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:pub_semver/pub_semver.dart' as semver;
 import 'package:unpub/src/api/models.dart';
-import 'package:unpub/unpub_mongo.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:yaml/yaml.dart';
 import 'package:archive/archive.dart';
+import 'package:unpub/src/models.dart';
 import 'package:unpub/src/meta_store.dart';
 import 'package:unpub/src/package_store.dart';
 

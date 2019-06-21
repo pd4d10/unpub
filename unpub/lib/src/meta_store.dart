@@ -1,24 +1,90 @@
 import 'package:mongo_dart/mongo_dart.dart';
-import 'models.dart';
-export 'models.dart';
+import 'package:unpub/src/models.dart';
 
-abstract class UnpubMetaStore {
+final packageCollection = 'packages';
+final statsCollection = 'stats';
+
+class UnpubMetaStore {
   Db db;
 
-  Stream<UnpubVersion> getAllVersions(String name);
+  UnpubMetaStore(String uri) : db = Db(uri);
 
-  Future<UnpubVersion> getVersion(String name, String version);
+  Future<UnpubPackage> _queryPackage(String package) async {
+    var map = await db
+        .collection(packageCollection)
+        .findOne(where.eq('name', package));
+    if (map == null) return null;
+    return UnpubPackage.fromJson(map);
+  }
+
+  Stream<UnpubVersion> getAllVersions(String name) async* {
+    var package = await _queryPackage(name);
+    if (package == null) return;
+    yield* Stream.fromIterable(package.versions);
+  }
+
+  Future<UnpubVersion> getVersion(String package, String version) async {
+    return getAllVersions(package)
+        .firstWhere((item) => item.version == version, orElse: () => null);
+  }
 
   Future<void> addVersion(
-      String name, UnpubVersion version, String uploaderEmail);
+      String name, UnpubVersion version, String uploaderEmail) async {
+    await db.collection(packageCollection).update(
+        where.eq('name', name),
+        {
+          '\$push': {
+            'versions': version.toJson(),
+          },
+          '\$addToSet': {
+            'uploaders': uploaderEmail,
+          }
+        },
+        upsert: true);
+  }
 
-  Stream<String> getUploaders(String name);
+  Future<void> addUploader(String name, String email) async {
+    await db.collection(packageCollection).update(
+        where.eq('name', name),
+        {
+          '\$push': {
+            'uploaders': email,
+          }
+        },
+        upsert: true);
+  }
 
-  Future<void> addUploader(String name, String email);
+  Future<void> removeUploader(String name, String email) async {
+    await db.collection(packageCollection).update(
+        where.eq('name', name),
+        {
+          '\$pull': {
+            'uploaders': email,
+          }
+        },
+        upsert: true);
+  }
 
-  Future<void> removeUploader(String name, String email);
+  Stream<String> getUploaders(String name) async* {
+    var package = await _queryPackage(name);
+    yield* Stream.fromIterable(package.uploaders);
+  }
 
-  void increaseDownloadCount(String name);
+  void increaseDownloadCount(String name) {
+    db.collection(statsCollection).update(
+        where.eq('name', name),
+        {
+          '\$inc': {'download': 1}
+        },
+        upsert: true);
+  }
 
-  void increaseQueryCount(String name);
+  void increaseQueryCount(String name) {
+    db.collection(statsCollection).update(
+        where.eq('name', name),
+        {
+          '\$inc': {'query': 1}
+        },
+        upsert: true);
+  }
 }

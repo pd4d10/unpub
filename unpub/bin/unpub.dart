@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:args/args.dart';
 import 'package:unpub/src/app.dart';
+import 'package:unpub/src/meta_store.dart';
 import 'package:unpub/unpub_file.dart';
-import 'package:unpub/unpub_mongo.dart';
 
 main(List<String> args) async {
   var parser = ArgParser();
@@ -23,8 +23,11 @@ main(List<String> args) async {
 
   var baseDir = path.absolute('unpub-data');
 
+  var metaStore = UnpubMetaStore('mongodb://localhost:27017/dart_pub');
+  await metaStore.db.open();
+
   var app = UnpubApp(
-    metaStore: await UnpubMongo.connect('mongodb://localhost:27017/dart_pub'),
+    metaStore: metaStore,
     packageStore: UnpubFileStore(baseDir),
   );
 
