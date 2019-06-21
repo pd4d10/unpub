@@ -22,5 +22,6 @@ Router _$UnpubAppRouter(UnpubApp service) {
       service.removeUploader);
   router.add('GET', '/webapi/top', service.getTopPackages);
   router.add('GET', '/webapi/detail/<name>', service.getPackageDetail);
+  router.add('GET', '/webapi/search', service.search);
   return router;
 }

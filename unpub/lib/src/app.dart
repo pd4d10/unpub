@@ -412,4 +412,31 @@ class UnpubApp {
 
     return _ok({'data': data.toJson()});
   }
+
+  @Route.get('/webapi/search')
+  Future<Response> search(Request req) async {
+    var params = req.requestedUri.queryParameters;
+    var q = params['q'];
+    var page = int.tryParse(params['page'] ?? '') ?? 1;
+    // var sort = params['sort'] ?? 'download';
+    var size = int.tryParse(params['size'] ?? '') ?? 10;
+
+    if (q == null || q.isEmpty) {
+      return _badRequest('No search keyword provided');
+    }
+
+    var packages = await metaStore.db
+        .collection(packageCollection)
+        .find(where.match('name', '.*$q.*').skip(size * (page - 1)).limit(size)
+            // .sortBy('download'),
+            )
+        .map((package) {
+      package.remove('versions');
+      return package;
+    }).toList();
+
+    return _ok({
+      'data': packages,
+    });
+  }
 }
