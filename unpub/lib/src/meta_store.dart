@@ -80,13 +80,4 @@ class UnpubMetaStore {
         },
         upsert: true);
   }
-
-  void increaseQueryCount(String name) {
-    db.collection(statsCollection).update(
-        where.eq('name', name),
-        {
-          '\$inc': {'query': 1}
-        },
-        upsert: true);
-  }
 }

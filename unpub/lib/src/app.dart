@@ -118,10 +118,6 @@ class UnpubApp {
           body: res.stream);
     }
 
-    if (isPubClient(req)) {
-      metaStore.increaseQueryCount(name);
-    }
-
     versions.sort((a, b) {
       return semver.Version.prioritize(
           semver.Version.parse(a.version), semver.Version.parse(b.version));
@@ -158,9 +154,6 @@ class UnpubApp {
           body: res.stream);
     }
 
-    if (isPubClient(req)) {
-      metaStore.increaseQueryCount(name);
-    }
     return _ok(_versionToJson(item, req.requestedUri));
   }
 
