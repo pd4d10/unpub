@@ -5,3 +5,5 @@ dart:
   - stable
 before_script:
   - sleep 15
+  - cd unpub
+  - echo $PUB_CREDENTIALS > ~/.pub-cache/credentials.json
