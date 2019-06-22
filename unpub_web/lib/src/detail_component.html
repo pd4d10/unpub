@@ -44,18 +44,16 @@
         </li>
       </ul>
       <section
-        class="content js-content markdown-body"
+        class="content markdown-body"
         [ngClass]="{ '-active': activeTab == 0 }"
-      >
-        {{ readme }}
-      </section>
+        [innerHtml]="readmeHtml"
+      ></section>
       <section
-        class="content js-content markdown-body"
+        class="content markdown-body"
         [ngClass]="{ '-active': activeTab == 1 }"
-      >
-        {{ changelog }}
-      </section>
-      <section class="content js-content">
+        [innerHtml]="changelogHtml"
+      ></section>
+      <section class="content">
         <table class="version-table">
           <thead>
             <tr>

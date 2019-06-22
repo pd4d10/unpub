@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:angular/angular.dart';
 import 'package:angular_router/angular_router.dart';
+import 'package:markdown/markdown.dart';
 import 'package:unpub_web/app_service.dart';
 import 'routes.dart';
 
@@ -23,8 +24,6 @@ class DetailComponent implements OnInit, OnActivate {
   get createdAt => package['version']['createdAt'];
   get pubspec => package['version']['pubspec'];
   get versions => package['versions'];
-  get readme => package['version']['readme'];
-  get changelog => package['version']['changelog'];
   get uploaders => package['version']['uploaders'];
 
   get authors {
@@ -35,6 +34,18 @@ class DetailComponent implements OnInit, OnActivate {
       return pubspec['authors'];
     }
     return [];
+  }
+
+  get readmeHtml {
+    var readme = package['version']['readme'];
+    if (readme == null) return null;
+    return markdownToHtml(readme);
+  }
+
+  get changelogHtml {
+    var changelog = package['version']['changelog'];
+    if (changelog == null) return null;
+    return markdownToHtml(changelog);
   }
 
   get dependencies {
