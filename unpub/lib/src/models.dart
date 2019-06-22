@@ -65,20 +65,20 @@ class UnpubPackage {
 }
 
 @JsonSerializable()
-class webapiListView {
+class WebapiListView {
   String name;
   String description;
   List<String> tags;
   String latest;
   DateTime updatedAt;
 
-  webapiListView(
+  WebapiListView(
       this.name, this.description, this.tags, this.latest, this.updatedAt);
 
-  factory webapiListView.fromJson(Map<String, dynamic> map) =>
-      _$webapiListViewFromJson(map);
+  factory WebapiListView.fromJson(Map<String, dynamic> map) =>
+      _$WebapiListViewFromJson(map);
 
-  Map<String, dynamic> toJson() => _$webapiListViewToJson(this);
+  Map<String, dynamic> toJson() => _$WebapiListViewToJson(this);
 }
 
 @JsonSerializable()
@@ -95,21 +95,15 @@ class DetailViewVersion {
 }
 
 @JsonSerializable()
-class DetailView {
+class WebapiDetailView {
   String name;
-  String version;
-  DateTime createdAt;
-  Map<String, dynamic> pubspec;
-  List<String> uploaders;
-  String readme;
-  String changelog;
+  UnpubVersion version;
   List<DetailViewVersion> versions;
 
-  DetailView(this.name, this.version, this.createdAt, this.pubspec,
-      this.uploaders, this.readme, this.changelog, this.versions);
+  WebapiDetailView(this.name, this.version, this.versions);
 
-  factory DetailView.fromJson(Map<String, dynamic> map) =>
-      _$DetailViewFromJson(map);
+  factory WebapiDetailView.fromJson(Map<String, dynamic> map) =>
+      _$WebapiDetailViewFromJson(map);
 
-  Map<String, dynamic> toJson() => _$DetailViewToJson(this);
+  Map<String, dynamic> toJson() => _$WebapiDetailViewToJson(this);
 }

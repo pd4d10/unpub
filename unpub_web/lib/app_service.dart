@@ -27,8 +27,9 @@ class AppService {
         '/webapi/packages', {'size': size, 'page': page, 'sort': sort, 'q': q});
   }
 
-  Future fetchPackage(String name) async {
-    return _fetch('/webapi/package/$name');
+  Future fetchPackage(String name, String version) async {
+    version = version ?? 'latest';
+    return _fetch('/webapi/package/$name/$version');
   }
 
   getDetailUrl(package) {

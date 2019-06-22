@@ -9,10 +9,8 @@ class RoutePaths {
   static final home = RoutePath(path: '');
   static final list = RoutePath(path: 'packages');
   static final detail = RoutePath(path: 'packages/:name');
-}
-
-String getName(Map<String, String> parameters) {
-  return parameters['name'];
+  static final detailVersion =
+      RoutePath(path: 'packages/:name/versions/:version');
 }
 
 class Routes {
@@ -26,6 +24,10 @@ class Routes {
   );
   static final detail = RouteDefinition(
     routePath: RoutePaths.detail,
+    component: detail_template.DetailComponentNgFactory,
+  );
+  static final detailVersion = RouteDefinition(
+    routePath: RoutePaths.detailVersion,
     component: detail_template.DetailComponentNgFactory,
   );
 

@@ -56,8 +56,8 @@ Map<String, dynamic> _$UnpubPackageToJson(UnpubPackage instance) =>
       'uploaders': instance.uploaders
     };
 
-webapiListView _$webapiListViewFromJson(Map<String, dynamic> json) {
-  return webapiListView(
+WebapiListView _$WebapiListViewFromJson(Map<String, dynamic> json) {
+  return WebapiListView(
       json['name'] as String,
       json['description'] as String,
       (json['tags'] as List)?.map((e) => e as String)?.toList(),
@@ -67,7 +67,7 @@ webapiListView _$webapiListViewFromJson(Map<String, dynamic> json) {
           : DateTime.parse(json['updatedAt'] as String));
 }
 
-Map<String, dynamic> _$webapiListViewToJson(webapiListView instance) =>
+Map<String, dynamic> _$WebapiListViewToJson(WebapiListView instance) =>
     <String, dynamic>{
       'name': instance.name,
       'description': instance.description,
@@ -90,17 +90,12 @@ Map<String, dynamic> _$DetailViewVersionToJson(DetailViewVersion instance) =>
       'createdAt': instance.createdAt?.toIso8601String()
     };
 
-DetailView _$DetailViewFromJson(Map<String, dynamic> json) {
-  return DetailView(
+WebapiDetailView _$WebapiDetailViewFromJson(Map<String, dynamic> json) {
+  return WebapiDetailView(
       json['name'] as String,
-      json['version'] as String,
-      json['createdAt'] == null
+      json['version'] == null
           ? null
-          : DateTime.parse(json['createdAt'] as String),
-      json['pubspec'] as Map<String, dynamic>,
-      (json['uploaders'] as List)?.map((e) => e as String)?.toList(),
-      json['readme'] as String,
-      json['changelog'] as String,
+          : UnpubVersion.fromJson(json['version'] as Map<String, dynamic>),
       (json['versions'] as List)
           ?.map((e) => e == null
               ? null
@@ -108,14 +103,9 @@ DetailView _$DetailViewFromJson(Map<String, dynamic> json) {
           ?.toList());
 }
 
-Map<String, dynamic> _$DetailViewToJson(DetailView instance) =>
+Map<String, dynamic> _$WebapiDetailViewToJson(WebapiDetailView instance) =>
     <String, dynamic>{
       'name': instance.name,
       'version': instance.version,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'pubspec': instance.pubspec,
-      'uploaders': instance.uploaders,
-      'readme': instance.readme,
-      'changelog': instance.changelog,
       'versions': instance.versions
     };

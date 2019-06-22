@@ -11,21 +11,21 @@ import 'routes.dart';
   providers: [ClassProvider(AppService)],
   exports: [RoutePaths],
 )
-class DetailComponent implements OnInit {
+class DetailComponent implements OnInit, OnActivate {
   final AppService appService;
 
   Map<String, dynamic> package;
   int activeTab = 0;
   DetailComponent(this.appService);
 
-  get name => package['name'];
-  get version => package['version'];
-  get createdAt => package['createdAt'];
-  get pubspec => package['pubspec'];
+  get name => package['version']['name'];
+  get version => package['version']['version'];
+  get createdAt => package['version']['createdAt'];
+  get pubspec => package['version']['pubspec'];
   get versions => package['versions'];
-  get readme => package['readme'];
-  get changelog => package['changelog'];
-  get uploaders => package['uploaders'];
+  get readme => package['version']['readme'];
+  get changelog => package['version']['changelog'];
+  get uploaders => package['version']['uploaders'];
 
   get authors {
     if (pubspec['author'] != null) {
@@ -44,8 +44,16 @@ class DetailComponent implements OnInit {
   }
 
   @override
-  Future<Null> ngOnInit() async {
-    package = await appService.fetchPackage('router');
+  Future<Null> ngOnInit() async {}
+
+  @override
+  void onActivate(_, RouterState current) async {
+    final name = current.parameters['name'];
+    final version = current.parameters['version'];
+
+    if (name != null) {
+      package = await appService.fetchPackage(name, version);
+    }
   }
 
   getDetailUrl(package) {

@@ -339,7 +339,7 @@ class App {
   }
 
   @Route.get('/webapi/packages')
-  Future<shelf.Response> getTopPackages(shelf.Request req) async {
+  Future<shelf.Response> getPackages(shelf.Request req) async {
     var params = req.requestedUri.queryParameters;
     var size = int.tryParse(params['size'] ?? '') ?? 10;
     var page = int.tryParse(params['page'] ?? '') ?? 0;
@@ -358,7 +358,7 @@ class App {
         tags = ['flutter', 'web', 'other'];
       }
 
-      return webapiListView(
+      return WebapiListView(
         package.name,
         latest.pubspec['description'] as String,
         tags,
@@ -370,20 +370,40 @@ class App {
     return _ok({'data': data});
   }
 
-  @Route.get('/webapi/package/<name>')
+  @Route.get('/webapi/package/<name>/<version>')
   Future<shelf.Response> getPackageDetail(
-      shelf.Request req, String name) async {
+      shelf.Request req, String name, String version) async {
     var package = await metaStore.queryPackage(name);
     if (package == null) {
       return _ok({'error': 'package not exists'});
     }
 
-    return _ok({'data': package.toJson()});
+    UnpubVersion packageVersion;
+    if (version == 'latest') {
+      packageVersion = package.versions.last;
+    } else {
+      packageVersion = package.versions
+          .firstWhere((item) => item.version == version, orElse: () => null);
+    }
+    if (packageVersion == null) {
+      return _ok({'error': 'package not exists'});
+    }
+
+    var data = WebapiDetailView(
+      package.name,
+      packageVersion,
+      package.versions
+          .map((v) => DetailViewVersion(v.version, v.createdAt))
+          .toList(),
+    );
+
+    return _ok({'data': data.toJson()});
   }
 
   @Route.get('/')
   @Route.get('/packages')
   @Route.get('/packages/<name>')
+  @Route.get('/packages/<name>/versions/<version>')
   Future<shelf.Response> indexHtml(shelf.Request req) async {
     return shelf.Response(HttpStatus.ok,
         body: index_html.content,

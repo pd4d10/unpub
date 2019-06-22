@@ -20,11 +20,13 @@ Router _$AppRouter(App service) {
   router.add('POST', '/api/packages/<name>/uploaders', service.addUploader);
   router.add('DELETE', '/api/packages/<name>/uploaders/<email>',
       service.removeUploader);
-  router.add('GET', '/webapi/packages', service.getTopPackages);
-  router.add('GET', '/webapi/package/<name>', service.getPackageDetail);
+  router.add('GET', '/webapi/packages', service.getPackages);
+  router.add(
+      'GET', '/webapi/package/<name>/<version>', service.getPackageDetail);
   router.add('GET', '/', service.indexHtml);
   router.add('GET', '/packages', service.indexHtml);
   router.add('GET', '/packages/<name>', service.indexHtml);
+  router.add('GET', '/packages/<name>/versions/<version>', service.indexHtml);
   router.add('GET', '/main.dart.js', service.mainDartJs);
   router.add('GET', '/styles.css', service.stylesCss);
   return router;
