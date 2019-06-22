@@ -8,4 +8,5 @@ before_script:
   - mkdir -p ~/.pub-cache
   - echo $PUB_CREDENTIALS > ~/.pub-cache/credentials.json
   - cd unpub
+script:
   - pub run test
