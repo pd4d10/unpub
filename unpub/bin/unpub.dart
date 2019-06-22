@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:args/args.dart';
-import 'package:unpub/src/app.dart';
-import 'package:unpub/src/meta_store.dart';
-import 'package:unpub/unpub_file.dart';
+import 'package:unpub/unpub.dart' as unpub;
 
 main(List<String> args) async {
   var parser = ArgParser();
@@ -21,18 +19,17 @@ main(List<String> args) async {
     exit(1);
   }
 
-  var baseDir = path.absolute('unpub-data');
+  var baseDir = path.absolute('unpub-packages');
+  var db = 'mongodb://localhost:27017/dart_pub';
 
-  var metaStore = UnpubMetaStore('mongodb://localhost:27017/dart_pub');
+  var metaStore = unpub.MetaStore(db);
   await metaStore.db.open();
 
-  var app = UnpubApp(
+  var app = unpub.App(
     metaStore: metaStore,
-    packageStore: UnpubFileStore(baseDir),
+    packageStore: unpub.FileStore(baseDir),
   );
 
   var server = await app.serve(host, port);
-  host = server.address.host;
-  port = server.port;
-  print('Serving at http://$host:$port');
+  print('Serving at http://${server.address.host}:${server.port}');
 }

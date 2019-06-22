@@ -1,14 +1,14 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
-import 'unpub.dart';
+import 'package_store.dart';
 
-class UnpubFileStore extends UnpubPackageStore {
+class FileStore extends PackageStore {
   String baseDir;
 
-  UnpubFileStore(this.baseDir);
+  FileStore(this.baseDir);
 
   File _getTarballFile(String package, String version) {
-    return File(path.join(baseDir, package, version, 'package.tar.gz'));
+    return File(path.join(baseDir, '$package-$version.tar.gz'));
   }
 
   @override

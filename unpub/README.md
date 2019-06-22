@@ -23,20 +23,23 @@ It will use file system as meta store and package(tarball) store
 ### Via Dart API
 
 ```dart
-import 'package:unpub/unpub.dart';
+import 'package:unpub/unpub.dart' as unpub;
 
-var baseDir = path.absolute('unpub-data');
+main(List<String> args) async {
+  var basedir = '/path/to/basedir'; // Base directory to save pacakges
+  var db = 'mongodb://localhost:27017/dart_pub'; // MongoDB uri
 
-var repository = UnpubRepository(
-    metaStore:
-        await UnpubMongo.connect('mongodb://localhost:27017/dart_pub_test'),
-    packageStore: UnpubFileStore(baseDir),
-  shouldCheckUploader: true,
-);
+  var metaStore = unpub.MetaStore(db);
+  await metaStore.db.open();
 
-var server = UnpubServer(repository);
-server.serve('0.0.0.0', 3000);
+  var app = unpub.App(
+    metaStore: metaStore,
+    packageStore: unpub.FileStore(basedir),
+  );
 
+  var server = await app.serve('0.0.0.0', 4000);
+  print('Serving at http://${server.address.host}:${server.port}');
+}
 ```
 
 ## License

@@ -5,10 +5,10 @@ import 'package:unpub/src/models.dart';
 final packageCollection = 'packages';
 final statsCollection = 'stats';
 
-class UnpubMetaStore {
+class MetaStore {
   Db db;
 
-  UnpubMetaStore(String uri) : db = Db(uri);
+  MetaStore(String uri) : db = Db(uri);
 
   Future<UnpubPackage> _queryPackage(String package) async {
     var map = await db

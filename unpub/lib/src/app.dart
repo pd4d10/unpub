@@ -38,11 +38,11 @@ shelf.Response _badRequest(String message, {int status = 400}) =>
         }),
         headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
 
-class UnpubApp {
+class App {
   static var _httpClient = http.Client();
 
-  final UnpubMetaStore metaStore;
-  final UnpubPackageStore packageStore;
+  final MetaStore metaStore;
+  final PackageStore packageStore;
   final String proxyUrl;
   final Future<String> Function(String token) uploaderEmailGetter;
   final Future<void> Function(dynamic pubspecJson, String email)
@@ -56,7 +56,7 @@ class UnpubApp {
 
   static Future<void> defaultUploadValidator(_, __) async {}
 
-  UnpubApp({
+  App({
     this.metaStore,
     this.packageStore,
     this.proxyUrl = 'https://pub.dev',
@@ -109,7 +109,7 @@ class UnpubApp {
     return ua != null && ua.toLowerCase().contains('dart pub');
   }
 
-  Router get router => _$UnpubAppRouter(this);
+  Router get router => _$AppRouter(this);
 
   @Route.get('/api/packages/<name>')
   Future<shelf.Response> getVersions(shelf.Request req, String name) async {
