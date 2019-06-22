@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:angular/core.dart';
 import 'src/routes.dart';
+import 'package:unpub_api/models.dart';
 
 @Injectable()
 class AppService {
@@ -22,14 +23,17 @@ class AppService {
     return data['data'];
   }
 
-  Future fetchPackages({int size, int page, String sort, String q}) {
-    return _fetch(
+  Future<List<WebapiListView>> fetchPackages(
+      {int size, int page, String sort, String q}) async {
+    var res = await _fetch(
         '/webapi/packages', {'size': size, 'page': page, 'sort': sort, 'q': q});
+    return (res as List).map((item) => WebapiListView.fromJson(item)).toList();
   }
 
-  Future fetchPackage(String name, String version) async {
+  Future<WebapiDetailView> fetchPackage(String name, String version) async {
     version = version ?? 'latest';
-    return _fetch('/webapi/package/$name/$version');
+    var res = await _fetch('/webapi/package/$name/$version');
+    return WebapiDetailView.fromJson(res);
   }
 
   getDetailUrl(package) {

@@ -1,0 +1,4 @@
+name: unpub_api
+
+environment:
+  sdk: ">=2.3.0 <3.0.0"

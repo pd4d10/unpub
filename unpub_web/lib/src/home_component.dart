@@ -3,6 +3,7 @@ import 'package:angular/angular.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:unpub_web/app_service.dart';
 import 'routes.dart';
+import 'package:unpub_api/models.dart';
 
 @Component(
   selector: 'home',
@@ -14,7 +15,7 @@ import 'routes.dart';
 class HomeComponent implements OnInit {
   final AppService appService;
 
-  List packages = [];
+  List<WebapiListView> packages = [];
   HomeComponent(this.appService);
 
   @override
@@ -22,7 +23,7 @@ class HomeComponent implements OnInit {
     packages = await appService.fetchPackages(size: 15);
   }
 
-  getDetailUrl(package) {
-    return RoutePaths.detail.toUrl(parameters: {'name': package['name']});
+  getDetailUrl(WebapiListView package) {
+    return RoutePaths.detail.toUrl(parameters: {'name': package.name});
   }
 }

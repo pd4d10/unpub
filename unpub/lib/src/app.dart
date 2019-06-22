@@ -11,6 +11,7 @@ import 'package:pub_semver/pub_semver.dart' as semver;
 import 'package:yaml/yaml.dart';
 import 'package:archive/archive.dart';
 import 'package:unpub/src/models.dart';
+import 'package:unpub/unpub_api/lib/models.dart';
 import 'package:unpub/src/meta_store.dart';
 import 'package:unpub/src/package_store.dart';
 import 'static/index.html.dart' as index_html;
@@ -389,12 +390,37 @@ class App {
       return _ok({'error': 'package not exists'});
     }
 
+    var pubspec = packageVersion.pubspec;
+    List<String> authors;
+    if (pubspec['author'] != null) {
+      authors = RegExp(r'<(.*?)>')
+          .allMatches(pubspec['author'])
+          .map((match) => match.group(1))
+          .toList();
+    } else if (pubspec['authors'] != null) {
+      authors = (pubspec['authors'] as List)
+          .map((author) => RegExp(r'<(.*?)>').firstMatch(author).group(1))
+          .toList();
+    } else {
+      authors = [];
+    }
+
+    var depMap = (pubspec['dependencies'] as Map).cast<String, String>() ?? {};
+
     var data = WebapiDetailView(
       package.name,
-      packageVersion,
+      packageVersion.version,
+      packageVersion.pubspec['description'] ?? '',
+      packageVersion.pubspec['homepage'] ?? '',
+      package.uploaders,
+      packageVersion.createdAt,
+      packageVersion.readme,
+      packageVersion.changelog,
       package.versions
           .map((v) => DetailViewVersion(v.version, v.createdAt))
           .toList(),
+      authors,
+      depMap.keys.toList(),
     );
 
     return _ok({'data': data.toJson()});

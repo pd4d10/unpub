@@ -4,14 +4,14 @@
   <ul class="package-list">
     <li class="list-item -full" *ngFor="let package of packages">
       <h3 class="title">
-        <a [routerLink]="getDetailUrl(package)">{{ package["name"] }}</a>
+        <a [routerLink]="getDetailUrl(package)">{{ package.name }}</a>
       </h3>
-      <p class="description">{{ package["description"] }}</p>
+      <p class="description">{{ package.description }}</p>
       <p class="metadata">
-        v <a [routerLink]="getDetailUrl(package)">{{ package["latest"] }}</a>
+        v <a [routerLink]="getDetailUrl(package)">{{ package.latest }}</a>
 
-        • Updated: <span>{{ package["updateAt"] }}</span>
-        <span class="package-tag" *ngFor="let tag of package['tags']">{{
+        • Updated: <span>{{ package.updatedAt }}</span>
+        <span class="package-tag" *ngFor="let tag of package.tags">{{
           tag
         }}</span>
       </p>

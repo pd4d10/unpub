@@ -1,8 +1,8 @@
 <main *ngIf="package != null">
   <div class="package-header">
-    <h2 class="title">{{ name }} {{ version }}</h2>
+    <h2 class="title">{{ package.name }} {{ package.version }}</h2>
     <div class="metadata">
-      Published <span>{{ createdAt }}</span>
+      Published <span>{{ package.createdAt }}</span>
       <div class="tags">
         <a
           class="package-tag"
@@ -53,7 +53,7 @@
         [ngClass]="{ '-active': activeTab == 1 }"
         [innerHtml]="changelogHtml"
       ></section>
-      <section class="content">
+      <section class="content" [ngClass]="{ '-active': activeTab == 2 }">
         <table class="version-table">
           <thead>
             <tr>
@@ -64,26 +64,26 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of versions">
+            <tr *ngFor="let item of package.versions">
               <td>
                 <strong
-                  ><a href="/packages/{{ name }}/versions/{{ item.version }}">{{
-                    version
+                  ><a [routerLink]="getDetailUrl(package.name, item.version)">{{
+                    item.version
                   }}</a></strong
                 >
               </td>
               <td>Jun 4, 2019</td>
               <td class="documentation">
                 <a
-                  href="/documentation/{{ name }}/{{ item.version }}/"
+                  href="/documentation/{{ package.name }}/{{ item.version }}/"
                   rel="nofollow"
-                  title="Go to the documentation of {{ name }} {{
+                  title="Go to the documentation of {{ package.name }} {{
                     item.version
                   }}"
                 >
                   <img
                     src="/static/img/ic_drive_document_black_24dp.svg"
-                    alt="Go to the documentation of {{ name }} {{
+                    alt="Go to the documentation of {{ package.name }} {{
                       item.version
                     }}"
                   />
@@ -91,12 +91,12 @@
               </td>
               <td class="archive">
                 <a
-                  href="/packages/{{ name }}-{{ item.version }}.tar.gz"
-                  title="Download {{ name }} {{ item.version }} archive"
+                  href="/packages/{{ package.name }}-{{ item.version }}.tar.gz"
+                  title="Download {{ package.name }} {{ item.version }} archive"
                 >
                   <img
                     src="/static/img/ic_get_app_black_24dp.svg"
-                    alt="Download {{ name }} {{ item.version }} archive"
+                    alt="Download {{ package.name }} {{ item.version }} archive"
                   />
                 </a>
               </td>
@@ -105,8 +105,8 @@
         </table>
 
         <p>
-          <a href="/packages/{{ name }}/versions"
-            >All {{ versions.length }} versions...</a
+          <a [routerLink]="getListUrl(package.name)"
+            >All {{ package.versions.length }} versions...</a
           >
         </p>
       </section>
@@ -114,54 +114,54 @@
 
     <aside class="sidebar sidebar-content">
       <h3 class="title">About</h3>
-      <p>{{ pubspec["description"] }}</p>
+      <p>{{ package.description }}</p>
       <p>
-        <a class="link" href="{{ pubspec['homepage'] }}">Homepage</a><br />
+        <a class="link" href="{{ package.homepage }}">Homepage</a><br />
         <a
           class="link"
-          href="/documentation/{{ name }}/{{ pubspec['version'] }}/"
+          href="/documentation/{{ package.name }}/{{ package.version }}/"
           >API reference</a
         ><br />
       </p>
 
       <h3 class="title">Author</h3>
       <div>
-        <span class="author" *ngFor="let author of authors">
+        <div class="author" *ngFor="let author of package.authors">
           <a
             href="/packages?q=email:{{ author }}"
             title="Search packages with {{ author }}"
             rel="nofollow"
             ><i class="search-icon"></i
           ></a>
-          {{ author }}</span
-        >
+          {{ author }}
+        </div>
       </div>
 
       <h3 class="title">Uploader</h3>
-      <p>
-        <span class="author" *ngFor="let author of uploaders">
+      <div>
+        <div class="author" *ngFor="let email of package.uploaders">
           <a
-            href="/packages?q=email:{{ author }}"
-            title="Search packages with {{ author }}"
+            href="/packages?q=email:{{ email }}"
+            title="Search packages with {{ email }}"
             rel="nofollow"
             ><i class="search-icon"></i
           ></a>
-          {{ author }}</span
-        >
-      </p>
+          {{ email }}
+        </div>
+      </div>
 
       <h3 class="title">Dependencies</h3>
       <p>
-        <a *ngFor="let dep of dependencies" href="/packages/{{ dep }}">{{
-          dep
-        }}</a
-        >,
+        <span *ngFor="let dep of package.dependencies; let isLast = last">
+          <a [routerLink]="getDetailUrl(dep)">{{ dep }}</a
+          >{{ isLast ? "" : ", " }}
+        </span>
       </p>
 
       <h3 class="title">More</h3>
       <p>
-        <a href="/packages?q=dependency%3A{{ name }}" rel="nofollow"
-          >Packages that depend on {{ name }}</a
+        <a href="/packages?q=dependency%3A{{ package.name }}" rel="nofollow"
+          >Packages that depend on {{ package.name }}</a
         >
       </p>
     </aside>
