@@ -3,8 +3,8 @@ services:
 language: dart
 dart:
   - stable
-before_script:
-  - sleep 15
+before_install:
+  - sleep 15 # Waiting mongodb service up
   - mkdir -p ~/.pub-cache
   - echo $PUB_CREDENTIALS > ~/.pub-cache/credentials.json
   - cd unpub
