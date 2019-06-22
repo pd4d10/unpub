@@ -20,9 +20,8 @@ Router _$AppRouter(App service) {
   router.add('POST', '/api/packages/<name>/uploaders', service.addUploader);
   router.add('DELETE', '/api/packages/<name>/uploaders/<email>',
       service.removeUploader);
-  router.add('GET', '/webapi/top', service.getTopPackages);
-  router.add('GET', '/webapi/detail/<name>', service.getPackageDetail);
-  router.add('GET', '/webapi/search', service.search);
+  router.add('GET', '/webapi/packages', service.getTopPackages);
+  router.add('GET', '/webapi/package/<name>', service.getPackageDetail);
   router.add('GET', '/', service.indexHtml);
   router.add('GET', '/packages', service.indexHtml);
   router.add('GET', '/packages/<name>', service.indexHtml);

@@ -8,8 +8,6 @@ import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:pub_semver/pub_semver.dart' as semver;
-import 'package:unpub/src/api/models.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:yaml/yaml.dart';
 import 'package:archive/archive.dart';
 import 'package:unpub/src/models.dart';
@@ -340,106 +338,47 @@ class App {
     return _successMessage('uploader removed');
   }
 
-  @Route.get('/webapi/top')
+  @Route.get('/webapi/packages')
   Future<shelf.Response> getTopPackages(shelf.Request req) async {
-    var packageNames = await metaStore.db
-        .collection(statsCollection)
-        .find(where.limit(15).sortBy('download', descending: true))
-        .map((item) => item['name'] as String)
-        .toList();
+    var params = req.requestedUri.queryParameters;
+    var size = int.tryParse(params['size'] ?? '') ?? 10;
+    var page = int.tryParse(params['page'] ?? '') ?? 0;
+    var sort = params['sort'] ?? 'download';
+    var q = params['q'];
 
-    var map = packageNames.asMap().map((key, value) => MapEntry(value, key));
+    var packages = await metaStore.queryPackages(size, page, sort, q);
+    var data = packages.map((package) {
+      var latest = package.versions.last;
 
-    var packages = await metaStore.db.collection(packageCollection).find({
-      '\$or': packageNames.map((name) => {'name': name}).toList()
-    }).map((item) {
-      var versions = item['versions'] as List;
-      List<String> tags = ['flutter', 'web', 'other'];
-      if (versions.last['pubspec']['flutter'] != null) {
+      // TODO: web and other tags
+      List<String> tags;
+      if (latest.pubspec['flutter'] != null) {
         tags = ['flutter'];
+      } else {
+        tags = ['flutter', 'web', 'other'];
       }
 
-      return PackageView(
-        item['name'] as String,
-        versions.last['pubspec']['description'] as String,
+      return webapiListView(
+        package.name,
+        latest.pubspec['description'] as String,
         tags,
-        versions.last['version'],
-        versions.last['createAt'],
-      );
+        latest.version,
+        latest.createdAt,
+      ).toJson();
     }).toList();
 
-    packages.sort((a, b) => map[a.name].compareTo(map[b.name]));
-
-    return _ok({
-      'data': packages.map((item) => item.toJson()).toList(),
-    });
+    return _ok({'data': data});
   }
 
-  @Route.get('/webapi/detail/<name>')
+  @Route.get('/webapi/package/<name>')
   Future<shelf.Response> getPackageDetail(
       shelf.Request req, String name) async {
-    var version = req.requestedUri.queryParameters['version'];
-
-    var package = await metaStore.db
-        .collection(packageCollection)
-        .findOne(where.eq('name', name));
+    var package = await metaStore.queryPackage(name);
     if (package == null) {
       return _ok({'error': 'package not exists'});
     }
 
-    var versions = (package['versions'] as List);
-
-    var packageVersion = version == null
-        ? versions.last
-        : versions.firstWhere((item) => item['version'] == version,
-            orElse: () => null);
-
-    if (packageVersion == null) {
-      return _ok({'error': 'version not exists'});
-    }
-
-    var data = DetailView(
-      package['name'] as String,
-      packageVersion['version'] as String,
-      packageVersion['createAt'] as DateTime,
-      packageVersion['pubspec'],
-      (package['uploaders'] as List).cast<String>(),
-      packageVersion['readme'],
-      packageVersion['changelog'],
-      versions
-          .map((item) => DetailViewVersion(
-              item['version'] as String, item['createAt'] as DateTime))
-          .toList(),
-    );
-
-    return _ok({'data': data.toJson()});
-  }
-
-  @Route.get('/webapi/search')
-  Future<shelf.Response> search(shelf.Request req) async {
-    var params = req.requestedUri.queryParameters;
-    var q = params['q'];
-    var page = int.tryParse(params['page'] ?? '') ?? 1;
-    // var sort = params['sort'] ?? 'download';
-    var size = int.tryParse(params['size'] ?? '') ?? 10;
-
-    if (q == null || q.isEmpty) {
-      return _badRequest('No search keyword provided');
-    }
-
-    var packages = await metaStore.db
-        .collection(packageCollection)
-        .find(where.match('name', '.*$q.*').skip(size * (page - 1)).limit(size)
-            // .sortBy('download'),
-            )
-        .map((package) {
-      package.remove('versions');
-      return package;
-    }).toList();
-
-    return _ok({
-      'data': packages,
-    });
+    return _ok({'data': package.toJson()});
   }
 
   @Route.get('/')

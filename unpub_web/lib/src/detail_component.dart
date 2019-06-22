@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:angular/angular.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:unpub_web/app_service.dart';
-import 'package:unpub_web/src/api/models.dart';
 import 'routes.dart';
 
 @Component(
@@ -15,32 +14,41 @@ import 'routes.dart';
 class DetailComponent implements OnInit {
   final AppService appService;
 
-  DetailView package;
+  Map<String, dynamic> package;
   int activeTab = 0;
   DetailComponent(this.appService);
 
+  get name => package['name'];
+  get version => package['version'];
+  get createdAt => package['createdAt'];
+  get pubspec => package['pubspec'];
+  get versions => package['versions'];
+  get readme => package['readme'];
+  get changelog => package['changelog'];
+  get uploaders => package['uploaders'];
+
   get authors {
-    if (package.pubspec['author'] != null) {
-      return [package.pubspec['author']];
+    if (pubspec['author'] != null) {
+      return [pubspec['author']];
     }
-    if (package.pubspec['authors'] != null) {
-      return package.pubspec['authors'];
+    if (pubspec['authors'] != null) {
+      return pubspec['authors'];
     }
     return [];
   }
 
   get dependencies {
-    var deps = (package.pubspec['dependencies'] as Map).cast<String, String>();
+    var deps = (pubspec['dependencies'] as Map).cast<String, String>();
     if (deps == null) return [];
     return deps.keys;
   }
 
   @override
   Future<Null> ngOnInit() async {
-    package = await appService.fetchDetail('router', '0.2.6');
+    package = await appService.fetchPackage('router');
   }
 
-  getDetailUrl(PackageView package) {
-    return RoutePaths.detail.toUrl(parameters: {'name': package.name});
+  getDetailUrl(package) {
+    return RoutePaths.detail.toUrl(parameters: {'name': package['name']});
   }
 }

@@ -74,8 +74,8 @@ main() {
       expect(meta['versions'], hasLength(1));
 
       var item = meta['versions'][0];
-      expect(item['createAt'], isA<DateTime>());
-      item.remove('createAt');
+      expect(item['createdAt'], isA<DateTime>());
+      item.remove('createdAt');
       expect(
         DeepCollectionEquality().equals(item, {
           'version': version,
@@ -125,8 +125,8 @@ main() {
       expect(meta['versions'][1]['version'], '0.0.3');
 
       var item = meta['versions'][2];
-      expect(item['createAt'], isA<DateTime>());
-      item.remove('createAt');
+      expect(item['createdAt'], isA<DateTime>());
+      item.remove('createdAt');
       expect(
         DeepCollectionEquality().equals(item, {
           'version': version,

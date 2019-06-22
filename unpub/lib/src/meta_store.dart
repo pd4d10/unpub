@@ -72,4 +72,23 @@ class MetaStore {
         },
         upsert: true);
   }
+
+  Future<List<UnpubPackage>> queryPackages(
+      int size, int page, String sort, String q) async {
+    var selector =
+        where.sortBy(sort, descending: true).limit(size).skip(page * size);
+    if (q != null) {
+      selector = selector.match('name', '.*$q.*');
+    }
+
+    var packageNames = await db
+        .collection(statsCollection)
+        .find(selector)
+        .map((item) => item['name'] as String)
+        .toList();
+
+    var packages =
+        await Future.wait(packageNames.map((name) => queryPackage(name)));
+    return packages;
+  }
 }
