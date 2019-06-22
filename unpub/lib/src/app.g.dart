@@ -23,5 +23,10 @@ Router _$UnpubAppRouter(UnpubApp service) {
   router.add('GET', '/webapi/top', service.getTopPackages);
   router.add('GET', '/webapi/detail/<name>', service.getPackageDetail);
   router.add('GET', '/webapi/search', service.search);
+  router.add('GET', '/', service.indexHtml);
+  router.add('GET', '/packages', service.indexHtml);
+  router.add('GET', '/packages/<name>', service.indexHtml);
+  router.add('GET', '/main.dart.js', service.mainDartJs);
+  router.add('GET', '/styles.css', service.stylesCss);
   return router;
 }
