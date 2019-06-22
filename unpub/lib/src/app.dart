@@ -14,6 +14,7 @@ import 'package:unpub/src/models.dart';
 import 'package:unpub/unpub_api/lib/models.dart';
 import 'package:unpub/src/meta_store.dart';
 import 'package:unpub/src/package_store.dart';
+import 'utils.dart';
 import 'static/index.html.dart' as index_html;
 import 'static/main.dart.js.dart' as main_dart_js;
 import 'static/styles.css.dart' as styles_css;
@@ -351,18 +352,10 @@ class App {
     var data = packages.map((package) {
       var latest = package.versions.last;
 
-      // TODO: web and other tags
-      List<String> tags;
-      if (latest.pubspec['flutter'] != null) {
-        tags = ['flutter'];
-      } else {
-        tags = ['flutter', 'web', 'other'];
-      }
-
       return WebapiListView(
         package.name,
         latest.pubspec['description'] as String,
-        tags,
+        getPackageTags(latest.pubspec),
         latest.version,
         latest.createdAt,
       ).toJson();
@@ -390,6 +383,14 @@ class App {
       return _ok({'error': 'package not exists'});
     }
 
+    var versions = package.versions
+        .map((v) => DetailViewVersion(v.version, v.createdAt))
+        .toList();
+    versions.sort((a, b) {
+      return semver.Version.prioritize(
+          semver.Version.parse(b.version), semver.Version.parse(a.version));
+    });
+
     var pubspec = packageVersion.pubspec;
     List<String> authors;
     if (pubspec['author'] != null) {
@@ -416,11 +417,10 @@ class App {
       packageVersion.createdAt,
       packageVersion.readme,
       packageVersion.changelog,
-      package.versions
-          .map((v) => DetailViewVersion(v.version, v.createdAt))
-          .toList(),
+      versions,
       authors,
       depMap.keys.toList(),
+      getPackageTags(packageVersion.pubspec),
     );
 
     return _ok({'data': data.toJson()});

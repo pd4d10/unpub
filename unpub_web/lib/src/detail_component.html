@@ -4,12 +4,9 @@
     <div class="metadata">
       Published <span>{{ package.createdAt }}</span>
       <div class="tags">
-        <a
-          class="package-tag"
-          href="/flutter/packages"
-          title="Compatible with the Flutter platform."
-          >Flutter</a
-        >
+        <span class="package-tag" *ngFor="let tag of package.tags">{{
+          tag
+        }}</span>
       </div>
     </div>
   </div>
@@ -72,7 +69,7 @@
                   }}</a></strong
                 >
               </td>
-              <td>Jun 4, 2019</td>
+              <td>{{ item.createdAt }}</td>
               <td class="documentation">
                 <a
                   href="/documentation/{{ package.name }}/{{ item.version }}/"
@@ -82,7 +79,7 @@
                   }}"
                 >
                   <img
-                    src="/static/img/ic_drive_document_black_24dp.svg"
+                    src="https://pub.dev/static/img/ic_drive_document_black_24dp.svg"
                     alt="Go to the documentation of {{ package.name }} {{
                       item.version
                     }}"
@@ -95,7 +92,7 @@
                   title="Download {{ package.name }} {{ item.version }} archive"
                 >
                   <img
-                    src="/static/img/ic_get_app_black_24dp.svg"
+                    src="https://pub.dev/static/img/ic_get_app_black_24dp.svg"
                     alt="Download {{ package.name }} {{ item.version }} archive"
                   />
                 </a>
@@ -103,12 +100,6 @@
             </tr>
           </tbody>
         </table>
-
-        <p>
-          <a [routerLink]="getListUrl(package.name)"
-            >All {{ package.versions.length }} versions...</a
-          >
-        </p>
       </section>
     </div>
 

@@ -16,3 +16,12 @@ Map<String, dynamic> loadYamlAsMap(dynamic value) {
   var yamlMap = loadYaml(value) as YamlMap;
   return convertYaml(yamlMap).cast<String, dynamic>();
 }
+
+List<String> getPackageTags(Map<String, dynamic> pubspec) {
+  // TODO: web and other tags
+  if (pubspec['flutter'] != null) {
+    return ['flutter'];
+  } else {
+    return ['flutter', 'web', 'other'];
+  }
+}

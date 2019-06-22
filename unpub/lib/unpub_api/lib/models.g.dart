@@ -58,7 +58,8 @@ WebapiDetailView _$WebapiDetailViewFromJson(Map<String, dynamic> json) {
               : DetailViewVersion.fromJson(e as Map<String, dynamic>))
           ?.toList(),
       (json['authors'] as List)?.map((e) => e as String)?.toList(),
-      (json['dependencies'] as List)?.map((e) => e as String)?.toList());
+      (json['dependencies'] as List)?.map((e) => e as String)?.toList(),
+      (json['tags'] as List)?.map((e) => e as String)?.toList());
 }
 
 Map<String, dynamic> _$WebapiDetailViewToJson(WebapiDetailView instance) =>
@@ -73,5 +74,6 @@ Map<String, dynamic> _$WebapiDetailViewToJson(WebapiDetailView instance) =>
       'changelog': instance.changelog,
       'versions': instance.versions,
       'authors': instance.authors,
-      'dependencies': instance.dependencies
+      'dependencies': instance.dependencies,
+      'tags': instance.tags
     };

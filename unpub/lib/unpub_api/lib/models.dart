@@ -45,6 +45,7 @@ class WebapiDetailView {
   List<DetailViewVersion> versions;
   List<String> authors;
   List<String> dependencies;
+  List<String> tags;
 
   WebapiDetailView(
       this.name,
@@ -57,7 +58,8 @@ class WebapiDetailView {
       this.changelog,
       this.versions,
       this.authors,
-      this.dependencies);
+      this.dependencies,
+      this.tags);
 
   factory WebapiDetailView.fromJson(Map<String, dynamic> map) =>
       _$WebapiDetailViewFromJson(map);

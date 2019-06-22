@@ -6,9 +6,9 @@ import 'package:unpub_web/src/routes.dart';
   selector: 'my-app',
   styleUrls: ['app_component.css'],
   templateUrl: 'app_component.html',
-  directives: [RouterOutlet],
+  directives: [RouterOutlet, RouterLink],
   exports: [RoutePaths, Routes],
 )
 class AppComponent {
-  // Nothing here yet. All logic is in TodoListComponent.
+  String get homeUrl => RoutePaths.home.toUrl();
 }
