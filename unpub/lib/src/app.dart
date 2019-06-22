@@ -48,20 +48,20 @@ class App {
   final Future<void> Function(dynamic pubspecJson, String email)
       uploadValidator;
 
-  static Future<String> defaultUploaderEmailGetter(String token) async {
+  static Future<String> _uploaderEmailGetter(String token) async {
     var info = await Oauth2Api(_httpClient).tokeninfo(accessToken: token);
     if (info == null) return null;
     return info.email;
   }
 
-  static Future<void> defaultUploadValidator(_, __) async {}
+  static Future<void> _uploadValidator(_, __) async {}
 
   App({
     this.metaStore,
     this.packageStore,
     this.proxyUrl = 'https://pub.dev',
-    this.uploaderEmailGetter = defaultUploaderEmailGetter,
-    this.uploadValidator = defaultUploadValidator,
+    this.uploaderEmailGetter = _uploaderEmailGetter,
+    this.uploadValidator = _uploadValidator,
   });
 
   Future<HttpServer> serve([String host = '0.0.0.0', int port = 4000]) async {
@@ -113,9 +113,9 @@ class App {
 
   @Route.get('/api/packages/<name>')
   Future<shelf.Response> getVersions(shelf.Request req, String name) async {
-    var versions = await metaStore.getAllVersions(name).toList();
+    var package = await metaStore.queryPackage(name);
 
-    if (versions.isEmpty) {
+    if (package == null) {
       var res = await _httpClient.send(http.Request(
           'GET', Uri.parse(proxyUrl).resolve('/api/packages/$name')));
       return shelf.Response(res.statusCode,
@@ -123,17 +123,18 @@ class App {
           body: res.stream);
     }
 
-    versions.sort((a, b) {
+    package.versions.sort((a, b) {
       return semver.Version.prioritize(
           semver.Version.parse(a.version), semver.Version.parse(b.version));
     });
 
-    var versionMaps =
-        versions.map((item) => _versionToJson(item, req.requestedUri)).toList();
+    var versionMaps = package.versions
+        .map((item) => _versionToJson(item, req.requestedUri))
+        .toList();
 
     return _ok({
       'name': name,
-      'latest': versionMaps.last,
+      'latest': versionMaps.last, // TODO: Exclude pre release
       'versions': versionMaps,
     });
   }
@@ -148,8 +149,7 @@ class App {
       print(err);
     }
 
-    var item = await metaStore.getVersion(name, version);
-
+    var item = await metaStore.queryPackageVersion(name, version);
     if (item == null) {
       var res = await _httpClient.send(http.Request(
           'GET',
@@ -166,7 +166,7 @@ class App {
   @Route.get('/packages/<name>/versions/<version>.tar.gz')
   Future<shelf.Response> download(
       shelf.Request req, String name, String version) async {
-    var item = await metaStore.getVersion(name, version);
+    var item = await metaStore.queryPackageVersion(name, version);
 
     Stream<List<int>> stream;
 
@@ -252,24 +252,24 @@ class App {
       var name = pubspec['name'] as String;
       var version = pubspec['version'] as String;
 
-      var duplicatedVersion = await metaStore.getAllVersions(name).firstWhere(
-            (item) => version == item.version,
-            orElse: () => null,
-          );
+      var package = await metaStore.queryPackage(name);
 
-      if (duplicatedVersion != null) {
-        throw 'version invalid: $name@$version already exists.';
-      }
-
-      var packageEmpty = await metaStore.getAllVersions(name).isEmpty;
-      if (!packageEmpty) {
-        var uploaders = await metaStore.getUploaders(name).toList();
-        if (!uploaders.contains(email)) {
+      // Package already exists
+      if (package != null) {
+        // Check uploaders
+        if (!package.uploaders.contains(email)) {
           throw 'UnauthorizedAccess';
+        }
+
+        // Check duplicated version
+        var duplicated = package.versions
+            .firstWhere((item) => version == item.version, orElse: () => null);
+        if (duplicated != null) {
+          throw 'version invalid: $name@$version already exists.';
         }
       }
 
-      // Upload package tar to storage
+      // Upload package tarball to storage
       await packageStore.upload(name, version, tarballBytes);
 
       String readme;
@@ -280,6 +280,7 @@ class App {
       if (changelogFile != null) {
         changelog = utf8.decode(changelogFile.content);
       }
+
       // Write package meta to database
       await metaStore.addVersion(name,
           UnpubVersion.fromTarball(pubspecYaml, readme, changelog), email);
@@ -308,12 +309,12 @@ class App {
     var body = await req.readAsString();
     var email = Uri.splitQueryString(body)['email'];
     var operatorEmail = await _getUploaderEmail(req);
-    var uploaders = await metaStore.getUploaders(name).toList();
+    var package = await metaStore.queryPackage(name);
 
-    if (!uploaders.contains(operatorEmail)) {
+    if (!package.uploaders.contains(operatorEmail)) {
       return _badRequest('no permission', status: 403);
     }
-    if (uploaders.contains(email)) {
+    if (package.uploaders.contains(email)) {
       return _badRequest('email already exists');
     }
 
@@ -326,12 +327,12 @@ class App {
       shelf.Request req, String name, String email) async {
     email = Uri.decodeComponent(email);
     var operatorEmail = await _getUploaderEmail(req);
-    var uploaders = await metaStore.getUploaders(name).toList();
+    var package = await metaStore.queryPackage(name);
 
-    if (!uploaders.contains(operatorEmail)) {
+    if (!package.uploaders.contains(operatorEmail)) {
       return _badRequest('no permission', status: 403);
     }
-    if (!uploaders.contains(email)) {
+    if (!package.uploaders.contains(email)) {
       return _badRequest('email not uploader');
     }
 

@@ -10,22 +10,19 @@ class MetaStore {
 
   MetaStore(String uri) : db = Db(uri);
 
-  Future<UnpubPackage> _queryPackage(String package) async {
-    var map = await db
+  Future<UnpubPackage> queryPackage(String package) async {
+    var json = await db
         .collection(packageCollection)
         .findOne(where.eq('name', package));
-    if (map == null) return null;
-    return UnpubPackage.fromJson(map);
+    if (json == null) return null;
+    return UnpubPackage.fromJson(json);
   }
 
-  Stream<UnpubVersion> getAllVersions(String name) async* {
-    var package = await _queryPackage(name);
-    if (package == null) return;
-    yield* Stream.fromIterable(package.versions);
-  }
+  Future<UnpubVersion> queryPackageVersion(String name, String version) async {
+    var package = await queryPackage(name);
+    if (package == null) return null;
 
-  Future<UnpubVersion> getVersion(String package, String version) async {
-    return getAllVersions(package)
+    return package.versions
         .firstWhere((item) => item.version == version, orElse: () => null);
   }
 
@@ -64,11 +61,6 @@ class MetaStore {
           }
         },
         upsert: true);
-  }
-
-  Stream<String> getUploaders(String name) async* {
-    var package = await _queryPackage(name);
-    yield* Stream.fromIterable(package.uploaders);
   }
 
   void increaseDownloadCount(String name) {
