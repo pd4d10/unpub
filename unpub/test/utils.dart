@@ -22,7 +22,7 @@ createServer(String opEmail) async {
   var app = unpub.App(
     metaStore: metaStore,
     packageStore: unpub.FileStore(baseDir),
-    uploaderEmailGetter: (token) async => opEmail,
+    overrideUploaderEmail: opEmail,
   );
 
   var server = await app.serve('0.0.0.0', 4000);

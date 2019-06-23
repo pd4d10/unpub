@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:googleapis/oauth2/v2.dart';
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
@@ -39,30 +41,48 @@ shelf.Response _badRequest(String message, {int status = 400}) =>
         headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
 
 class App {
-  static var _httpClient = http.Client();
-
   final MetaStore metaStore;
   final PackageStore packageStore;
-  final String proxyUrl;
-  final Future<String> Function(String token) uploaderEmailGetter;
+  final String upstream;
+  final String googleapisProxy;
+  final String overrideUploaderEmail;
   final Future<void> Function(dynamic pubspecJson, String email)
       uploadValidator;
 
-  static Future<String> _uploaderEmailGetter(String token) async {
-    var info = await Oauth2Api(_httpClient).tokeninfo(accessToken: token);
+  App({
+    @required this.metaStore,
+    @required this.packageStore,
+    this.upstream = 'https://pub.dev',
+    this.googleapisProxy,
+    this.overrideUploaderEmail,
+    this.uploadValidator,
+  });
+
+  var _httpClient = http.Client();
+  http.Client _googleapisClient;
+
+  Future<String> _getUploaderEmail(shelf.Request req) async {
+    if (overrideUploaderEmail != null) return overrideUploaderEmail;
+
+    var authHeader = req.headers[HttpHeaders.authorizationHeader];
+    if (authHeader == null) return null;
+
+    var token = authHeader.split(' ').last;
+
+    if (_googleapisClient == null) {
+      if (googleapisProxy != null) {
+        _googleapisClient = IOClient(HttpClient()
+          ..findProxy = (url) => HttpClient.findProxyFromEnvironment(url,
+              environment: {"https_proxy": googleapisProxy}));
+      } else {
+        _googleapisClient = http.Client();
+      }
+    }
+
+    var info = await Oauth2Api(_googleapisClient).tokeninfo(accessToken: token);
     if (info == null) return null;
     return info.email;
   }
-
-  static Future<void> _uploadValidator(_, __) async {}
-
-  App({
-    this.metaStore,
-    this.packageStore,
-    this.proxyUrl = 'https://pub.dev',
-    this.uploaderEmailGetter = _uploaderEmailGetter,
-    this.uploadValidator = _uploadValidator,
-  });
 
   Future<HttpServer> serve([String host = '0.0.0.0', int port = 4000]) async {
     var handler = const shelf.Pipeline()
@@ -79,17 +99,6 @@ class App {
     });
     var server = await shelf_io.serve(handler, host, port);
     return server;
-  }
-
-  Future<String> _getUploaderEmail(shelf.Request req) async {
-    var authHeader = req.headers[HttpHeaders.authorizationHeader];
-    if (authHeader == null) {
-      throw 'No auth';
-    }
-
-    var token = authHeader.split(' ').last;
-    var email = await uploaderEmailGetter(token);
-    return email;
   }
 
   Map<String, dynamic> _versionToJson(UnpubVersion item, Uri baseUri) {
@@ -117,7 +126,7 @@ class App {
 
     if (package == null) {
       var res = await _httpClient.send(http.Request(
-          'GET', Uri.parse(proxyUrl).resolve('/api/packages/$name')));
+          'GET', Uri.parse(upstream).resolve('/api/packages/$name')));
       return shelf.Response(res.statusCode,
           headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType},
           body: res.stream);
@@ -153,7 +162,7 @@ class App {
     if (item == null) {
       var res = await _httpClient.send(http.Request(
           'GET',
-          Uri.parse(proxyUrl)
+          Uri.parse(upstream)
               .resolve('/api/packages/$name/versions/$version')));
       return shelf.Response(res.statusCode,
           headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType},
@@ -173,7 +182,7 @@ class App {
     if (item == null) {
       var res = await _httpClient.send(http.Request(
           'GET',
-          Uri.parse(proxyUrl)
+          Uri.parse(upstream)
               .resolve('/packages/$name/versions/$version.tar.gz')));
       stream = res.stream;
     } else {
@@ -243,11 +252,11 @@ class App {
       }
 
       var pubspecYaml = utf8.decode(pubspecArchiveFile.content);
-      // TODO: Error handling.
       var pubspec = loadYaml(pubspecYaml);
 
-      // Validator
-      await uploadValidator(pubspec, email);
+      if (uploadValidator != null) {
+        await uploadValidator(pubspec, email);
+      }
 
       var name = pubspec['name'] as String;
       var version = pubspec['version'] as String;
