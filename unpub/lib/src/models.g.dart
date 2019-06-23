@@ -13,6 +13,7 @@ UnpubVersion _$UnpubVersionFromJson(Map<String, dynamic> json) {
       json['pubspecYaml'] as String,
       json['readme'] as String,
       json['changelog'] as String,
+      json['uploader'] as String,
       json['createdAt'] == null
           ? null
           : identity(json['createdAt'] as DateTime));
@@ -32,6 +33,7 @@ Map<String, dynamic> _$UnpubVersionToJson(UnpubVersion instance) {
   writeNotNull('pubspecYaml', instance.pubspecYaml);
   writeNotNull('readme', instance.readme);
   writeNotNull('changelog', instance.changelog);
+  writeNotNull('uploader', instance.uploader);
   writeNotNull('createdAt',
       instance.createdAt == null ? null : identity(instance.createdAt));
   return val;

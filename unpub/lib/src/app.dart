@@ -283,7 +283,7 @@ class App {
 
       // Write package meta to database
       await metaStore.addVersion(name,
-          UnpubVersion.fromTarball(pubspecYaml, readme, changelog), email);
+          UnpubVersion.fromTarball(pubspecYaml, readme, changelog, email));
 
       // TODO: Upload docs
       return shelf.Response.found(req.requestedUri

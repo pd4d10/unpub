@@ -13,6 +13,7 @@ class UnpubVersion {
   final String pubspecYaml;
   final String readme;
   final String changelog;
+  final String uploader;
 
   @JsonKey(fromJson: identity, toJson: identity)
   final DateTime createdAt;
@@ -23,6 +24,7 @@ class UnpubVersion {
     this.pubspecYaml,
     this.readme,
     this.changelog,
+    this.uploader,
     this.createdAt,
   );
 
@@ -30,7 +32,7 @@ class UnpubVersion {
       _$UnpubVersionFromJson(map);
 
   factory UnpubVersion.fromTarball(
-      String pubspecYaml, String readme, String changelog) {
+      String pubspecYaml, String readme, String changelog, String uploader) {
     var pubspec = loadYamlAsMap(pubspecYaml);
 
     return UnpubVersion(
@@ -39,6 +41,7 @@ class UnpubVersion {
       pubspecYaml,
       readme,
       changelog,
+      uploader,
       DateTime.now(),
     );
   }

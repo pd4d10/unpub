@@ -26,8 +26,7 @@ class MetaStore {
         .firstWhere((item) => item.version == version, orElse: () => null);
   }
 
-  Future<void> addVersion(
-      String name, UnpubVersion version, String uploaderEmail) async {
+  Future<void> addVersion(String name, UnpubVersion version) async {
     await db.collection(packageCollection).update(
         where.eq('name', name),
         {
@@ -35,7 +34,7 @@ class MetaStore {
             'versions': version.toJson(),
           },
           '\$addToSet': {
-            'uploaders': uploaderEmail,
+            'uploaders': version.uploader,
           }
         },
         upsert: true);

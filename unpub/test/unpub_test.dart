@@ -83,7 +83,8 @@ main() {
           'pubspec':
               loadYamlAsMap(await _readFile(package0, version, 'pubspec.yaml')),
           'readme': await _readFile(package0, version, 'README.md'),
-          'changelog': await _readFile(package0, version, 'CHANGELOG.md')
+          'changelog': await _readFile(package0, version, 'CHANGELOG.md'),
+          'uploader': email0,
         }),
         true,
       );
@@ -133,6 +134,7 @@ main() {
           'pubspecYaml': await _readFile(package0, version, 'pubspec.yaml'),
           'pubspec':
               loadYamlAsMap(await _readFile(package0, version, 'pubspec.yaml')),
+          'uploader': email0,
         }),
         true,
       );
