@@ -11,14 +11,14 @@ import 'package:unpub_api/models.dart';
   directives: [routerDirectives, coreDirectives],
   exports: [RoutePaths],
 )
-class HomeComponent implements OnInit {
+class HomeComponent implements OnActivate {
   final AppService appService;
 
   ListApi data;
   HomeComponent(this.appService);
 
   @override
-  Future<Null> ngOnInit() async {
+  void onActivate(RouterState previous, RouterState current) async {
     appService.setLoading(true);
     data = await appService.fetchPackages(size: 15);
     appService.setLoading(false);
