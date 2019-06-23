@@ -12,6 +12,7 @@ class PackageNotExistsException implements Exception {
 @Injectable()
 class AppService {
   bool loading = false;
+  String keyword = '';
 
   void setLoading(bool value) {
     loading = value;
@@ -43,11 +44,11 @@ class AppService {
     return data['data'];
   }
 
-  Future<List<WebapiListView>> fetchPackages(
+  Future<ListApi> fetchPackages(
       {int size, int page, String sort, String q}) async {
     var res = await _fetch(
         '/webapi/packages', {'size': size, 'page': page, 'sort': sort, 'q': q});
-    return (res as List).map((item) => WebapiListView.fromJson(item)).toList();
+    return ListApi.fromJson(res);
   }
 
   Future<WebapiDetailView> fetchPackage(String name, String version) async {

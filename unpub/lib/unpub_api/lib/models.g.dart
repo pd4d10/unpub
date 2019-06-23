@@ -6,8 +6,21 @@ part of 'models.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-WebapiListView _$WebapiListViewFromJson(Map<String, dynamic> json) {
-  return WebapiListView(
+ListApi _$ListApiFromJson(Map<String, dynamic> json) {
+  return ListApi(
+      json['count'] as int,
+      (json['packages'] as List)
+          ?.map((e) => e == null
+              ? null
+              : ListApiPackage.fromJson(e as Map<String, dynamic>))
+          ?.toList());
+}
+
+Map<String, dynamic> _$ListApiToJson(ListApi instance) =>
+    <String, dynamic>{'count': instance.count, 'packages': instance.packages};
+
+ListApiPackage _$ListApiPackageFromJson(Map<String, dynamic> json) {
+  return ListApiPackage(
       json['name'] as String,
       json['description'] as String,
       (json['tags'] as List)?.map((e) => e as String)?.toList(),
@@ -17,7 +30,7 @@ WebapiListView _$WebapiListViewFromJson(Map<String, dynamic> json) {
           : DateTime.parse(json['updatedAt'] as String));
 }
 
-Map<String, dynamic> _$WebapiListViewToJson(WebapiListView instance) =>
+Map<String, dynamic> _$ListApiPackageToJson(ListApiPackage instance) =>
     <String, dynamic>{
       'name': instance.name,
       'description': instance.description,

@@ -8,23 +8,23 @@ import 'package:unpub_api/models.dart';
 @Component(
   selector: 'home',
   templateUrl: 'home_component.html',
-  directives: [NgFor, NgIf, RouterLink],
+  directives: [routerDirectives, coreDirectives],
   exports: [RoutePaths],
 )
 class HomeComponent implements OnInit {
   final AppService appService;
 
-  List<WebapiListView> packages = [];
+  ListApi data;
   HomeComponent(this.appService);
 
   @override
   Future<Null> ngOnInit() async {
     appService.setLoading(true);
-    packages = await appService.fetchPackages(size: 15);
+    data = await appService.fetchPackages(size: 15);
     appService.setLoading(false);
   }
 
-  getDetailUrl(WebapiListView package) {
+  getDetailUrl(ListApiPackage package) {
     return RoutePaths.detail.toUrl(parameters: {'name': package.name});
   }
 }

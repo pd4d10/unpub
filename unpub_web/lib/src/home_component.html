@@ -1,4 +1,4 @@
-<main>
+<main *ngIf="data != null">
   <div class="home-lists-container">
     <div class="landing-page-title-block">
       <div class="tooltip-base hoverable">
@@ -9,7 +9,7 @@
     </div>
 
     <ul class="package-list">
-      <li class="list-item" *ngFor="let package of packages">
+      <li class="list-item" *ngFor="let package of data.packages">
         <h3 class="title">
           <a [routerLink]="getDetailUrl(package)">{{ package.name }}</a>
         </h3>

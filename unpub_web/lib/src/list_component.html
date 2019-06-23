@@ -1,8 +1,8 @@
-<main>
+<main *ngIf="data != null">
   <h2 class="listing-page-title">Top Dart packages</h2>
 
   <ul class="package-list">
-    <li class="list-item -full" *ngFor="let package of packages">
+    <li class="list-item -full" *ngFor="let package of data.packages">
       <h3 class="title">
         <a [routerLink]="getDetailUrl(package)">{{ package.name }}</a>
       </h3>
@@ -18,23 +18,21 @@
     </li>
   </ul>
   <ul class="pagination">
-    <li class="-disabled">
-      <a href="">
+    <li [ngClass]="{ '-disabled': currentPage == 0 }">
+      <a [routerLink]="getListUrl(0)">
         <span>«</span>
       </a>
     </li>
-    <li class="-active">
-      <a href="">
-        <span>1</span>
+    <li
+      [ngClass]="{ '-active': currentPage == page }"
+      *ngFor="let _ of pages; let page = index"
+    >
+      <a [routerLink]="getListUrl(page)">
+        <span>{{ page + 1 }}</span>
       </a>
     </li>
-    <li class="">
-      <a href="/packages?page=2" rel="next">
-        <span>2</span>
-      </a>
-    </li>
-    <li class="">
-      <a href="/packages?page=2">
+    <li [ngClass]="{ '-disabled': currentPage == pages.length }">
+      <a [routerLink]="getListUrl(pages.length)">
         <span>»</span>
       </a>
     </li>

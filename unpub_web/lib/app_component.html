@@ -22,8 +22,9 @@
         placeholder="Search Dart packages"
         autocomplete="on"
         autofocus="autofocus"
+        [(ngModel)]="appService.keyword"
       />
-      <button class="icon"></button>
+      <button class="icon" (click)="submit()"></button>
     </form>
   </main>
 </div>

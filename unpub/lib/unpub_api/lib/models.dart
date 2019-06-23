@@ -3,20 +3,30 @@ import 'package:json_annotation/json_annotation.dart';
 part 'models.g.dart';
 
 @JsonSerializable()
-class WebapiListView {
+class ListApi {
+  int count;
+  List<ListApiPackage> packages;
+
+  ListApi(this.count, this.packages);
+
+  factory ListApi.fromJson(Map<String, dynamic> map) => _$ListApiFromJson(map);
+  Map<String, dynamic> toJson() => _$ListApiToJson(this);
+}
+
+@JsonSerializable()
+class ListApiPackage {
   String name;
   String description;
   List<String> tags;
   String latest;
   DateTime updatedAt;
 
-  WebapiListView(
+  ListApiPackage(
       this.name, this.description, this.tags, this.latest, this.updatedAt);
 
-  factory WebapiListView.fromJson(Map<String, dynamic> map) =>
-      _$WebapiListViewFromJson(map);
-
-  Map<String, dynamic> toJson() => _$WebapiListViewToJson(this);
+  factory ListApiPackage.fromJson(Map<String, dynamic> map) =>
+      _$ListApiPackageFromJson(map);
+  Map<String, dynamic> toJson() => _$ListApiPackageToJson(this);
 }
 
 @JsonSerializable()

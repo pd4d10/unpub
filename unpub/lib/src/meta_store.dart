@@ -27,17 +27,25 @@ class MetaStore {
   }
 
   Future<void> addVersion(String name, UnpubVersion version) async {
-    await db.collection(packageCollection).update(
-        where.eq('name', name),
-        {
-          '\$push': {
-            'versions': version.toJson(),
+    await Future.wait([
+      db.collection(packageCollection).update(
+          where.eq('name', name),
+          {
+            '\$push': {
+              'versions': version.toJson(),
+            },
+            '\$addToSet': {
+              'uploaders': version.uploader,
+            }
           },
-          '\$addToSet': {
-            'uploaders': version.uploader,
-          }
-        },
-        upsert: true);
+          upsert: true),
+      db.collection(statsCollection).update(
+          where.eq('name', name),
+          {
+            '\$setOnInsert': {'download': 0}
+          },
+          upsert: true)
+    ]);
   }
 
   Future<void> addUploader(String name, String email) async {
@@ -72,7 +80,13 @@ class MetaStore {
         upsert: true);
   }
 
-  Future<List<UnpubPackage>> queryPackages(
+  Future<int> queryCount(String q) async {
+    var selector = q == null ? null : where.match('name', '.*$q.*');
+    var count = await db.collection(statsCollection).count(selector);
+    return count;
+  }
+
+  Future<List<UnpubPackage>> querySortedPackages(
       int size, int page, String sort, String q) async {
     var selector =
         where.sortBy(sort, descending: true).limit(size).skip(page * size);

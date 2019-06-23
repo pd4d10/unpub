@@ -9,7 +9,7 @@ import 'package:unpub_api/models.dart';
 @Component(
   selector: 'detail',
   templateUrl: 'detail_component.html',
-  directives: [NgFor, NgIf, NgClass, RouterLink],
+  directives: [routerDirectives, coreDirectives],
   exports: [RoutePaths],
   styles: ['.not-exists { margin-top: 100px }'],
 )

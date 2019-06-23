@@ -348,20 +348,28 @@ class App {
     var sort = params['sort'] ?? 'download';
     var q = params['q'];
 
-    var packages = await metaStore.queryPackages(size, page, sort, q);
-    var data = packages.map((package) {
-      var latest = package.versions.last;
+    var count = await metaStore.queryCount(q);
+    if (count == 0) {
+      return _ok({'data': ListApi(0, []).toJson()});
+    }
 
-      return WebapiListView(
-        package.name,
-        latest.pubspec['description'] as String,
-        getPackageTags(latest.pubspec),
-        latest.version,
-        latest.createdAt,
-      ).toJson();
-    }).toList();
+    var packages = await metaStore.querySortedPackages(size, page, sort, q);
+    var data = ListApi(
+      count,
+      packages.map((package) {
+        var latest = package.versions.last;
 
-    return _ok({'data': data});
+        return ListApiPackage(
+          package.name,
+          latest.pubspec['description'] as String,
+          getPackageTags(latest.pubspec),
+          latest.version,
+          latest.createdAt,
+        );
+      }).toList(),
+    );
+
+    return _ok({'data': data.toJson()});
   }
 
   @Route.get('/webapi/package/<name>/<version>')
