@@ -177,24 +177,28 @@ class App {
       shelf.Request req, String name, String version) async {
     var item = await metaStore.queryPackageVersion(name, version);
 
-    Stream<List<int>> stream;
-
     if (item == null) {
-      var res = await _httpClient.send(http.Request(
-          'GET',
-          Uri.parse(upstream)
-              .resolve('/packages/$name/versions/$version.tar.gz')));
-      stream = res.stream;
-    } else {
-      if (isPubClient(req)) {
-        metaStore.increaseDownloadCount(name);
-      }
-      stream = packageStore.download(name, version);
+      return shelf.Response(HttpStatus.found, headers: {
+        HttpHeaders.locationHeader: Uri.parse(upstream)
+            .resolve('/packages/$name/versions/$version.tar.gz')
+            .toString()
+      });
     }
 
-    return shelf.Response(200,
+    if (isPubClient(req)) {
+      metaStore.increaseDownloadCount(name);
+    }
+    if (packageStore.supportsDownloadUrl) {
+      return shelf.Response(HttpStatus.found, headers: {
+        HttpHeaders.locationHeader: packageStore.downloadUrl(name, version)
+      });
+    } else {
+      return shelf.Response(
+        HttpStatus.ok,
         headers: {HttpHeaders.contentTypeHeader: ContentType.binary.mimeType},
-        body: stream);
+        body: packageStore.download(name, version),
+      );
+    }
   }
 
   @Route.get('/api/packages/versions/new')

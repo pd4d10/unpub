@@ -9,5 +9,5 @@ build/
 
 # Directory created by dartdoc
 doc/api/
-unpub-data/
+unpub-packages/
 .vscode/

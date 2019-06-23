@@ -1,11 +1,13 @@
 abstract class PackageStore {
-  Uri downloadUri(String package, String version) {
+  bool supportsDownloadUrl = false;
+
+  String downloadUrl(String name, String version) {
     throw 'downloadUri not implemented';
   }
 
-  Stream<List<int>> download(String package, String version) {
+  Stream<List<int>> download(String name, String version) {
     throw 'download not implemented';
   }
 
-  Future<void> upload(String package, String version, List<int> content);
+  Future<void> upload(String name, String version, List<int> content);
 }

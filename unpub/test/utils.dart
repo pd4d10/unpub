@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:unpub/unpub.dart' as unpub;
 
 final notExistingPacakge = 'not_existing_package';
-final baseDir = path.absolute('unpub-data');
+final baseDir = path.absolute('unpub-packages');
 final pubHostedUrl = 'http://localhost:4000';
 final baseUri = Uri.parse(pubHostedUrl);
 
