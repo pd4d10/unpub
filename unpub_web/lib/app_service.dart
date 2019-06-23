@@ -6,6 +6,12 @@ import 'package:unpub_api/models.dart';
 
 @Injectable()
 class AppService {
+  bool loading = false;
+
+  void setLoading(bool value) {
+    loading = value;
+  }
+
   Future _fetch(String path,
       [Map<String, dynamic> queryParameters = const {}]) async {
     queryParameters.entries
@@ -20,6 +26,7 @@ class AppService {
     );
     var res = await http.get(uri);
     var data = json.decode(res.body);
+
     return data['data'];
   }
 

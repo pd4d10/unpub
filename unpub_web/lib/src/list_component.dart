@@ -9,7 +9,6 @@ import 'package:unpub_api/models.dart';
   selector: 'list',
   templateUrl: 'list_component.html',
   directives: [NgFor, NgIf, RouterLink],
-  providers: [ClassProvider(AppService)],
   exports: [RoutePaths],
 )
 class ListComponent implements OnInit {
@@ -20,7 +19,9 @@ class ListComponent implements OnInit {
 
   @override
   Future<Null> ngOnInit() async {
+    appService.setLoading(true);
     packages = await appService.fetchPackages(size: 10);
+    appService.setLoading(false);
   }
 
   getDetailUrl(WebapiListView package) {

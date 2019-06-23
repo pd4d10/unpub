@@ -10,7 +10,6 @@ import 'package:unpub_api/models.dart';
   selector: 'detail',
   templateUrl: 'detail_component.html',
   directives: [NgFor, NgIf, NgClass, RouterLink],
-  providers: [ClassProvider(AppService)],
   exports: [RoutePaths],
 )
 class DetailComponent implements OnInit, OnActivate {
@@ -37,7 +36,9 @@ class DetailComponent implements OnInit, OnActivate {
     final version = current.parameters['version'];
 
     if (name != null) {
+      appService.setLoading(true);
       package = await appService.fetchPackage(name, version);
+      appService.setLoading(false);
     }
   }
 

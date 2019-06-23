@@ -117,20 +117,26 @@
 
       <h3 class="title">Author</h3>
       <div>
-        <div class="author" *ngFor="let author of package.authors">
+        <div class="author" *ngFor="let email of package.authors">
+          <a href="mailto:{{ email }}" title="Email {{ email }}"
+            ><i class="email-icon"></i
+          ></a>
           <a
-            href="/packages?q=email:{{ author }}"
-            title="Search packages with {{ author }}"
+            href="/packages?q=email:{{ email }}"
+            title="Search packages with {{ email }}"
             rel="nofollow"
             ><i class="search-icon"></i
           ></a>
-          {{ author }}
+          {{ email }}
         </div>
       </div>
 
       <h3 class="title">Uploader</h3>
       <div>
         <div class="author" *ngFor="let email of package.uploaders">
+          <a href="mailto:{{ email }}" title="Email {{ email }}"
+            ><i class="email-icon"></i
+          ></a>
           <a
             href="/packages?q=email:{{ email }}"
             title="Search packages with {{ email }}"

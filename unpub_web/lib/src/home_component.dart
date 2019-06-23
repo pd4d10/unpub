@@ -9,7 +9,6 @@ import 'package:unpub_api/models.dart';
   selector: 'home',
   templateUrl: 'home_component.html',
   directives: [NgFor, NgIf, RouterLink],
-  providers: [ClassProvider(AppService)],
   exports: [RoutePaths],
 )
 class HomeComponent implements OnInit {
@@ -20,7 +19,9 @@ class HomeComponent implements OnInit {
 
   @override
   Future<Null> ngOnInit() async {
+    appService.setLoading(true);
     packages = await appService.fetchPackages(size: 15);
+    appService.setLoading(false);
   }
 
   getDetailUrl(WebapiListView package) {
