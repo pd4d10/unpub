@@ -19,7 +19,6 @@ import 'package:unpub/src/package_store.dart';
 import 'utils.dart';
 import 'static/index.html.dart' as index_html;
 import 'static/main.dart.js.dart' as main_dart_js;
-import 'static/styles.css.dart' as styles_css;
 
 part 'app.g.dart';
 
@@ -462,12 +461,5 @@ class App {
     return shelf.Response(HttpStatus.ok,
         body: main_dart_js.content,
         headers: {HttpHeaders.contentTypeHeader: 'text/javascript'});
-  }
-
-  @Route.get('/styles.css')
-  Future<shelf.Response> stylesCss(shelf.Request req) async {
-    return shelf.Response(HttpStatus.ok,
-        body: styles_css.content,
-        headers: {HttpHeaders.contentTypeHeader: 'text/css'});
   }
 }
