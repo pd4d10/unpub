@@ -1,5 +1,7 @@
 <main *ngIf="data != null">
-  <h2 class="listing-page-title">Top Dart packages</h2>
+  <p class="package-count">
+    <span>{{ data.count }}</span> results
+  </p>
 
   <ul class="package-list">
     <li class="list-item -full" *ngFor="let package of data.packages">
