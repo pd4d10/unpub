@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
-var files = ['index.html', 'main.dart.js', 'styles.css'];
+var files = ['index.html', 'main.dart.js'];
 
 main(List<String> args) {
   for (var file in files) {
