@@ -4,6 +4,8 @@ import 'package:angular/core.dart';
 import 'src/routes.dart';
 import 'package:unpub_api/models.dart';
 
+const isProduction = String.fromEnvironment('production') == 'true';
+
 class PackageNotExistsException implements Exception {
   final String message;
   PackageNotExistsException(this.message);
@@ -25,8 +27,8 @@ class AppService {
         .toList()
         .forEach((entry) => queryParameters.remove(entry.key));
 
-    // TODO: production
-    var uri = Uri.parse('http://localhost:4000').replace(
+    var baseUrl = isProduction ? '' : 'http://localhost:4000';
+    var uri = Uri.parse(baseUrl).replace(
       path: path,
       queryParameters: queryParameters.map((k, v) => MapEntry(k, v.toString())),
     );
