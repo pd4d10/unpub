@@ -31,7 +31,7 @@
         <span>{{ page + 1 }}</span>
       </a>
     </li>
-    <li [ngClass]="{ '-disabled': currentPage == pages.length }">
+    <li [ngClass]="{ '-disabled': currentPage == pages.length - 1 }">
       <a [routerLink]="getListUrl(pages.length)">
         <span>»</span>
       </a>
