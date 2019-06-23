@@ -423,7 +423,7 @@ class App {
       authors = [];
     }
 
-    var depMap = (pubspec['dependencies'] as Map).cast<String, String>() ?? {};
+    var depMap = (pubspec['dependencies'] as Map ?? {}).cast<String, String>();
 
     var data = WebapiDetailView(
       package.name,
