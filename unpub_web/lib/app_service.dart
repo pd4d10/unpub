@@ -4,6 +4,11 @@ import 'package:angular/core.dart';
 import 'src/routes.dart';
 import 'package:unpub_api/models.dart';
 
+class PackageNotExistsException implements Exception {
+  final String message;
+  PackageNotExistsException(this.message);
+}
+
 @Injectable()
 class AppService {
   bool loading = false;
@@ -26,6 +31,14 @@ class AppService {
     );
     var res = await http.get(uri);
     var data = json.decode(res.body);
+
+    if (data['error'] != null) {
+      var error = data['error'] as String;
+      if (error.contains('package not exists')) {
+        throw PackageNotExistsException(error);
+      }
+      throw error;
+    }
 
     return data['data'];
   }

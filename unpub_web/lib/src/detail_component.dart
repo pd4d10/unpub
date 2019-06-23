@@ -11,19 +11,31 @@ import 'package:unpub_api/models.dart';
   templateUrl: 'detail_component.html',
   directives: [NgFor, NgIf, NgClass, RouterLink],
   exports: [RoutePaths],
+  styles: ['.not-exists { margin-top: 100px }'],
 )
 class DetailComponent implements OnInit, OnActivate {
   final AppService appService;
+  DetailComponent(this.appService);
 
   WebapiDetailView package;
+  String packageName;
+  String packageVersion;
   int activeTab = 0;
-  DetailComponent(this.appService);
+  bool packageNotExists = false;
 
   String get readmeHtml =>
       package.readme == null ? null : markdownToHtml(package.readme);
 
   String get changelogHtml =>
       package.changelog == null ? null : markdownToHtml(package.changelog);
+
+  String get pubDevLink {
+    var url = 'https://pub.dev/packages/$packageName';
+    if (packageVersion != null) {
+      url += '/versions/$packageVersion';
+    }
+    return url;
+  }
 
   @override
   Future<Null> ngOnInit() async {
@@ -36,9 +48,16 @@ class DetailComponent implements OnInit, OnActivate {
     final version = current.parameters['version'];
 
     if (name != null) {
+      packageName = name;
+      packageVersion = version;
       appService.setLoading(true);
-      package = await appService.fetchPackage(name, version);
-      appService.setLoading(false);
+      try {
+        package = await appService.fetchPackage(name, version);
+      } on PackageNotExistsException catch (e) {
+        packageNotExists = true;
+      } finally {
+        appService.setLoading(false);
+      }
     }
   }
 

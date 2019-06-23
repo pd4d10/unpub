@@ -17,8 +17,5 @@ class AppComponent {
   AppComponent(this.appService);
 
   String get homeUrl => RoutePaths.home.toUrl();
-  bool get loading {
-    print(appService.loading);
-    return appService.loading;
-  }
+  bool get loading => appService.loading;
 }

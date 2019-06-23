@@ -380,7 +380,7 @@ class App {
           .firstWhere((item) => item.version == version, orElse: () => null);
     }
     if (packageVersion == null) {
-      return _ok({'error': 'package not exists'});
+      return _ok({'error': 'version not exists'});
     }
 
     var versions = package.versions

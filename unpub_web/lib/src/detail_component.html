@@ -164,3 +164,14 @@
     </aside>
   </div>
 </main>
+
+<main *ngIf="packageNotExists">
+  <div class="not-exists">
+    <div>
+      This is not a private package, click link below to view it:
+    </div>
+    <a href="{{ pubDevLink }}" target="_blank" rel="nofollow">{{
+      pubDevLink
+    }}</a>
+  </div>
+</main>
