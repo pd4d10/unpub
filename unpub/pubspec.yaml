@@ -1,6 +1,6 @@
 name: unpub
-description: Private Dart Pub for Enterprise.
-version: 0.2.2
+description: Private Dart Pub server for Enterprise.
+version: 0.3.0
 homepage: https://github.com/bytedance/unpub
 author: Rongjian Zhang <pd4d10@gmail.com>
 
