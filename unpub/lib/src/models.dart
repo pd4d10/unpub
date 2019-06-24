@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
 
 part 'models.g.dart';
 
@@ -38,15 +37,23 @@ class UnpubPackage {
   final String name;
   final List<UnpubVersion> versions;
   final List<String> uploaders;
+  final bool private;
 
-  UnpubPackage({
-    @required this.name,
-    @required this.versions,
-    @required this.uploaders,
-  });
+  @JsonKey(fromJson: identity, toJson: identity)
+  final DateTime createdAt;
+
+  @JsonKey(fromJson: identity, toJson: identity)
+  final DateTime updatedAt;
+
+  UnpubPackage(
+    this.name,
+    this.versions,
+    this.private,
+    this.uploaders,
+    this.createdAt,
+    this.updatedAt,
+  );
 
   factory UnpubPackage.fromJson(Map<String, dynamic> map) =>
       _$UnpubPackageFromJson(map);
-
-  Map<String, dynamic> toJson() => _$UnpubPackageToJson(this);
 }

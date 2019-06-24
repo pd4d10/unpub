@@ -383,7 +383,7 @@ class App {
           latest.pubspec['description'] as String,
           getPackageTags(latest.pubspec),
           latest.version,
-          latest.createdAt,
+          package.updatedAt,
         );
       }).toList(),
     );
