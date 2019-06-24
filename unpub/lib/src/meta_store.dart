@@ -30,53 +30,32 @@ class MetaStore {
     await Future.wait([
       db.collection(packageCollection).update(
           where.eq('name', name),
-          {
-            '\$push': {
-              'versions': version.toJson(),
-            },
-            '\$addToSet': {
-              'uploaders': version.uploader,
-            }
-          },
+          modify
+              .push('versions', version.toJson())
+              .addToSet('uploaders', version.uploader),
           upsert: true),
       db.collection(statsCollection).update(
-          where.eq('name', name),
-          {
-            '\$setOnInsert': {'download': 0}
-          },
+          where.eq('name', name), modify.setOnInsert('download', 0),
           upsert: true)
     ]);
   }
 
   Future<void> addUploader(String name, String email) async {
     await db.collection(packageCollection).update(
-        where.eq('name', name),
-        {
-          '\$push': {
-            'uploaders': email,
-          }
-        },
+        where.eq('name', name), modify.push('uploaders', email),
         upsert: true);
   }
 
   Future<void> removeUploader(String name, String email) async {
     await db.collection(packageCollection).update(
-        where.eq('name', name),
-        {
-          '\$pull': {
-            'uploaders': email,
-          }
-        },
+        where.eq('name', name), modify.pull('uploaders', email),
         upsert: true);
   }
 
   void increaseDownloadCount(String name) {
     var today = DateFormat('yyyyMMdd').format(DateTime.now());
     db.collection(statsCollection).update(
-        where.eq('name', name),
-        {
-          '\$inc': {'download': 1, 'd$today': 1}
-        },
+        where.eq('name', name), modify.inc('download', 1).inc('d$today', 1),
         upsert: true);
   }
 
