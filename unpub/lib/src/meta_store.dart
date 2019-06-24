@@ -80,28 +80,48 @@ class MetaStore {
         upsert: true);
   }
 
-  Future<int> queryCount(String q) async {
-    var selector = q == null ? null : where.match('name', '.*$q.*');
-    var count = await db.collection(statsCollection).count(selector);
-    return count;
+  static final _keywordPrefixes = {
+    'email:': (String email) => where.eq('uploaders', email),
+    'package:': (String package) => where.match('name', '^$package.*'),
+    'dependency:': (String dependency) => where.raw({
+          // FIXME: raw
+          'versions': {
+            '\$elemMatch': {
+              'pubspec.dependencies.$dependency': {'\$exists': true}
+            }
+          }
+        }),
+  };
+
+  SelectorBuilder _buildSearchSelector(String q) {
+    if (q == null || q == '') return where;
+
+    for (var entry in _keywordPrefixes.entries) {
+      if (q.startsWith(entry.key)) {
+        return entry.value(q.substring(entry.key.length).trim());
+      }
+    }
+
+    return where.match('name', '.*$q.*');
+  }
+
+  Future<int> queryCount(String q) {
+    return db.collection(packageCollection).count(_buildSearchSelector(q));
   }
 
   Future<List<UnpubPackage>> querySortedPackages(
       int size, int page, String sort, String q) async {
-    var selector =
-        where.sortBy(sort, descending: true).limit(size).skip(page * size);
-    if (q != null) {
-      selector = selector.match('name', '.*$q.*');
-    }
+    var selector = _buildSearchSelector(q)
+        .sortBy(sort, descending: true)
+        .limit(size)
+        .skip(page * size);
 
-    var packageNames = await db
-        .collection(statsCollection)
+    var packages = await db
+        .collection(packageCollection)
         .find(selector)
-        .map((item) => item['name'] as String)
+        .map((item) => UnpubPackage.fromJson(item))
         .toList();
 
-    var packages =
-        await Future.wait(packageNames.map((name) => queryPackage(name)));
     return packages;
   }
 }
