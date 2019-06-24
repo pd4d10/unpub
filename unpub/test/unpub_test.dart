@@ -70,6 +70,7 @@ main() {
 
       expect(meta['name'], package0);
       expect(meta['uploaders'], [email0]);
+      expect(meta['private'], true);
       expect(meta['versions'], isList);
       expect(meta['versions'], hasLength(1));
 

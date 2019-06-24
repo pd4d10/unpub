@@ -10,10 +10,12 @@ class MetaStore {
 
   MetaStore(String uri) : db = Db(uri);
 
-  Future<UnpubPackage> queryPackage(String package) async {
-    var json = await db
-        .collection(packageCollection)
-        .findOne(where.eq('name', package));
+  SelectorBuilder nameSelector(String name) =>
+      where.eq('private', true).eq('name', name);
+
+  Future<UnpubPackage> queryPackage(String name) async {
+    var json =
+        await db.collection(packageCollection).findOne(nameSelector(name));
     if (json == null) return null;
     return UnpubPackage.fromJson(json);
   }
@@ -29,33 +31,33 @@ class MetaStore {
   Future<void> addVersion(String name, UnpubVersion version) async {
     await Future.wait([
       db.collection(packageCollection).update(
-          where.eq('name', name),
+          nameSelector(name),
           modify
               .push('versions', version.toJson())
               .addToSet('uploaders', version.uploader),
           upsert: true),
       db.collection(statsCollection).update(
-          where.eq('name', name), modify.setOnInsert('download', 0),
+          nameSelector(name), modify.setOnInsert('download', 0),
           upsert: true)
     ]);
   }
 
   Future<void> addUploader(String name, String email) async {
     await db.collection(packageCollection).update(
-        where.eq('name', name), modify.push('uploaders', email),
+        nameSelector(name), modify.push('uploaders', email),
         upsert: true);
   }
 
   Future<void> removeUploader(String name, String email) async {
     await db.collection(packageCollection).update(
-        where.eq('name', name), modify.pull('uploaders', email),
+        nameSelector(name), modify.pull('uploaders', email),
         upsert: true);
   }
 
   void increaseDownloadCount(String name) {
     var today = DateFormat('yyyyMMdd').format(DateTime.now());
     db.collection(statsCollection).update(
-        where.eq('name', name), modify.inc('download', 1).inc('d$today', 1),
+        nameSelector(name), modify.inc('download', 1).inc('d$today', 1),
         upsert: true);
   }
 
