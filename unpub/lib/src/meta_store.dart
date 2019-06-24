@@ -34,7 +34,9 @@ class MetaStore {
           nameSelector(name),
           modify
               .push('versions', version.toJson())
-              .addToSet('uploaders', version.uploader),
+              .addToSet('uploaders', version.uploader)
+              .setOnInsert('createdAt', version.createdAt)
+              .set('updatedAt', version.createdAt),
           upsert: true),
       db.collection(statsCollection).update(
           nameSelector(name), modify.setOnInsert('download', 0),

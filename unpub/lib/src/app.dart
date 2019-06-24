@@ -10,7 +10,6 @@ import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:pub_semver/pub_semver.dart' as semver;
-import 'package:yaml/yaml.dart';
 import 'package:archive/archive.dart';
 import 'package:unpub/src/models.dart';
 import 'package:unpub/unpub_api/lib/models.dart';
@@ -255,7 +254,7 @@ class App {
       }
 
       var pubspecYaml = utf8.decode(pubspecArchiveFile.content);
-      var pubspec = loadYaml(pubspecYaml);
+      var pubspec = loadYamlAsMap(pubspecYaml);
 
       if (uploadValidator != null) {
         await uploadValidator(pubspec, email);
@@ -294,8 +293,16 @@ class App {
       }
 
       // Write package meta to database
-      await metaStore.addVersion(name,
-          UnpubVersion.fromTarball(pubspecYaml, readme, changelog, email));
+      var unpubVersion = UnpubVersion(
+        pubspec['version'] as String,
+        pubspec,
+        pubspecYaml,
+        readme,
+        changelog,
+        email,
+        DateTime.now(),
+      );
+      await metaStore.addVersion(name, unpubVersion);
 
       // TODO: Upload docs
       return shelf.Response.found(req.requestedUri

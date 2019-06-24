@@ -71,6 +71,8 @@ main() {
       expect(meta['name'], package0);
       expect(meta['uploaders'], [email0]);
       expect(meta['private'], true);
+      expect(meta['createdAt'], isA<DateTime>());
+      expect(meta['updatedAt'], isA<DateTime>());
       expect(meta['versions'], isList);
       expect(meta['versions'], hasLength(1));
 

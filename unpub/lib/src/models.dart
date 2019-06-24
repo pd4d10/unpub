@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:unpub/src/utils.dart';
 import 'package:meta/meta.dart';
 
 part 'models.g.dart';
@@ -30,21 +29,6 @@ class UnpubVersion {
 
   factory UnpubVersion.fromJson(Map<String, dynamic> map) =>
       _$UnpubVersionFromJson(map);
-
-  factory UnpubVersion.fromTarball(
-      String pubspecYaml, String readme, String changelog, String uploader) {
-    var pubspec = loadYamlAsMap(pubspecYaml);
-
-    return UnpubVersion(
-      pubspec['version'] as String,
-      pubspec,
-      pubspecYaml,
-      readme,
-      changelog,
-      uploader,
-      DateTime.now(),
-    );
-  }
 
   Map<String, dynamic> toJson() => _$UnpubVersionToJson(this);
 }
