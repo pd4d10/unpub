@@ -22,11 +22,11 @@ main(List<String> args) async {
   var baseDir = path.absolute('unpub-packages');
   var db = 'mongodb://localhost:27017/dart_pub';
 
-  var metaStore = unpub.MetaStore(db);
-  await metaStore.db.open();
+  var mongoStore = unpub.MongoStore(db);
+  await mongoStore.db.open();
 
   var app = unpub.App(
-    metaStore: metaStore,
+    metaStore: mongoStore,
     packageStore: unpub.FileStore(baseDir),
   );
 

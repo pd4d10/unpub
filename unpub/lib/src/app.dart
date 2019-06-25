@@ -184,7 +184,7 @@ class App {
     }
 
     if (isPubClient(req)) {
-      metaStore.increaseDownloadCount(name);
+      metaStore.increaseDownloads(name);
     }
     if (packageStore.supportsDownloadUrl) {
       return shelf.Response(HttpStatus.found, headers: {
@@ -372,21 +372,19 @@ class App {
       return _ok({'data': ListApi(0, []).toJson()});
     }
 
-    var packages = await metaStore.querySortedPackages(size, page, sort, q);
-    var data = ListApi(
-      count,
-      packages.map((package) {
-        var latest = package.versions.last;
+    var packages =
+        await metaStore.queryPackages(size, page, sort, q).map((package) {
+      var latest = package.versions.last;
 
-        return ListApiPackage(
-          package.name,
-          latest.pubspec['description'] as String,
-          getPackageTags(latest.pubspec),
-          latest.version,
-          package.updatedAt,
-        );
-      }).toList(),
-    );
+      return ListApiPackage(
+        package.name,
+        latest.pubspec['description'] as String,
+        getPackageTags(latest.pubspec),
+        latest.version,
+        package.updatedAt,
+      );
+    }).toList();
+    var data = ListApi(count, packages);
 
     return _ok({'data': data.toJson()});
   }
