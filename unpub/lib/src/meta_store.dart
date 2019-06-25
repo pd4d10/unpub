@@ -10,12 +10,11 @@ class MetaStore {
 
   MetaStore(String uri) : db = Db(uri);
 
-  SelectorBuilder nameSelector(String name) =>
-      where.eq('private', true).eq('name', name);
+  SelectorBuilder selectByName(String name) => where.eq('name', name);
 
   Future<UnpubPackage> queryPackage(String name) async {
     var json =
-        await db.collection(packageCollection).findOne(nameSelector(name));
+        await db.collection(packageCollection).findOne(selectByName(name));
     if (json == null) return null;
     return UnpubPackage.fromJson(json);
   }
@@ -31,35 +30,36 @@ class MetaStore {
   Future<void> addVersion(String name, UnpubVersion version) async {
     await Future.wait([
       db.collection(packageCollection).update(
-          nameSelector(name),
+          selectByName(name),
           modify
               .push('versions', version.toJson())
               .addToSet('uploaders', version.uploader)
               .setOnInsert('createdAt', version.createdAt)
+              .setOnInsert('private', true)
               .set('updatedAt', version.createdAt),
           upsert: true),
       db.collection(statsCollection).update(
-          nameSelector(name), modify.setOnInsert('download', 0),
+          selectByName(name), modify.setOnInsert('download', 0),
           upsert: true)
     ]);
   }
 
   Future<void> addUploader(String name, String email) async {
     await db.collection(packageCollection).update(
-        nameSelector(name), modify.push('uploaders', email),
+        selectByName(name), modify.push('uploaders', email),
         upsert: true);
   }
 
   Future<void> removeUploader(String name, String email) async {
     await db.collection(packageCollection).update(
-        nameSelector(name), modify.pull('uploaders', email),
+        selectByName(name), modify.pull('uploaders', email),
         upsert: true);
   }
 
   void increaseDownloadCount(String name) {
     var today = DateFormat('yyyyMMdd').format(DateTime.now());
     db.collection(statsCollection).update(
-        nameSelector(name), modify.inc('download', 1).inc('d$today', 1),
+        selectByName(name), modify.inc('download', 1).inc('d$today', 1),
         upsert: true);
   }
 
