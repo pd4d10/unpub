@@ -21,23 +21,6 @@ import 'static/main.dart.js.dart' as main_dart_js;
 
 part 'app.g.dart';
 
-shelf.Response _ok(Map<String, dynamic> data, {int status = 200}) =>
-    shelf.Response(status, body: json.encode(data), headers: {
-      HttpHeaders.contentTypeHeader: ContentType.json.mimeType,
-      'Access-Control-Allow-Origin': '*'
-    });
-
-shelf.Response _successMessage(String message, {int status = 200}) => _ok({
-      'success': {'message': message}
-    }, status: status);
-
-shelf.Response _badRequest(String message, {int status = 400}) =>
-    shelf.Response(status,
-        body: json.encode({
-          'error': {'message': message}
-        }),
-        headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
-
 class App {
   final MetaStore metaStore;
   final PackageStore packageStore;
@@ -56,7 +39,29 @@ class App {
     this.uploadValidator,
   });
 
-  var _httpClient = http.Client();
+  static shelf.Response _okWithJson(Map<String, dynamic> data) =>
+      shelf.Response.ok(
+        json.encode(data),
+        headers: {
+          HttpHeaders.contentTypeHeader: ContentType.json.mimeType,
+          'Access-Control-Allow-Origin': '*'
+        },
+      );
+
+  static shelf.Response _successMessage(String message) => _okWithJson({
+        'success': {'message': message}
+      });
+
+  static shelf.Response _badRequest(String message,
+          {int status = HttpStatus.badRequest}) =>
+      shelf.Response(
+        status,
+        headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType},
+        body: json.encode({
+          'error': {'message': message}
+        }),
+      );
+
   http.Client _googleapisClient;
 
   Future<String> _getUploaderEmail(shelf.Request req) async {
@@ -123,11 +128,8 @@ class App {
     var package = await metaStore.queryPackage(name);
 
     if (package == null) {
-      var res = await _httpClient.send(http.Request(
-          'GET', Uri.parse(upstream).resolve('/api/packages/$name')));
-      return shelf.Response(res.statusCode,
-          headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType},
-          body: res.stream);
+      return shelf.Response.found(
+          Uri.parse(upstream).resolve('/api/packages/$name').toString());
     }
 
     package.versions.sort((a, b) {
@@ -139,7 +141,7 @@ class App {
         .map((item) => _versionToJson(item, req.requestedUri))
         .toList();
 
-    return _ok({
+    return _okWithJson({
       'name': name,
       'latest': versionMaps.last, // TODO: Exclude pre release
       'versions': versionMaps,
@@ -156,52 +158,49 @@ class App {
       print(err);
     }
 
-    var item = await metaStore.queryPackageVersion(name, version);
-    if (item == null) {
-      var res = await _httpClient.send(http.Request(
-          'GET',
-          Uri.parse(upstream)
-              .resolve('/api/packages/$name/versions/$version')));
-      return shelf.Response(res.statusCode,
-          headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType},
-          body: res.stream);
+    var package = await metaStore.queryPackage(name);
+    if (package == null) {
+      return shelf.Response.found(Uri.parse(upstream)
+          .resolve('/api/packages/$name/versions/$version')
+          .toString());
     }
 
-    return _ok(_versionToJson(item, req.requestedUri));
+    var packageVersion = package.versions
+        .firstWhere((item) => item.version == version, orElse: () => null);
+    if (packageVersion == null) {
+      return shelf.Response.notFound('Not Found');
+    }
+
+    return _okWithJson(_versionToJson(packageVersion, req.requestedUri));
   }
 
   @Route.get('/packages/<name>/versions/<version>.tar.gz')
   Future<shelf.Response> download(
       shelf.Request req, String name, String version) async {
-    var item = await metaStore.queryPackageVersion(name, version);
-
-    if (item == null) {
-      return shelf.Response(HttpStatus.found, headers: {
-        HttpHeaders.locationHeader: Uri.parse(upstream)
-            .resolve('/packages/$name/versions/$version.tar.gz')
-            .toString()
-      });
+    var package = await metaStore.queryPackage(name);
+    if (package == null) {
+      return shelf.Response.found(Uri.parse(upstream)
+          .resolve('/packages/$name/versions/$version.tar.gz')
+          .toString());
     }
 
     if (isPubClient(req)) {
       metaStore.increaseDownloads(name);
     }
+
     if (packageStore.supportsDownloadUrl) {
-      return shelf.Response(HttpStatus.found, headers: {
-        HttpHeaders.locationHeader: packageStore.downloadUrl(name, version)
-      });
+      return shelf.Response.found(packageStore.downloadUrl(name, version));
     } else {
-      return shelf.Response(
-        HttpStatus.ok,
+      return shelf.Response.ok(
+        packageStore.download(name, version),
         headers: {HttpHeaders.contentTypeHeader: ContentType.binary.mimeType},
-        body: packageStore.download(name, version),
       );
     }
   }
 
   @Route.get('/api/packages/versions/new')
   Future<shelf.Response> getUploadUrl(shelf.Request req) async {
-    return _ok({
+    return _okWithJson({
       'url': req.requestedUri
           .resolve('/api/packages/versions/newUpload')
           .toString(),
@@ -331,7 +330,7 @@ class App {
     var package = await metaStore.queryPackage(name);
 
     if (!package.uploaders.contains(operatorEmail)) {
-      return _badRequest('no permission', status: 403);
+      return _badRequest('no permission', status: HttpStatus.forbidden);
     }
     if (package.uploaders.contains(email)) {
       return _badRequest('email already exists');
@@ -349,7 +348,7 @@ class App {
     var package = await metaStore.queryPackage(name);
 
     if (!package.uploaders.contains(operatorEmail)) {
-      return _badRequest('no permission', status: 403);
+      return _badRequest('no permission', status: HttpStatus.forbidden);
     }
     if (!package.uploaders.contains(email)) {
       return _badRequest('email not uploader');
@@ -369,7 +368,7 @@ class App {
 
     var count = await metaStore.queryCount(q);
     if (count == 0) {
-      return _ok({'data': ListApi(0, []).toJson()});
+      return _okWithJson({'data': ListApi(0, []).toJson()});
     }
 
     var packages =
@@ -386,7 +385,7 @@ class App {
     }).toList();
     var data = ListApi(count, packages);
 
-    return _ok({'data': data.toJson()});
+    return _okWithJson({'data': data.toJson()});
   }
 
   @Route.get('/webapi/package/<name>/<version>')
@@ -394,7 +393,7 @@ class App {
       shelf.Request req, String name, String version) async {
     var package = await metaStore.queryPackage(name);
     if (package == null) {
-      return _ok({'error': 'package not exists'});
+      return _okWithJson({'error': 'package not exists'});
     }
 
     UnpubVersion packageVersion;
@@ -405,7 +404,7 @@ class App {
           .firstWhere((item) => item.version == version, orElse: () => null);
     }
     if (packageVersion == null) {
-      return _ok({'error': 'version not exists'});
+      return _okWithJson({'error': 'version not exists'});
     }
 
     var versions = package.versions
@@ -448,7 +447,7 @@ class App {
       getPackageTags(packageVersion.pubspec),
     );
 
-    return _ok({'data': data.toJson()});
+    return _okWithJson({'data': data.toJson()});
   }
 
   @Route.get('/')
@@ -456,15 +455,13 @@ class App {
   @Route.get('/packages/<name>')
   @Route.get('/packages/<name>/versions/<version>')
   Future<shelf.Response> indexHtml(shelf.Request req) async {
-    return shelf.Response(HttpStatus.ok,
-        body: index_html.content,
+    return shelf.Response.ok(index_html.content,
         headers: {HttpHeaders.contentTypeHeader: ContentType.html.mimeType});
   }
 
   @Route.get('/main.dart.js')
   Future<shelf.Response> mainDartJs(shelf.Request req) async {
-    return shelf.Response(HttpStatus.ok,
-        body: main_dart_js.content,
+    return shelf.Response.ok(main_dart_js.content,
         headers: {HttpHeaders.contentTypeHeader: 'text/javascript'});
   }
 }

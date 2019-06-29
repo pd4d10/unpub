@@ -23,20 +23,15 @@ class MongoStore extends MetaStore {
 
   @override
   Future<void> addVersion(String name, UnpubVersion version) async {
-    await Future.wait([
-      db.collection(packageCollection).update(
-          _selectByName(name),
-          modify
-              .push('versions', version.toJson())
-              .addToSet('uploaders', version.uploader)
-              .setOnInsert('createdAt', version.createdAt)
-              .setOnInsert('private', true)
-              .set('updatedAt', version.createdAt),
-          upsert: true),
-      db.collection(statsCollection).update(
-          _selectByName(name), modify.setOnInsert('download', 0),
-          upsert: true)
-    ]);
+    await db.collection(packageCollection).update(
+        _selectByName(name),
+        modify
+            .push('versions', version.toJson())
+            .addToSet('uploaders', version.uploader)
+            .setOnInsert('createdAt', version.createdAt)
+            .setOnInsert('private', true)
+            .setOnInsert('download', 0)
+            .set('updatedAt', version.createdAt));
   }
 
   @override
@@ -56,9 +51,12 @@ class MongoStore extends MetaStore {
   @override
   void increaseDownloads(String name) {
     var today = DateFormat('yyyyMMdd').format(DateTime.now());
-    db.collection(statsCollection).update(
-        _selectByName(name), modify.inc('download', 1).inc('d$today', 1),
-        upsert: true);
+    db
+        .collection(packageCollection)
+        .update(_selectByName(name), modify.inc('download', 1), upsert: true);
+    db
+        .collection(statsCollection)
+        .update(_selectByName(name), modify.inc('d$today', 1), upsert: true);
   }
 
   static final _keywordPrefixes = {
