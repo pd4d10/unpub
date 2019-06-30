@@ -185,7 +185,7 @@ class App {
     }
 
     if (isPubClient(req)) {
-      metaStore.increaseDownloads(name);
+      metaStore.increaseDownloads(name, version);
     }
 
     if (packageStore.supportsDownloadUrl) {

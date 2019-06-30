@@ -49,7 +49,7 @@ class MongoStore extends MetaStore {
   }
 
   @override
-  void increaseDownloads(String name) {
+  void increaseDownloads(String name, String version) {
     var today = DateFormat('yyyyMMdd').format(DateTime.now());
     db
         .collection(packageCollection)
