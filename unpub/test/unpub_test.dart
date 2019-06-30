@@ -35,12 +35,6 @@ main() {
     return _pubspecCache[key];
   }
 
-  // Future<Map<String, dynamic>> _readPubSpec(
-  //     String package, String version) async {
-  //   var content = await _readFile(package, version, 'pubspec.yaml');
-  //   return loadYamlAsMap(content);
-  // }
-
   _cleanUpDb() async {
     await _db.dropCollection(packageCollection);
     await _db.dropCollection(statsCollection);
@@ -166,7 +160,7 @@ main() {
           "name": "package_0",
           "latest": {
             "archive_url":
-                "http://localhost:4000/packages/package_0/versions/0.0.2.tar.gz",
+                "$pubHostedUrl/packages/package_0/versions/0.0.2.tar.gz",
             "pubspec": loadYamlAsMap(
                 await _readFile('package_0', '0.0.2', 'pubspec.yaml')),
             "version": "0.0.2"
@@ -174,14 +168,14 @@ main() {
           "versions": [
             {
               "archive_url":
-                  "http://localhost:4000/packages/package_0/versions/0.0.1.tar.gz",
+                  "$pubHostedUrl/packages/package_0/versions/0.0.1.tar.gz",
               "pubspec": loadYamlAsMap(
                   await _readFile('package_0', '0.0.1', 'pubspec.yaml')),
               "version": "0.0.1"
             },
             {
               "archive_url":
-                  "http://localhost:4000/packages/package_0/versions/0.0.2.tar.gz",
+                  "$pubHostedUrl/packages/package_0/versions/0.0.2.tar.gz",
               "pubspec": loadYamlAsMap(
                   await _readFile('package_0', '0.0.2', 'pubspec.yaml')),
               "version": "0.0.2"
@@ -227,7 +221,7 @@ main() {
       expect(
         DeepCollectionEquality().equals(body, {
           "archive_url":
-              "http://localhost:4000/packages/package_0/versions/0.0.1.tar.gz",
+              "$pubHostedUrl/packages/package_0/versions/0.0.1.tar.gz",
           "pubspec": loadYamlAsMap(
               await _readFile('package_0', '0.0.1', 'pubspec.yaml')),
           "version": '0.0.1'
@@ -244,7 +238,7 @@ main() {
       expect(
         DeepCollectionEquality().equals(body, {
           "archive_url":
-              "http://localhost:4000/packages/package_0/versions/0.0.3+1.tar.gz",
+              "$pubHostedUrl/packages/package_0/versions/0.0.3+1.tar.gz",
           "pubspec": loadYamlAsMap(
               await _readFile('package_0', '0.0.3+1', 'pubspec.yaml')),
           "version": '0.0.3+1'

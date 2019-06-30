@@ -266,6 +266,10 @@ class App {
 
       // Package already exists
       if (package != null) {
+        if (package.private != true) {
+          throw '$name is not a private package';
+        }
+
         // Check uploaders
         if (!package.uploaders.contains(email)) {
           throw 'UnauthorizedAccess';
