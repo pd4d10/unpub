@@ -31,7 +31,8 @@ class MongoStore extends MetaStore {
             .setOnInsert('createdAt', version.createdAt)
             .setOnInsert('private', true)
             .setOnInsert('download', 0)
-            .set('updatedAt', version.createdAt));
+            .set('updatedAt', version.createdAt),
+        upsert: true);
   }
 
   @override
