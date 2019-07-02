@@ -7,11 +7,14 @@ main(List<String> args) async {
   var parser = ArgParser();
   parser.addOption('host', abbr: 'h', defaultsTo: '0.0.0.0');
   parser.addOption('port', abbr: 'p', defaultsTo: '4000');
+  parser.addOption('database',
+      abbr: 'd', defaultsTo: 'mongodb://localhost:27017/dart_pub');
 
   var results = parser.parse(args);
 
   var host = results['host'] as String;
   var port = int.parse(results['port'] as String);
+  var db = results['database'] as String;
 
   if (results.rest.isNotEmpty) {
     print('Got unexpected arguments: "${results.rest.join(' ')}".\n\nUsage:\n');
@@ -20,7 +23,6 @@ main(List<String> args) async {
   }
 
   var baseDir = path.absolute('unpub-packages');
-  var db = 'mongodb://localhost:27017/dart_pub';
 
   var mongoStore = unpub.MongoStore(db);
   await mongoStore.db.open();
