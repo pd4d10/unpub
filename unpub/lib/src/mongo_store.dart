@@ -37,16 +37,16 @@ class MongoStore extends MetaStore {
 
   @override
   Future<void> addUploader(String name, String email) async {
-    await db.collection(packageCollection).update(
-        _selectByName(name), modify.push('uploaders', email),
-        upsert: true);
+    await db
+        .collection(packageCollection)
+        .update(_selectByName(name), modify.push('uploaders', email));
   }
 
   @override
   Future<void> removeUploader(String name, String email) async {
-    await db.collection(packageCollection).update(
-        _selectByName(name), modify.pull('uploaders', email),
-        upsert: true);
+    await db
+        .collection(packageCollection)
+        .update(_selectByName(name), modify.pull('uploaders', email));
   }
 
   @override
@@ -54,10 +54,10 @@ class MongoStore extends MetaStore {
     var today = DateFormat('yyyyMMdd').format(DateTime.now());
     db
         .collection(packageCollection)
-        .update(_selectByName(name), modify.inc('download', 1), upsert: true);
+        .update(_selectByName(name), modify.inc('download', 1));
     db
         .collection(statsCollection)
-        .update(_selectByName(name), modify.inc('d$today', 1), upsert: true);
+        .update(_selectByName(name), modify.inc('d$today', 1));
   }
 
   static final _keywordPrefixes = {
