@@ -4,7 +4,7 @@ import 'package:angular/core.dart';
 import 'src/routes.dart';
 import 'package:unpub_api/models.dart';
 
-const isProduction = String.fromEnvironment('production') == 'true';
+const isProduction = true;
 
 class PackageNotExistsException implements Exception {
   final String message;

@@ -1,9 +1,0 @@
-# Add production env variables
-# https://stackoverflow.com/questions/51877725/dart-2-angulardart-how-to-config-env-vars-in-deployment-environment
-targets:
-  $default:
-    builders:
-      build_web_compilers|entrypoint:
-        release_options:
-          dart2js_args:
-            - -Dproduction=true
