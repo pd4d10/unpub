@@ -1,6 +1,6 @@
 # Unpub [![build](https://img.shields.io/travis/bytedance/unpub.svg)](https://travis-ci.org/bytedance/unpub) [![pub](https://img.shields.io/pub/v/unpub.svg)](https://pub.dev/packages/unpub)
 
-Private Dart Pub server for Enterprise.
+Unpub is a private Dart Pub server for Enterprise, with a simple web interface to search and view packages information.
 
 ![Screenshot](https://raw.githubusercontent.com/bytedance/unpub/master/assets/screenshot.png)
 
@@ -105,7 +105,11 @@ var app = unpub.App(
 ## Alternatives
 
 - [pub-dev](https://github.com/dart-lang/pub-dev): Source code of [pub.dev](https://pub.dev), which should be deployed at Google Cloud Platform.
-- [pub_server](https://github.com/dart-lang/pub_server): An alpha version of pub server provided by Dart team, not recommended for production use.
+- [pub_server](https://github.com/dart-lang/pub_server): An alpha version of pub server provided by Dart team.
+
+## Credits
+
+Web page styles are mostly imported from https://pub.dev directly.
 
 ## License
 
