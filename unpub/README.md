@@ -1,9 +1,8 @@
-# Unpub
-
-[![build](https://img.shields.io/travis/bytedance/unpub.svg)](https://travis-ci.org/bytedance/unpub)
-[![pub](https://img.shields.io/pub/v/unpub.svg)](https://pub.dev/packages/unpub)
+# Unpub [![build](https://img.shields.io/travis/bytedance/unpub.svg)](https://travis-ci.org/bytedance/unpub) [![pub](https://img.shields.io/pub/v/unpub.svg)](https://pub.dev/packages/unpub)
 
 Private Dart Pub server for Enterprise.
+
+![Screenshot](https://raw.githubusercontent.com/bytedance/unpub/master/assets/screenshot.png)
 
 ## Usage via command line
 
