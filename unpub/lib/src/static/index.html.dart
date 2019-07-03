@@ -1,4 +1,4 @@
-var content ="""<!DOCTYPE html>
+var content = """<!DOCTYPE html>
 <html>
   <head>
     <title>Unpub</title>
