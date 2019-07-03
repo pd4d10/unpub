@@ -27,8 +27,8 @@ class App {
   final String upstream;
   final String googleapisProxy;
   final String overrideUploaderEmail;
-  final Future<void> Function(dynamic pubspecJson, String email)
-      uploadValidator;
+  final Future<void> Function(
+      Map<String, dynamic> pubspec, String uploaderEmail) uploadValidator;
 
   App({
     @required this.metaStore,
