@@ -12,12 +12,12 @@
   </div>
 
   <div class="package-container">
-    <div class="main tabs-content">
-      <ul class="package-tabs js-tabs">
+    <div class="main package-tabs-content">
+      <ul class="package-tabs-header">
         <li
           [ngClass]="{ '-active': activeTab == 0 }"
           (click)="activeTab = 0"
-          class="tab"
+          class="tab-button"
           role="button"
         >
           README.md
@@ -25,7 +25,7 @@
         <li
           [ngClass]="{ '-active': activeTab == 1 }"
           (click)="activeTab = 1"
-          class="tab"
+          class="tab-button"
           role="button"
         >
           CHANGELOG.md
@@ -34,23 +34,23 @@
         <li
           [ngClass]="{ '-active': activeTab == 2 }"
           (click)="activeTab = 2"
-          class="tab"
+          class="tab-button"
           role="button"
         >
           Versions
         </li>
       </ul>
       <section
-        class="content markdown-body"
+        class="tab-content markdown-body"
         [ngClass]="{ '-active': activeTab == 0 }"
         [innerHtml]="readmeHtml"
       ></section>
       <section
-        class="content markdown-body"
+        class="tab-content markdown-body"
         [ngClass]="{ '-active': activeTab == 1 }"
         [innerHtml]="changelogHtml"
       ></section>
-      <section class="content" [ngClass]="{ '-active': activeTab == 2 }">
+      <section class="tab-content" [ngClass]="{ '-active': activeTab == 2 }">
         <table class="version-table">
           <thead>
             <tr>
