@@ -2,7 +2,7 @@
   <div class="package-header">
     <h2 class="title">{{ package.name }} {{ package.version }}</h2>
     <div class="metadata">
-      Published <span>{{ package.createdAt }}</span>
+      Published <span>{{ package.createdAt | date: "mediumDate" }}</span>
       <div class="tags">
         <span class="package-tag" *ngFor="let tag of package.tags">{{
           tag
@@ -69,7 +69,7 @@
                   }}</a></strong
                 >
               </td>
-              <td>{{ item.createdAt }}</td>
+              <td>{{ item.createdAt | date: "mediumDate" }}</td>
               <td class="documentation">
                 <a
                   href="/documentation/{{ package.name }}/{{ item.version }}/"

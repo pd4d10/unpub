@@ -25,6 +25,7 @@ final NodeValidatorBuilder _htmlValidator = NodeValidatorBuilder.common()
   directives: [routerDirectives, coreDirectives],
   exports: [RoutePaths],
   styles: ['.not-exists { margin-top: 100px }'],
+  pipes: [DatePipe],
 )
 class DetailComponent implements OnInit, OnActivate {
   final AppService appService;

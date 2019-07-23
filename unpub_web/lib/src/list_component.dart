@@ -10,6 +10,7 @@ import 'package:unpub_api/models.dart';
   templateUrl: 'list_component.html',
   directives: [routerDirectives, coreDirectives],
   exports: [RoutePaths],
+  pipes: [DatePipe],
 )
 class ListComponent implements OnInit, OnActivate {
   final AppService appService;
