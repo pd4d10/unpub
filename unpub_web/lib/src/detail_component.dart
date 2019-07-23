@@ -1,10 +1,23 @@
 import 'dart:async';
+import 'dart:html';
 import 'package:angular/angular.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:markdown/markdown.dart';
 import 'package:unpub_web/app_service.dart';
 import 'routes.dart';
 import 'package:unpub_api/models.dart';
+
+// Allow all url
+// https://stackoverflow.com/questions/18867266/dart-removing-disallowed-attribute-after-editor-upgraded
+class _MyUriPolicy implements UriPolicy {
+  bool allowsUri(String uri) => true;
+}
+
+final _myUriPolify = _MyUriPolicy();
+
+final NodeValidatorBuilder _htmlValidator = NodeValidatorBuilder.common()
+  ..allowElement('a', attributes: ['href'], uriPolicy: _myUriPolify)
+  ..allowElement('img', uriAttributes: ['src'], uriPolicy: _myUriPolify);
 
 @Component(
   selector: 'detail',
@@ -53,6 +66,11 @@ class DetailComponent implements OnInit, OnActivate {
       appService.setLoading(true);
       try {
         package = await appService.fetchPackage(name, version);
+        await Future.delayed(Duration(seconds: 0)); // Next tick
+        querySelector('#readme')
+            .setInnerHtml(readmeHtml, validator: _htmlValidator);
+        querySelector('#changelog')
+            .setInnerHtml(changelogHtml, validator: _htmlValidator);
       } on PackageNotExistsException catch (e) {
         packageNotExists = true;
       } finally {

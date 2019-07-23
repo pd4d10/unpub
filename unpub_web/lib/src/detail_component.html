@@ -43,12 +43,12 @@
       <section
         class="tab-content markdown-body"
         [ngClass]="{ '-active': activeTab == 0 }"
-        [innerHtml]="readmeHtml"
+        id="readme"
       ></section>
       <section
         class="tab-content markdown-body"
         [ngClass]="{ '-active': activeTab == 1 }"
-        [innerHtml]="changelogHtml"
+        id="changelog"
       ></section>
       <section class="tab-content" [ngClass]="{ '-active': activeTab == 2 }">
         <table class="version-table">
