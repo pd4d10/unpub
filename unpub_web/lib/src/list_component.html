@@ -21,20 +21,20 @@
   </ul>
   <ul class="pagination">
     <li [ngClass]="{ '-disabled': currentPage == 0 }">
-      <a [routerLink]="getListUrl(0)">
+      <a [routerLink]="getListUrl(currentPage - 1)">
         <span>«</span>
       </a>
     </li>
     <li
       [ngClass]="{ '-active': currentPage == page }"
-      *ngFor="let _ of pages; let page = index"
+      *ngFor="let page of pages"
     >
       <a [routerLink]="getListUrl(page)">
         <span>{{ page + 1 }}</span>
       </a>
     </li>
-    <li [ngClass]="{ '-disabled': currentPage == pages.length - 1 }">
-      <a [routerLink]="getListUrl(pages.length)">
+    <li [ngClass]="{ '-disabled': currentPage == pageCount - 1 }">
+      <a [routerLink]="getListUrl(currentPage + 1)">
         <span>»</span>
       </a>
     </li>

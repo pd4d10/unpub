@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:angular/angular.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:unpub_web/app_service.dart';
@@ -21,10 +22,14 @@ class ListComponent implements OnInit, OnActivate {
   ListApi data;
   ListComponent(this.appService);
 
+  int get pageCount => (data.count / size).ceil();
+
   List<int> get pages {
     if (data == null) return [];
-    var pageCount = (data.count / size).ceil();
-    return List.filled(pageCount, 0);
+    var leftCount = min(currentPage, 5);
+    var rightCount = min(pageCount - currentPage, 5);
+    var offset = max(currentPage - 5, 0);
+    return List.generate(leftCount + rightCount + 1, (i) => i + offset);
   }
 
   @override
