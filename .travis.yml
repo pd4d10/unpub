@@ -5,8 +5,6 @@ before_install:
   - mkdir -p $HOME/.pub-cache
   - echo $PUB_CREDENTIALS > $HOME/.pub-cache/credentials.json
   - cd unpub
-before_script:
-  - cd unpub
 
 cache:
   directories:
