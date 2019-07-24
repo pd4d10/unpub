@@ -1,12 +1,13 @@
 services:
   - mongodb
 language: dart
-dart:
-  - stable
 before_install:
-  - sleep 15 # Waiting mongodb service up
-  - mkdir -p ~/.pub-cache
-  - echo $PUB_CREDENTIALS > ~/.pub-cache/credentials.json
+  - mkdir -p $HOME/.pub-cache
+  - echo $PUB_CREDENTIALS > $HOME/.pub-cache/credentials.json
   - cd unpub
-script:
-  - echo success # FIXME: tests still failing
+before_script:
+  - cd unpub
+
+cache:
+  directories:
+    - $HOME/.pub-cache
