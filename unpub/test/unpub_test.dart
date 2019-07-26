@@ -4,6 +4,8 @@ import 'package:collection/collection.dart';
 import 'package:unpub/src/utils.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'utils.dart';
 import 'package:unpub/unpub.dart';
@@ -343,6 +345,63 @@ main() {
       test('remove', () async {
         var result = await pubUploader(package0, 'remove', email0);
         expect(result.stderr, contains('no permission'));
+      });
+    });
+  });
+
+  group('badge', () {
+    setUpAll(() async {
+      await _cleanUpDb();
+      _server = await createServer(email0);
+      await pubPublish(package0, '0.0.1');
+    });
+
+    tearDownAll(() async {
+      await _server.close();
+    });
+
+    group('v', () {
+      test('<1.0.0', () async {
+        var res = await http.Client().send(
+            http.Request('GET', baseUri.resolve('/badge/v/$package0'))
+              ..followRedirects = false);
+        expect(res.statusCode, HttpStatus.found);
+        expect(res.headers[HttpHeaders.locationHeader],
+            'https://img.shields.io/static/v1?label=unpub&message=0.0.1&color=orange');
+      });
+
+      test('>=1.0.0', () async {
+        await pubPublish(package0, '1.0.0');
+
+        var res = await http.Client().send(
+            http.Request('GET', baseUri.resolve('/badge/v/$package0'))
+              ..followRedirects = false);
+        expect(res.statusCode, HttpStatus.found);
+        expect(res.headers[HttpHeaders.locationHeader],
+            'https://img.shields.io/static/v1?label=unpub&message=1.0.0&color=blue');
+      });
+
+      test('package not exists', () async {
+        var res =
+            await http.get(baseUri.resolve('/badge/v/$notExistingPacakge'));
+        expect(res.statusCode, HttpStatus.notFound);
+      });
+    });
+
+    group('d', () {
+      test('correct download count', () async {
+        var res = await http.Client().send(
+            http.Request('GET', baseUri.resolve('/badge/d/$package0'))
+              ..followRedirects = false);
+        expect(res.statusCode, HttpStatus.found);
+        expect(res.headers[HttpHeaders.locationHeader],
+            'https://img.shields.io/static/v1?label=downloads&message=0&color=blue');
+      });
+
+      test('package not exists', () async {
+        var res =
+            await http.get(baseUri.resolve('/badge/d/$notExistingPacakge'));
+        expect(res.statusCode, HttpStatus.notFound);
       });
     });
   });
