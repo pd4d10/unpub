@@ -28,5 +28,6 @@ Router _$AppRouter(App service) {
   router.add('GET', '/packages/<name>', service.indexHtml);
   router.add('GET', '/packages/<name>/versions/<version>', service.indexHtml);
   router.add('GET', '/main.dart.js', service.mainDartJs);
+  router.add('GET', '/badge/<type>/<name>', service.badge);
   return router;
 }

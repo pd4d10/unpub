@@ -54,7 +54,8 @@ UnpubPackage _$UnpubPackageFromJson(Map<String, dynamic> json) {
           : identity(json['createdAt'] as DateTime),
       json['updatedAt'] == null
           ? null
-          : identity(json['updatedAt'] as DateTime));
+          : identity(json['updatedAt'] as DateTime),
+      json['download'] as int);
 }
 
 Map<String, dynamic> _$UnpubPackageToJson(UnpubPackage instance) =>
@@ -66,5 +67,6 @@ Map<String, dynamic> _$UnpubPackageToJson(UnpubPackage instance) =>
       'createdAt':
           instance.createdAt == null ? null : identity(instance.createdAt),
       'updatedAt':
-          instance.updatedAt == null ? null : identity(instance.updatedAt)
+          instance.updatedAt == null ? null : identity(instance.updatedAt),
+      'download': instance.download
     };

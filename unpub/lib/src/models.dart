@@ -45,6 +45,8 @@ class UnpubPackage {
   @JsonKey(fromJson: identity, toJson: identity)
   final DateTime updatedAt;
 
+  final int download;
+
   UnpubPackage(
     this.name,
     this.versions,
@@ -52,6 +54,7 @@ class UnpubPackage {
     this.uploaders,
     this.createdAt,
     this.updatedAt,
+    this.download,
   );
 
   factory UnpubPackage.fromJson(Map<String, dynamic> map) =>

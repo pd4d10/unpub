@@ -468,4 +468,46 @@ class App {
     return shelf.Response.ok(main_dart_js.content,
         headers: {HttpHeaders.contentTypeHeader: 'text/javascript'});
   }
+
+  String _getBadgeUrl(String label, String message, String color,
+      Map<String, String> queryParameters) {
+    var badgeUri = Uri.parse('https://img.shields.io/static/v1');
+    return Uri(
+        scheme: badgeUri.scheme,
+        host: badgeUri.host,
+        path: badgeUri.path,
+        queryParameters: {
+          'label': label,
+          'message': message,
+          'color': color,
+          ...queryParameters,
+        }).toString();
+  }
+
+  @Route.get('/badge/<type>/<name>')
+  Future<shelf.Response> badge(
+      shelf.Request req, String type, String name) async {
+    var queryParameters = req.requestedUri.queryParameters;
+    var package = await metaStore.queryPackage(name);
+    if (package == null) {
+      return shelf.Response.notFound('Not found');
+    }
+
+    switch (type) {
+      case 'v':
+        var latest = semver.Version.primary(package.versions
+            .map((pv) => semver.Version.parse(pv.version))
+            .toList());
+
+        var color = latest.major == 0 ? 'orange' : 'blue';
+
+        return shelf.Response.found(
+            _getBadgeUrl('unpub', latest.toString(), color, queryParameters));
+      case 'd':
+        return shelf.Response.found(_getBadgeUrl(
+            'downloads', package.download.toString(), 'blue', queryParameters));
+      default:
+        return shelf.Response.notFound('Not found');
+    }
+  }
 }
