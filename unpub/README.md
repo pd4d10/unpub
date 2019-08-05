@@ -106,6 +106,14 @@ var app = unpub.App(
 )
 ```
 
+## Badges
+
+| URL                                          | Badge                                                                                     |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `/badge/v/{package_name}` (version < 1.0.0)  | ![badge example](https://img.shields.io/static/v1?label=unpub&message=0.1.0&color=orange) |
+| `/badge/v/{package_name}` (version >= 1.0.0) | ![badge example](https://img.shields.io/static/v1?label=unpub&message=1.0.0&color=blue)   |
+| `/badge/d/{package_name}`                    | ![badge example](https://img.shields.io/static/v1?label=downloads&message=123&color=blue) |
+
 ## Alternatives
 
 - [pub-dev](https://github.com/dart-lang/pub-dev): Source code of [pub.dev](https://pub.dev), which should be deployed at Google Cloud Platform.
@@ -114,6 +122,7 @@ var app = unpub.App(
 ## Credits
 
 - [pub-dev](https://github.com/dart-lang/pub-dev): Web page styles are mostly imported from https://pub.dev directly.
+- [shields](https://shields.io): Badges generation.
 
 ## License
 
