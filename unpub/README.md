@@ -3,7 +3,7 @@
 [![build](https://img.shields.io/travis/bytedance/unpub.svg)](https://travis-ci.org/bytedance/unpub)
 [![pub](https://img.shields.io/pub/v/unpub.svg)](https://pub.dev/packages/unpub)
 
-Unpub is a private Dart Pub server for Enterprise, with a simple web interface to search and view packages information.
+Unpub is a self-hosted private Dart Pub server for Enterprise, with a simple web interface to search and view packages information.
 
 ## Screenshots
 
