@@ -1,6 +1,11 @@
-# Unpub [![build](https://img.shields.io/travis/bytedance/unpub.svg)](https://travis-ci.org/bytedance/unpub) [![pub](https://img.shields.io/pub/v/unpub.svg)](https://pub.dev/packages/unpub)
+# Unpub
+
+[![build](https://img.shields.io/travis/bytedance/unpub.svg)](https://travis-ci.org/bytedance/unpub)
+[![pub](https://img.shields.io/pub/v/unpub.svg)](https://pub.dev/packages/unpub)
 
 Unpub is a private Dart Pub server for Enterprise, with a simple web interface to search and view packages information.
+
+## Screenshots
 
 ![Screenshot](https://raw.githubusercontent.com/bytedance/unpub/master/assets/screenshot.png)
 
@@ -41,20 +46,16 @@ main(List<String> args) async {
 }
 ```
 
-### More options
+### Options
 
-```dart
-var app = unpub.App(
-  // Specify upstream url, use https://pub.dev by default
-  upstream: 'https://some-faster-mirror-of-pub-dev',
-
-  // Http proxy to call googleapis to get uploader email
-  googleapisProxy: 'http://i-can-visit-google'
-
-  // If specified, unpub will use this email as uploader instead of requesting googleapis
-  overrideUploaderEmail: 'dart-pub@my-company.com'
-);
-```
+| Option                    | Description                                                                          | Default         |
+| ------------------------- | ------------------------------------------------------------------------------------ | --------------- |
+| `metaStore` (Required)    | Meta information store                                                               | -               |
+| `packageStore` (Required) | Package(tarball) store                                                               | -               |
+| `upstream`                | Upstream url                                                                         | https://pub.dev |
+| `googleapisProxy`         | Http(s) proxy to call googleapis (to get uploader email)                             | -               |
+| `overrideUploaderEmail`   | If specified, unpub will use this email as uploader instead of requesting googleapis | -               |
+| `uploadValidator`         | See [Package validator](#package-validator)                                          | -               |
 
 ### Package validator
 
@@ -81,17 +82,20 @@ var app = unpub.App(
 );
 ```
 
-### Customize meta and package Store
+### Customize meta and package store
 
 Unpub is designed to be extensible. It is quite easy to customize your own meta store and package store.
 
 ```dart
+import 'package:unpub/unpub.dart' as unpub;
+
 class MyAwesomeMetaStore extends unpub.MetaStore {
   // Implement methods of MetaStore abstract class
   // ...
 }
 
 class MyAwesomePackageStore extends unpub.PackageStore {
+  // Implement methods of PackageStore abstract class
   // ...
 }
 
@@ -109,7 +113,7 @@ var app = unpub.App(
 
 ## Credits
 
-Web page styles are mostly imported from https://pub.dev directly.
+- [pub-dev](https://github.com/dart-lang/pub-dev): Web page styles are mostly imported from https://pub.dev directly.
 
 ## License
 
