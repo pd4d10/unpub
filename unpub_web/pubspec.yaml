@@ -2,6 +2,7 @@ name: unpub_web
 description: A web app that uses AngularDart Components
 version: 1.0.0
 author: Rongjian Zhang <pd4d10@gmail.com>
+publish_to: none
 
 environment:
   sdk: ">=2.3.0 <3.0.0"

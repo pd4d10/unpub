@@ -1,3 +1,8 @@
+## 1.1.0
+
+- feat: badges for version and downloads
+- fix: web page style
+
 ## 1.0.0
 
 ## 0.4.0
