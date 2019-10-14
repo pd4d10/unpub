@@ -1,6 +1,6 @@
 name: unpub
 description: A self-hosted private Dart Pub server for Enterprise, with a simple web interface to search and view packages information.
-version: 1.1.0
+version: 1.2.0
 homepage: https://github.com/bytedance/unpub
 author: Rongjian Zhang <pd4d10@gmail.com>
 

@@ -1,7 +1,12 @@
+## 1.2.0
+
+- Supports mongodb pool connection
+- Update web page styles
+
 ## 1.1.0
 
-- feat: badges for version and downloads
-- fix: web page style
+- Add badges for version and downloads
+- Fix web page styles
 
 ## 1.0.0
 
