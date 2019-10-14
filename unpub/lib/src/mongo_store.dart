@@ -10,6 +10,7 @@ class MongoStore extends MetaStore {
   Db db;
 
   MongoStore(String uri) : db = Db(uri);
+  MongoStore.pool(List<String> uris) : db = Db.pool(uris);
 
   SelectorBuilder _selectByName(String name) => where.eq('name', name);
 
