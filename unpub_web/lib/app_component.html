@@ -1,12 +1,13 @@
 <header class="site-header-row">
-  <div class="site-header">
+  <div class="container site-header">
+    <h1 class="_visuallyhidden">Dart pub</h1>
+    <button class="hamburger"></button>
+    <div class="mask"></div>
     <div class="nav-wrap">
       <div class="nav-header">
-        <a class="logo" [routerLink]="homeUrl"
-          ><img
-            src="https://pub.dev/static/img/pub-dev-logo-2x.png"
-            alt="dart pub logo"
-        /></a>
+        <a class="logo" [routerLink]="homeUrl"><img
+            src="https://pub.dev/static/img/pub-dev-logo-2x.png?hash=umitaheu8hl7gd3mineshk2koqfngugi"
+            alt="dart pub logo" /></a>
         <div class="_flex-space"></div>
         <button class="close"></button>
       </div>
@@ -14,26 +15,20 @@
   </div>
 </header>
 <div class="_banner-bg">
-  <main class="home-banner">
-    <form class="search-bar" action="/packages">
-      <input
-        class="input"
-        name="q"
-        placeholder="Search Dart packages"
-        autocomplete="on"
-        autofocus="autofocus"
-        [(ngModel)]="appService.keyword"
-      />
-      <button class="icon" (click)="submit()"></button>
-    </form>
-  </main>
+  <div class="container">
+    <div class="home-banner">
+      <form class="search-bar" action="/packages">
+        <input class="input" name="q" placeholder="Search Dart packages" autocomplete="on" autofocus="autofocus"
+          [(ngModel)]="appService.keyword" />
+        <button class="icon" (click)="submit()"></button>
+      </form>
+    </div>
+  </div>
 </div>
-<router-outlet [routes]="Routes.all"></router-outlet>
+<div class="container">
+  <router-outlet [routes]="Routes.all"></router-outlet>
+</div>
 <footer class="site-footer" *ngIf="!loading">
   <a class="link" href="https://github.com/bytedance/unpub">Source code</a>
-  <a
-    class="link github_issue"
-    href="https://github.com/bytedance/unpub/issues/new"
-    >Report an issue</a
-  >
+  <a class="link github_issue" href="https://github.com/bytedance/unpub/issues/new">Report an issue</a>
 </footer>

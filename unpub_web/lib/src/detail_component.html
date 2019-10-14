@@ -1,5 +1,5 @@
 <main *ngIf="package != null">
-  <div class="package-header">
+  <div class="detail-header">
     <h2 class="title">{{ package.name }} {{ package.version }}</h2>
     <div class="metadata">
       Published <span>{{ package.createdAt | date: "mediumDate" }}</span>
@@ -11,45 +11,22 @@
     </div>
   </div>
 
-  <div class="package-container">
-    <div class="main package-tabs-content">
-      <ul class="package-tabs-header">
-        <li
-          [ngClass]="{ '-active': activeTab == 0 }"
-          (click)="activeTab = 0"
-          class="tab-button"
-          role="button"
-        >
-          README.md
-        </li>
-        <li
-          [ngClass]="{ '-active': activeTab == 1 }"
-          (click)="activeTab = 1"
-          class="tab-button"
-          role="button"
-        >
-          CHANGELOG.md
-        </li>
-        <!-- <li class="tab" data-name="-installing-tab-" role="button">Installing</li> -->
-        <li
-          [ngClass]="{ '-active': activeTab == 2 }"
-          (click)="activeTab = 2"
-          class="tab-button"
-          role="button"
-        >
-          Versions
-        </li>
-      </ul>
-      <section
-        class="tab-content markdown-body"
-        [ngClass]="{ '-active': activeTab == 0 }"
-        id="readme"
-      ></section>
-      <section
-        class="tab-content markdown-body"
-        [ngClass]="{ '-active': activeTab == 1 }"
-        id="changelog"
-      ></section>
+  <div class="detail-container">
+    <ul class="detail-tabs-header">
+      <li [ngClass]="{ '-active': activeTab == 0 }" (click)="activeTab = 0" class="tab-button" role="button">
+        README.md
+      </li>
+      <li [ngClass]="{ '-active': activeTab == 1 }" (click)="activeTab = 1" class="tab-button" role="button">
+        CHANGELOG.md
+      </li>
+      <!-- <li class="tab" data-name="-installing-tab-" role="button">Installing</li> -->
+      <li [ngClass]="{ '-active': activeTab == 2 }" (click)="activeTab = 2" class="tab-button" role="button">
+        Versions
+      </li>
+    </ul>
+    <div class="detail-tabs-content main">
+      <section class="tab-content markdown-body" [ngClass]="{ '-active': activeTab == 0 }" id="readme"></section>
+      <section class="tab-content markdown-body" [ngClass]="{ '-active': activeTab == 1 }" id="changelog"></section>
       <section class="tab-content" [ngClass]="{ '-active': activeTab == 2 }">
         <table class="version-table">
           <thead>
@@ -63,38 +40,25 @@
           <tbody>
             <tr *ngFor="let item of package.versions">
               <td>
-                <strong
-                  ><a [routerLink]="getDetailUrl(package.name, item.version)">{{
+                <strong><a [routerLink]="getDetailUrl(package.name, item.version)">{{
                     item.version
-                  }}</a></strong
-                >
+                  }}</a></strong>
               </td>
               <td>{{ item.createdAt | date: "mediumDate" }}</td>
               <td class="documentation">
-                <a
-                  href="/documentation/{{ package.name }}/{{ item.version }}/"
-                  rel="nofollow"
-                  title="Go to the documentation of {{ package.name }} {{
+                <a href="/documentation/{{ package.name }}/{{ item.version }}/" rel="nofollow" title="Go to the documentation of {{ package.name }} {{
                     item.version
-                  }}"
-                >
-                  <img
-                    src="https://pub.dev/static/img/ic_drive_document_black_24dp.svg"
-                    alt="Go to the documentation of {{ package.name }} {{
+                  }}">
+                  <img src="https://pub.dev/static/img/ic_drive_document_black_24dp.svg" alt="Go to the documentation of {{ package.name }} {{
                       item.version
-                    }}"
-                  />
+                    }}" />
                 </a>
               </td>
               <td class="archive">
-                <a
-                  href="/packages/{{ package.name }}-{{ item.version }}.tar.gz"
-                  title="Download {{ package.name }} {{ item.version }} archive"
-                >
-                  <img
-                    src="https://pub.dev/static/img/ic_get_app_black_24dp.svg"
-                    alt="Download {{ package.name }} {{ item.version }} archive"
-                  />
+                <a href="/packages/{{ package.name }}-{{ item.version }}.tar.gz"
+                  title="Download {{ package.name }} {{ item.version }} archive">
+                  <img src="https://pub.dev/static/img/ic_get_app_black_24dp.svg"
+                    alt="Download {{ package.name }} {{ item.version }} archive" />
                 </a>
               </td>
             </tr>
@@ -103,30 +67,20 @@
       </section>
     </div>
 
-    <aside class="sidebar sidebar-content">
+    <aside class="detail-info-box">
       <h3 class="title">About</h3>
       <p>{{ package.description }}</p>
       <p>
         <a class="link" href="{{ package.homepage }}">Homepage</a><br />
-        <a
-          class="link"
-          href="/documentation/{{ package.name }}/{{ package.version }}/"
-          >API reference</a
-        ><br />
+        <a class="link" href="/documentation/{{ package.name }}/{{ package.version }}/">API reference</a><br />
       </p>
 
       <h3 class="title">Author</h3>
       <div>
         <div class="author" *ngFor="let email of package.authors">
-          <a href="mailto:{{ email }}" title="Email {{ email }}"
-            ><i class="email-icon"></i
-          ></a>
-          <a
-            href="/packages?q=email:{{ email }}"
-            title="Search packages with {{ email }}"
-            rel="nofollow"
-            ><i class="search-icon"></i
-          ></a>
+          <a href="mailto:{{ email }}" title="Email {{ email }}"><i class="email-icon"></i></a>
+          <a href="/packages?q=email:{{ email }}" title="Search packages with {{ email }}" rel="nofollow"><i
+              class="search-icon"></i></a>
           {{ email }}
         </div>
       </div>
@@ -134,15 +88,9 @@
       <h3 class="title">Uploader</h3>
       <div>
         <div class="author" *ngFor="let email of package.uploaders">
-          <a href="mailto:{{ email }}" title="Email {{ email }}"
-            ><i class="email-icon"></i
-          ></a>
-          <a
-            href="/packages?q=email:{{ email }}"
-            title="Search packages with {{ email }}"
-            rel="nofollow"
-            ><i class="search-icon"></i
-          ></a>
+          <a href="mailto:{{ email }}" title="Email {{ email }}"><i class="email-icon"></i></a>
+          <a href="/packages?q=email:{{ email }}" title="Search packages with {{ email }}" rel="nofollow"><i
+              class="search-icon"></i></a>
           {{ email }}
         </div>
       </div>
@@ -150,19 +98,18 @@
       <h3 class="title">Dependencies</h3>
       <p>
         <span *ngFor="let dep of package.dependencies; let isLast = last">
-          <a [routerLink]="getDetailUrl(dep)">{{ dep }}</a
-          >{{ isLast ? "" : ", " }}
+          <a [routerLink]="getDetailUrl(dep)">{{ dep }}</a>{{ isLast ? "" : ", " }}
         </span>
       </p>
 
       <h3 class="title">More</h3>
       <p>
-        <a href="/packages?q=dependency%3A{{ package.name }}" rel="nofollow"
-          >Packages that depend on {{ package.name }}</a
-        >
+        <a href="/packages?q=dependency%3A{{ package.name }}" rel="nofollow">Packages that depend on
+          {{ package.name }}</a>
       </p>
     </aside>
   </div>
+
 </main>
 
 <main *ngIf="packageNotExists">

@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:angular/core.dart';
+import 'package:unpub_web/constants.dart';
 import 'src/routes.dart';
 import 'package:unpub_api/models.dart';
-
-const isProduction = true;
 
 class PackageNotExistsException implements Exception {
   final String message;
