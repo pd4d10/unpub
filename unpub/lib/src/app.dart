@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:meta/meta.dart';
+import 'package:resource/resource.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:http/http.dart' as http;
@@ -16,8 +17,6 @@ import 'package:unpub/unpub_api/lib/models.dart';
 import 'package:unpub/src/meta_store.dart';
 import 'package:unpub/src/package_store.dart';
 import 'utils.dart';
-import 'static/index.html.dart' as index_html;
-import 'static/main.dart.js.dart' as main_dart_js;
 
 part 'app.g.dart';
 
@@ -459,13 +458,17 @@ class App {
   @Route.get('/packages/<name>')
   @Route.get('/packages/<name>/versions/<version>')
   Future<shelf.Response> indexHtml(shelf.Request req) async {
-    return shelf.Response.ok(index_html.content,
+    var index_html =
+        await Resource('package:unpub/static/build/index.html').readAsString();
+    return shelf.Response.ok(index_html,
         headers: {HttpHeaders.contentTypeHeader: ContentType.html.mimeType});
   }
 
   @Route.get('/main.dart.js')
   Future<shelf.Response> mainDartJs(shelf.Request req) async {
-    return shelf.Response.ok(main_dart_js.content,
+    var main_dart_js = await Resource('package:unpub/static/build/main.dart.js')
+        .readAsString(encoding: utf8);
+    return shelf.Response.ok(main_dart_js,
         headers: {HttpHeaders.contentTypeHeader: 'text/javascript'});
   }
 

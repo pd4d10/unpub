@@ -24,6 +24,7 @@ dependencies:
   mime: ^0.9.6+3
   intl: ^0.15.8
   path: ^1.6.2
+  resource: ^2.1.6
 
 dev_dependencies:
   pedantic: ^1.0.0
