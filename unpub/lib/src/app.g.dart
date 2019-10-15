@@ -8,26 +8,26 @@ part of 'app.dart';
 
 Router _$AppRouter(App service) {
   final router = Router();
-  router.add('GET', '/api/packages/<name>', service.getVersions);
+  router.add('GET', r'/api/packages/<name>', service.getVersions);
   router.add(
-      'GET', '/api/packages/<name>/versions/<version>', service.getVersion);
+      'GET', r'/api/packages/<name>/versions/<version>', service.getVersion);
   router.add(
-      'GET', '/packages/<name>/versions/<version>.tar.gz', service.download);
-  router.add('GET', '/api/packages/versions/new', service.getUploadUrl);
-  router.add('POST', '/api/packages/versions/newUpload', service.upload);
+      'GET', r'/packages/<name>/versions/<version>.tar.gz', service.download);
+  router.add('GET', r'/api/packages/versions/new', service.getUploadUrl);
+  router.add('POST', r'/api/packages/versions/newUpload', service.upload);
   router.add(
-      'GET', '/api/packages/versions/newUploadFinish', service.uploadFinish);
-  router.add('POST', '/api/packages/<name>/uploaders', service.addUploader);
-  router.add('DELETE', '/api/packages/<name>/uploaders/<email>',
+      'GET', r'/api/packages/versions/newUploadFinish', service.uploadFinish);
+  router.add('POST', r'/api/packages/<name>/uploaders', service.addUploader);
+  router.add('DELETE', r'/api/packages/<name>/uploaders/<email>',
       service.removeUploader);
-  router.add('GET', '/webapi/packages', service.getPackages);
+  router.add('GET', r'/webapi/packages', service.getPackages);
   router.add(
-      'GET', '/webapi/package/<name>/<version>', service.getPackageDetail);
-  router.add('GET', '/', service.indexHtml);
-  router.add('GET', '/packages', service.indexHtml);
-  router.add('GET', '/packages/<name>', service.indexHtml);
-  router.add('GET', '/packages/<name>/versions/<version>', service.indexHtml);
-  router.add('GET', '/main.dart.js', service.mainDartJs);
-  router.add('GET', '/badge/<type>/<name>', service.badge);
+      'GET', r'/webapi/package/<name>/<version>', service.getPackageDetail);
+  router.add('GET', r'/', service.indexHtml);
+  router.add('GET', r'/packages', service.indexHtml);
+  router.add('GET', r'/packages/<name>', service.indexHtml);
+  router.add('GET', r'/packages/<name>/versions/<version>', service.indexHtml);
+  router.add('GET', r'/main.dart.js', service.mainDartJs);
+  router.add('GET', r'/badge/<type>/<name>', service.badge);
   return router;
 }
