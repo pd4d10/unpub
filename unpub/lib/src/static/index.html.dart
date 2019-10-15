@@ -1,4 +1,4 @@
-var content = """<!DOCTYPE html>
+const content = """<!DOCTYPE html>
 <html>
   <head>
     <title>Unpub</title>
@@ -11,7 +11,7 @@ var content = """<!DOCTYPE html>
     />
     <link
       rel="stylesheet"
-      href="https://pub.dev/static/css/style.css?hash=ihqbiqtkfet54el8k37siuav4ua1ansj"
+      href="https://pub.dev/static/css/style.css?hash=06qjiu76rbcjpj7gcqf4e7fagtcf1dsh"
     />
     <link
       rel="stylesheet"
