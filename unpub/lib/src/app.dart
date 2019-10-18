@@ -267,12 +267,12 @@ class App {
       // Package already exists
       if (package != null) {
         if (package.private != true) {
-          throw '$name is not a private package';
+          throw '$name is not a private package. Please upload it to https://pub.dev';
         }
 
         // Check uploaders
         if (!package.uploaders.contains(email)) {
-          throw 'UnauthorizedAccess';
+          throw '$email is not an uploader of $name';
         }
 
         // Check duplicated version
