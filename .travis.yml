@@ -7,7 +7,4 @@ before_install:
   - mkdir -p $HOME/.pub-cache
   - echo $PUB_CREDENTIALS > $HOME/.pub-cache/credentials.json
   - cd unpub
-
-before_script:
-  - ls -al $HOME/.pub-cache
-  - ls -al $HOME/.pub-cache/hosted
+  - pub publish --force
