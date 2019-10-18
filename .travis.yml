@@ -1,11 +1,13 @@
 services:
   - mongodb
+
 language: dart
+
 before_install:
-  - mkdir -p $TRAVIS_HOME/.pub-cache
-  - echo $PUB_CREDENTIALS > $TRAVIS_HOME/.pub-cache/credentials.json
+  - mkdir -p $HOME/.pub-cache
+  - echo $PUB_CREDENTIALS > $HOME/.pub-cache/credentials.json
   - cd unpub
 
-cache:
-  directories:
-    - $TRAVIS_HOME/.pub-cache
+before_script:
+  - ls -al $HOME/.pub-cache
+  - ls -al $HOME/.pub-cache/hosted
