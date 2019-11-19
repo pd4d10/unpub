@@ -110,8 +110,7 @@ var app = unpub.App(
 
 | URL                                          | Badge                                                                                     |
 | -------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `/badge/v/{package_name}` (version < 1.0.0)  | ![badge example](https://img.shields.io/static/v1?label=unpub&message=0.1.0&color=orange) |
-| `/badge/v/{package_name}` (version >= 1.0.0) | ![badge example](https://img.shields.io/static/v1?label=unpub&message=1.0.0&color=blue)   |
+| `/badge/v/{package_name}` | ![badge example](https://img.shields.io/static/v1?label=unpub&message=0.1.0&color=orange) ![badge example](https://img.shields.io/static/v1?label=unpub&message=1.0.0&color=blue) |
 | `/badge/d/{package_name}`                    | ![badge example](https://img.shields.io/static/v1?label=downloads&message=123&color=blue) |
 
 ## Alternatives
