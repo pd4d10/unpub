@@ -91,3 +91,10 @@ func ReadTarballPayload(r io.Reader) (*PackageTarballPayload, error) {
 
 	return &payload, nil
 }
+
+func readBytesFromTar(hdr *tar.Header, tr *tar.Reader) []byte {
+	fi := hdr.FileInfo()
+	b := make([]byte, fi.Size())
+	io.ReadFull(tr, b)
+	return b
+}
