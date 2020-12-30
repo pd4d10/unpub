@@ -1,4 +1,4 @@
-package main
+package unpub
 
 import (
 	"archive/tar"
@@ -10,7 +10,6 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 // ResponseWithClientError 4xx
@@ -33,18 +32,8 @@ func ResponseWithServerError(c *gin.Context, message string) {
 	})
 }
 
-// PackageTarballPayload payload
-type PackageTarballPayload struct {
-	pubspecYaml string
-	readme      string
-	changelog   string
-	pubspec     bson.M
-	name        string
-	version     string
-}
-
 // ReadTarballPayload pacakge.tar.gz
-func ReadTarballPayload(r io.Reader) (*PackageTarballPayload, error) {
+func ReadTarballPayload(r io.Reader, uploader string) (*VersionPayload, error) {
 	gzr, err := gzip.NewReader(r)
 	if err != nil {
 		return nil, err
@@ -52,7 +41,7 @@ func ReadTarballPayload(r io.Reader) (*PackageTarballPayload, error) {
 
 	tr := tar.NewReader(gzr)
 
-	var payload PackageTarballPayload
+	payload := VersionPayload{Uploader: uploader}
 
 	for {
 		hdr, err := tr.Next()
@@ -65,7 +54,7 @@ func ReadTarballPayload(r io.Reader) (*PackageTarballPayload, error) {
 
 		if hdr.Name == "pubspec.yaml" {
 			bytes := readBytesFromTar(hdr, tr)
-			err := yaml.Unmarshal(bytes, &payload.pubspec)
+			err := yaml.Unmarshal(bytes, &payload.Pubspec)
 			if err != nil {
 				return nil, err
 			}
@@ -79,13 +68,13 @@ func ReadTarballPayload(r io.Reader) (*PackageTarballPayload, error) {
 				return nil, err
 			}
 
-			payload.name = temp.Name
-			payload.version = temp.Version
-			payload.pubspecYaml = string(bytes)
+			payload.Name = temp.Name
+			payload.Version = temp.Version
+			payload.PubspecYaml = string(bytes)
 		} else if strings.ToLower(hdr.Name) == "readme.md" {
-			payload.readme = string(readBytesFromTar(hdr, tr))
+			payload.Readme = string(readBytesFromTar(hdr, tr))
 		} else if strings.ToLower(hdr.Name) == "changelog.md" {
-			payload.changelog = string(readBytesFromTar(hdr, tr))
+			payload.Changelog = string(readBytesFromTar(hdr, tr))
 		}
 	}
 

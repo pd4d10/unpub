@@ -1,15 +1,28 @@
-package main
+package unpub
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPackageFallback(t *testing.T) {
-	router := setupRouter()
+	metaStore := MongoStore{}
+	metaStore.Init(mongodbURI)
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	tarballStore := FileStore{}
+	tarballStore.Init(path.Join(cwd, "unpub-packages"))
+
+	router := SetupRouter(metaStore, tarballStore)
 
 	t.Run("newUploadFinish", func(t *testing.T) {
 		w := httptest.NewRecorder()

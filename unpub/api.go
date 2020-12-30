@@ -1,14 +1,11 @@
-package main
+package unpub
 
 import (
 	"context"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/oauth2"
 	goauth2 "google.golang.org/api/oauth2/v1"
 	goption "google.golang.org/api/option"
@@ -23,7 +20,7 @@ func PackagesNewUpload(c *gin.Context) {
 		return
 	}
 
-	// get email via googleapis
+	// get uploader email via googleapis
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
@@ -54,32 +51,21 @@ func PackagesNewUpload(c *gin.Context) {
 	}
 	defer file.Close()
 
-	tp, err := ReadTarballPayload(file)
+	tp, err := ReadTarballPayload(file, email)
 	if err != nil {
 		ResponseWithServerError(c, err.Error())
 		return
 	}
 
 	// check if pubspec is valid
-	if tp.name == "" || tp.version == "" {
+	if tp.Name == "" || tp.Version == "" {
 		ResponseWithClientError(c, "Invalid pubspec.yaml")
 		return
 	}
 
 	// check if package exists
-	ctx, cancel = context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-	filter := bson.M{"name": tp.name}
-	var p PubPackage
-	err = pc.FindOne(ctx, filter).Decode(&p)
-	if err != nil {
-		if strings.Contains(err.Error(), "no documents") {
-			// no documents, go ahead
-		} else {
-			ResponseWithServerError(c, err.Error())
-			return
-		}
-	} else {
+	p := metaStore.QueryPackage(tp.Name)
+	if p != nil {
 		// check if email in uploaders
 		isUploader := false
 		for _, uploader := range p.Uploaders {
@@ -89,56 +75,30 @@ func PackagesNewUpload(c *gin.Context) {
 			}
 		}
 		if !isUploader {
-			ResponseWithClientError(c, email+" is not an uploader of "+tp.name)
+			ResponseWithClientError(c, email+" is not an uploader of "+tp.Name)
 			return
 		}
 
 		// check duplicated version
 		for _, v := range p.Versions {
-			if tp.version == v.Version {
-				ResponseWithClientError(c, "Version invalid: "+tp.name+"@"+tp.version+" already exists.")
+			if tp.Version == v.Version {
+				ResponseWithClientError(c, "Version invalid: "+tp.Name+"@"+tp.Version+" already exists.")
 				return
 			}
 		}
 	}
 
 	// upload tarball
+	// TODO:
 
 	// update meta info
-	ctx, cancel = context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-	now := time.Now()
-	filter = bson.M{"name": tp.name}
-	update := bson.M{
-		"$push": bson.M{
-			"versions": PubPackageVersion{
-				Version:     tp.version,
-				Pubspec:     tp.pubspec,
-				PubspecYaml: tp.pubspecYaml,
-				Readme:      tp.readme,
-				Changelog:   tp.changelog,
-				CreatedAt:   now,
-			},
-		},
-		"$addToSet": bson.M{
-			"uploaders": email,
-		},
-		"$setOnInsert": bson.M{
-			"createdAt": now,
-			"private":   true,
-			"download":  0,
-		},
-		"$set": bson.M{
-			"updatedAt": now,
-		},
-	}
-	opts := options.Update().SetUpsert(true)
-	pc.UpdateOne(ctx, filter, update, opts)
+	metaStore.AddVersion(*tp)
+
 	c.Redirect(http.StatusFound, scheme+c.Request.Host+"/api/packages/versions/newUploadFinish")
 }
 
-// PackageFallback PackageFallback
-func PackageFallback(c *gin.Context) {
+// PackagesFallback PackagesFallback
+func PackagesFallback(c *gin.Context) {
 	action := c.Param("action")
 
 	if action == "/versions/new" {
@@ -163,13 +123,9 @@ func PackageFallback(c *gin.Context) {
 	}
 
 	name := strings.TrimLeft(action, "/")
-	var p PubPackage
 
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-	filter := bson.M{"name": name}
-	err := pc.FindOne(ctx, filter).Decode(&p)
-	if err != nil {
+	p := metaStore.QueryPackage(name)
+	if p != nil {
 		c.Redirect(http.StatusFound, upstream+c.Request.URL.Path)
 		return
 	}
