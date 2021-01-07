@@ -2,6 +2,7 @@ package unpub
 
 import (
 	"context"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -89,7 +90,12 @@ func PackagesNewUpload(c *gin.Context) {
 	}
 
 	// upload tarball
-	// TODO:
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		ResponseWithServerError(c, err.Error())
+		return
+	}
+	tarballStore.Upload(tp.Name, tp.Version, bytes)
 
 	// update meta info
 	metaStore.AddVersion(*tp)
@@ -125,7 +131,7 @@ func PackagesFallback(c *gin.Context) {
 	name := strings.TrimLeft(action, "/")
 
 	p := metaStore.QueryPackage(name)
-	if p != nil {
+	if p == nil {
 		c.Redirect(http.StatusFound, upstream+c.Request.URL.Path)
 		return
 	}
