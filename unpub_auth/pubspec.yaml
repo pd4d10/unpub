@@ -4,21 +4,21 @@ version: 0.1.0+3
 homepage: https://github.com/bytedance/unpub
 
 environment:
-  sdk: '>=2.15.0 <3.0.0'
+  sdk: '>=2.15.0 <4.0.0'
 
 executables:
   unpub_auth:
 
 dependencies:
-  collection: ^1.15.0
+  collection: ^1.18.0
   path: ^1.8.1
-  http: ^0.13.4
-  shelf: ^1.2.0
-  http_multi_server: ^3.0.1
-  oauth2: ^2.0.0
-  args: ^2.3.0
+  http: ^1.2.1
+  shelf: ^1.4.1
+  http_multi_server: ^3.2.1
+  oauth2: ^2.0.2
+  args: ^2.4.2
   console: ^4.1.0
 
 dev_dependencies:
-  lints: ^1.0.0
-  test: ^1.16.0
+  lints: ^3.0.0
+  test: ^1.25.2

@@ -1,3 +1,18 @@
+## 2.1.0
+
+- https://github.com/bytedance/unpub/pull/85
+- https://github.com/bytedance/unpub/pull/80
+- https://github.com/bytedance/unpub/pull/70
+- https://github.com/bytedance/unpub/pull/66
+- https://github.com/bytedance/unpub/pull/60
+- https://github.com/bytedance/unpub/pull/53
+- https://github.com/bytedance/unpub/pull/51
+- https://github.com/bytedance/unpub/pull/50
+- https://github.com/bytedance/unpub/pull/48
+- https://github.com/bytedance/unpub/pull/47
+- https://github.com/bytedance/unpub/pull/38
+- https://github.com/bytedance/unpub/pull/35
+
 ## 2.0.0
 
 - Supports NNBD

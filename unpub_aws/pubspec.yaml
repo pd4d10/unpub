@@ -3,21 +3,24 @@ description: A collection of modules to use for deploying unpub into AWS infrast
 version: 0.1.0
 homepage: https://github.com/bytedance/unpub
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.12.0 <4.0.0"
 
 dependencies:
-  unpub: ^2.0.0
-  minio: ^3.0.0
-  http: ^0.13.3
+  unpub: ^2.1.0
+  minio: ^3.5.0
+  http: ^1.2.1
 
 dev_dependencies:
-  lints: ^1.0.0
-  test: ^1.17.12
-  chunked_stream: ^1.4.1
-  mockito: ^5.0.16
-  build_runner: ^2.1.2
-  path: ^1.8.0
-  json_annotation: ^4.1.0
-# dependency_overrides:
-#   unpub:
-#     path: ../unpub
+  lints: ^3.0.0
+  test: ^1.25.2
+  chunked_stream: ^1.4.2
+  mockito: ^5.4.4
+  build_runner: ^2.4.9
+  path: ^1.9.0
+  json_annotation: ^4.8.1
+
+dependency_overrides:
+  unpub:
+    path: ../unpub
+  http: ^1.2.1
+  intl: ^0.19.0

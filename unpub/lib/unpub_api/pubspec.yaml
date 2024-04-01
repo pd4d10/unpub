@@ -1,4 +1,8 @@
 name: unpub_api
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.12.0 <4.0.0"
+dependencies:
+  json_annotation: ^4.8.1
+dev_dependencies:
+  json_serializable: ^6.7.1

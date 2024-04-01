@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 abstract class PackageStore {
   bool supportsDownloadUrl = false;
@@ -11,5 +12,5 @@ abstract class PackageStore {
     throw 'download not implemented';
   }
 
-  Future<void> upload(String name, String version, List<int> content);
+  Future<void> upload(String name, String version, Uint8List content);
 }
