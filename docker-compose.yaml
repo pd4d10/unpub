@@ -1,0 +1,32 @@
+# name: unpub2_1-docker
+services:
+  unpub-mongo:
+    image: mongo:5.0.29
+    ports:
+      - "27017:27017"
+    restart: always
+    logging:
+      options:
+        max-size: 10m
+    volumes:
+      - ~/.unpub/mongo:/data/db
+    hostname: unpub-mongo-service
+    domainname: unpub-mongo-service.com
+    # networks:
+    #   - unpub-network
+
+  unpub:
+    build: .
+    ports:
+      - "4000:4000"
+    restart: always
+    depends_on:
+      - unpub-mongo
+    volumes:
+      - ~/.unpub/packages:/app/unpub-packages
+    # networks:
+    #   - unpub-network
+# networks:
+#   unpub-network:
+#     external: true
+#     driver: bridge
